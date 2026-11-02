@@ -1,0 +1,48 @@
+name: Update FPL data
+
+on:
+  schedule:
+    - cron: "0 8,18 * * *"     # after FPL Core Insights refreshes (07:30 and 17:30 UTC)
+    - cron: "0 11,15,21 * * 5" # extra Friday runs for late team news before the deadline
+    - cron: "30 16 * * 5"      # just after the free weekend odds file is published
+  workflow_dispatch: {}         # adds a "Run workflow" button
+
+permissions:
+  contents: write   # to save each week's pre-deadline projections for the live accuracy log
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Pull data, run the model, simulations and accuracy checks
+        env:
+          FPL_TEAM_ID: ${{ vars.FPL_TEAM_ID }}
+          FPL_LEAGUE_ID: ${{ vars.FPL_LEAGUE_ID }}
+          ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+        run: python engine/fpl_engine.py --out site/data.json
+      - name: Keep the pre-deadline forecast history
+        run: |
+          git config user.name "fpl-lab-bot"
+          git config user.email "actions@users.noreply.github.com"
+          git add site/history
+          git diff --cached --quiet || (git commit -m "Save pre-deadline projections" && git push)
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - id: deployment
+        uses: actions/deploy-pages@v4
