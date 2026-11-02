@@ -346,7 +346,12 @@ def overlay_api(ds):
                 "price_change_percent", "price_change_hourly_rate", "price_change_projections",
                 "price_change_locked_until"]:
         if col in live:
-            p.loc[p.index.intersection(live.index), col] = live[col]
+            val = live[col]
+            if col in p and pd.api.types.is_numeric_dtype(p[col]):
+                val = pd.to_numeric(val, errors="coerce")   # API sends some numbers as text, e.g. "25.3"
+            elif col in p:
+                p[col] = p[col].astype(object)
+            p.loc[p.index.intersection(live.index), col] = val
     p.loc[p.index.intersection(live.index), "now_cost"] = live["now_cost"] / 10
     ds.players = p.reset_index()
     try:   # official fixture list: catches rearranged games (new doubles) and games awaiting a date (new blanks)
