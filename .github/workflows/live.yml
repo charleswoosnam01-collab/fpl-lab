@@ -1,0 +1,58 @@
+name: Live gameweek
+
+# Every 15 minutes while Premier League matches are usually on (UTC). Each run takes under a minute.
+on:
+  schedule:
+    - cron: "*/15 11-22 * * 6,0"     # Saturday and Sunday
+    - cron: "*/15 18-22 * * 1-5"     # weekday evenings
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  live:
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: Is a gameweek in progress?
+        id: check
+        run: |
+          python - <<'PY'
+          import json, os, urllib.request
+          req = urllib.request.Request("https://fantasy.premierleague.com/api/bootstrap-static/", headers={"User-Agent": "Mozilla/5.0 (FPL Lab)"})
+          ev = json.load(urllib.request.urlopen(req, timeout=30))["events"]
+          cur = next((e for e in ev if e.get("is_current")), None)
+          live = bool(cur and not cur.get("data_checked"))
+          open(os.environ["GITHUB_OUTPUT"], "a").write(f"live={'true' if live else 'false'}\n")
+          PY
+      - name: Fetch the current site data
+        if: steps.check.outputs.live == 'true'
+        run: curl -fsSL "https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/data.json" -o site/data.json
+      - name: Live scores
+        if: steps.check.outputs.live == 'true'
+        env:
+          FPL_TEAM_ID: ${{ vars.FPL_TEAM_ID }}
+        run: python engine/live.py --out site/live.json
+      - if: steps.check.outputs.live == 'true'
+        uses: actions/configure-pages@v5
+      - if: steps.check.outputs.live == 'true'
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: site
+      - if: steps.check.outputs.live == 'true'
+        id: deployment
+        uses: actions/deploy-pages@v4

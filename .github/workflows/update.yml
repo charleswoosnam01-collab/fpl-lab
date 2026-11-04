@@ -33,7 +33,13 @@ jobs:
           FPL_TEAM_ID: ${{ vars.FPL_TEAM_ID }}
           FPL_LEAGUE_ID: ${{ vars.FPL_LEAGUE_ID }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}          # optional: your ntfy.sh topic for the deadline reminder
+          PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: python engine/fpl_engine.py --out site/data.json
+      - name: Live gameweek scores (only does anything while a gameweek is on)
+        env:
+          FPL_TEAM_ID: ${{ vars.FPL_TEAM_ID }}
+        run: python engine/live.py --out site/live.json || true
       - name: Keep the pre-deadline forecast history
         run: |
           git config user.name "fpl-lab-bot"
