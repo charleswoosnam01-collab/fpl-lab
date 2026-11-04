@@ -343,6 +343,14 @@ def attribute_shots(sh, hist):
     return sh
 
 
+SOURCE_NOTES = {}           # why a data source wasn't used this run, shown on the Model tab
+
+
+def note_source(name, why):
+    SOURCE_NOTES[name] = str(why)[:160]
+    print(f"{name}: {why}")
+
+
 _FPL_SESSION = None
 
 
@@ -2066,20 +2074,31 @@ def build_priors(ds, prev, elo=None):
 
 
 def fetch_elo(teams, day=None):
-    """Club Elo ratings from api.clubelo.com (free)."""
-    try:
-        day = day or dt.date.today().isoformat()
-        df = pd.read_csv(f"http://api.clubelo.com/{day}")
-        look = team_lookup(teams)
-        out = {}
-        for r in df.itertuples():
-            t = look.get(_team_key(r.Club)) or look.get(_team_key(TEAM_ALIASES.get(_team_key(r.Club), "")))
-            if t and r.Country == "ENG":
-                out[t] = float(r.Elo)
-        return out if len(out) >= 15 else {}
-    except Exception as e:  # noqa: BLE001
-        print("ClubElo not reachable:", e)
-        return {}
+    """Club Elo ratings from api.clubelo.com (free). Elo updates after every result, so it is current-season information."""
+    import io
+    last = None
+    days = [day] if day else [dt.date.today().isoformat(), (dt.date.today() - dt.timedelta(days=1)).isoformat()]
+    for d in days:
+        for scheme in ("https", "http"):
+            try:
+                r = fpl_session().get(f"{scheme}://api.clubelo.com/{d}", timeout=25)
+                if not r.ok:
+                    last = f"HTTP {r.status_code} from api.clubelo.com"
+                    continue
+                df = pd.read_csv(io.StringIO(r.text))
+                look = team_lookup(teams)
+                out = {}
+                for row in df.itertuples():
+                    t = look.get(_team_key(row.Club)) or look.get(_team_key(TEAM_ALIASES.get(_team_key(row.Club), "")))
+                    if t and row.Country == "ENG":
+                        out[t] = float(row.Elo)
+                if len(out) >= 15:
+                    return out
+                last = f"only matched {len(out)} of 20 teams (club names may have changed)"
+            except Exception as e:  # noqa: BLE001
+                last = f"{type(e).__name__}: {e}"
+    note_source("ClubElo ratings", last or "no data returned")
+    return {}
 
 
 # ============================================================ referees
@@ -2258,14 +2277,18 @@ def fetch_understat(season_start_year):
         h = {"User-Agent": "Mozilla/5.0 (FPL Lab)", "X-Requested-With": "XMLHttpRequest"}
         r = requests.get(f"https://understat.com/getLeagueData/EPL/{season_start_year}", headers=h, timeout=20)
         if r.ok and r.text.strip().startswith("{"):
-            return r.json().get("players", [])
-        page = requests.get(f"https://understat.com/league/EPL/{season_start_year}", headers=h, timeout=20).text
-        m = re.search(r"playersData\s*=\s*JSON\.parse\('(.*?)'\)", page)
+            rows = r.json().get("players", [])
+            if rows:
+                return rows
+        resp = requests.get(f"https://understat.com/league/EPL/{season_start_year}", headers=h, timeout=20)
+        m = re.search(r"playersData\s*=\s*JSON\.parse\('(.*?)'\)", resp.text)
         if m:
             import codecs
             return json.loads(codecs.decode(m.group(1), "unicode_escape"))
+        note_source("Understat (second opinion)", f"HTTP {r.status_code} from the data endpoint, HTTP {resp.status_code} from the league page; "
+                                                  "the page layout may have changed")
     except Exception as e:  # noqa: BLE001
-        print("Understat not reachable:", e)
+        note_source("Understat (second opinion)", f"{type(e).__name__}: {e}")
     return []
 
 
@@ -2406,25 +2429,39 @@ def fetch_odds(teams, upcoming_pairs):
     look = team_lookup(teams)
     odds = {}
     key = os.environ.get("ODDS_API_KEY")
+    why = []
     if key:
         try:
             import requests
             r = requests.get(ODDS_API, params=dict(apiKey=key, regions="uk", markets="h2h,totals", oddsFormat="decimal"), timeout=20)
             if r.ok:
-                odds.update(odds_from_odds_api(r.json(), look))
+                got = odds_from_odds_api(r.json(), look)
+                odds.update(got)
                 print("Odds API requests left this month:", r.headers.get("x-requests-remaining"))
+                if not got:
+                    why.append(f"The Odds API answered but returned no matches the engine could read ({len(r.json())} events)")
+            else:
+                why.append(f"The Odds API refused the request (HTTP {r.status_code}: {r.text[:80]})")
         except Exception as e:  # noqa: BLE001
-            print("Odds API failed:", e)
+            why.append(f"The Odds API failed ({type(e).__name__})")
+    else:
+        why.append("no ODDS_API_KEY secret is set")
     fd = None
     try:
         fd = pd.read_csv(FD_FIXTURES)
         fd.columns = [c.lstrip("\ufeff") for c in fd.columns]
         if not odds:
-            odds.update(odds_from_football_data(fd, look))
+            got = odds_from_football_data(fd, look)
+            odds.update(got)
+            if not got:
+                why.append("football-data.co.uk hasn't published odds for this round yet (usually Thursday or Friday)")
     except Exception as e:  # noqa: BLE001
-        print("football-data.co.uk odds not available:", e)
+        why.append(f"football-data.co.uk fixtures file not available ({type(e).__name__})")
     fetch_odds.fixtures_file = fd
-    return {k: v for k, v in odds.items() if k in upcoming_pairs}
+    out = {k: v for k, v in odds.items() if k in upcoming_pairs}
+    if not out:
+        note_source("Bookmaker odds for the next round", "; ".join(why) or "no odds matched the coming fixtures")
+    return out
 
 
 # ================================================================ prices
@@ -2566,6 +2603,8 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             refs[pair] = dict(name=name, league=ref_league["pens"], pens=ref_league["pens"], yel=ref_league["yel"],
                               red=ref_league["red"], fouls=ref_league["fouls"], n=0, raw_pens=0)
     sources["Referee appointments for the next round"] = bool(refs)
+    if not refs:
+        note_source("Referee appointments for the next round", "not published yet; they appear in football-data.co.uk's fixtures file later in the week")
 
     # 5. Elite managers, set-piece notes, Understat
     live_ok = getattr(ds, "live_ok", False)
@@ -2724,7 +2763,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   rules=dict(ft_max=5, hit=4, chip_half_end=19, squad_max_per_club=3),
                   horizon=HORIZON, long_gws=long_gws, special=special,
                   unscheduled=getattr(ds, "unscheduled", []),
-                  venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
+                  source_notes=SOURCE_NOTES, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
