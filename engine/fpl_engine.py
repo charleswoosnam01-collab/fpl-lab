@@ -2093,10 +2093,27 @@ def fetch_elo(teams, day=None):
                     if t and row.Country == "ENG":
                         out[t] = float(row.Elo)
                 if len(out) >= 15:
+                    try:
+                        cache = Path(__file__).resolve().parents[1] / "site" / "history" / "elo_last.json"
+                        cache.parent.mkdir(parents=True, exist_ok=True)
+                        cache.write_text(json.dumps({"date": d, "elo": out}))
+                    except Exception:  # noqa: BLE001
+                        pass
                     return out
                 last = f"only matched {len(out)} of 20 teams (club names may have changed)"
             except Exception as e:  # noqa: BLE001
                 last = f"{type(e).__name__}: {e}"
+    cache = Path(__file__).resolve().parents[1] / "site" / "history" / "elo_last.json"
+    if cache.exists():
+        try:
+            saved = json.loads(cache.read_text())
+            age = (dt.date.today() - dt.date.fromisoformat(saved["date"])).days
+            if age <= 14 and len(saved["elo"]) >= 15:
+                note_source("ClubElo ratings", f"{last}; using the ratings saved on {saved['date']} instead")
+                fetch_elo.from_cache = saved["date"]
+                return {int(k): v for k, v in saved["elo"].items()}
+        except Exception:  # noqa: BLE001
+            pass
     note_source("ClubElo ratings", last or "no data returned")
     return {}
 
@@ -2271,22 +2288,37 @@ def parse_set_piece_notes(js):
 
 # ============================================================ understat
 def fetch_understat(season_start_year):
-    """Season xG, xA, xGChain and xGBuildup per player from understat.com (a second opinion)."""
+    """Season xG, xA, xGChain and xGBuildup per player from understat.com (a second opinion).
+    Understat now loads its tables through an AJAX endpoint; we ask for it the same way its own pages do."""
+    import requests
+    url = f"https://understat.com/getLeagueData/EPL/{season_start_year}"
+    page = f"https://understat.com/league/EPL/{season_start_year}"
+    variants = [
+        {"X-Requested-With": "XMLHttpRequest"},
+        {"X-Requested-With": "XMLHttpRequest", "Referer": page},
+        {"X-Requested-With": "XMLHttpRequest", "Referer": page, "Accept": "application/json, text/javascript, */*; q=0.01",
+         "User-Agent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Safari/605.1.15"},
+    ]
+    seen = []
     try:
-        import requests
-        h = {"User-Agent": "Mozilla/5.0 (FPL Lab)", "X-Requested-With": "XMLHttpRequest"}
-        r = requests.get(f"https://understat.com/getLeagueData/EPL/{season_start_year}", headers=h, timeout=20)
-        if r.ok and r.text.strip().startswith("{"):
-            rows = r.json().get("players", [])
-            if rows:
-                return rows
-        resp = requests.get(f"https://understat.com/league/EPL/{season_start_year}", headers=h, timeout=20)
-        m = re.search(r"playersData\s*=\s*JSON\.parse\('(.*?)'\)", resp.text)
-        if m:
-            import codecs
-            return json.loads(codecs.decode(m.group(1), "unicode_escape"))
-        note_source("Understat (second opinion)", f"HTTP {r.status_code} from the data endpoint, HTTP {resp.status_code} from the league page; "
-                                                  "the page layout may have changed")
+        with requests.Session() as sess:
+            for h in variants:
+                if "Referer" in h:
+                    sess.get(page, headers={k: v for k, v in h.items() if k == "User-Agent"}, timeout=20)   # pick up any cookies first
+                r = sess.get(url, headers=h, timeout=20)
+                try:
+                    data = r.json()
+                except ValueError:
+                    data = None
+                if isinstance(data, dict) and data.get("players"):
+                    return data["players"]
+                seen.append(f"HTTP {r.status_code}, {r.headers.get('content-type', '?').split(';')[0]}, starts {r.text.strip()[:30]!r}")
+            resp = sess.get(page, timeout=20)
+            m = re.search(r"playersData\s*=\s*JSON\.parse\('(.*?)'\)", resp.text)
+            if m:
+                import codecs
+                return json.loads(codecs.decode(m.group(1), "unicode_escape"))
+        note_source("Understat (second opinion)", "data endpoint gave " + " | ".join(seen[-1:]) + "; league page had no player table")
     except Exception as e:  # noqa: BLE001
         note_source("Understat (second opinion)", f"{type(e).__name__}: {e}")
     return []
