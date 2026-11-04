@@ -1255,7 +1255,7 @@ function sourcesList(){
   return `<div class="seasonbar"><div class="head"><b>Where team ratings come from right now</b><span>${pct(share)} this season</span></div>
       <div class="sbar"><i style="width:${100 * share}%"></i></div>
       <p class="sub">After ${D.meta.last_gw} gameweeks, ${pct(share)} of each team’s rating comes from this season’s matches and ${pct(1 - share)} from its starting point (last season, pulled a third of the way to average, blended with ClubElo when available). The starting point fades every week: about 76% this season by GW19 and 80% by the end. Tested on this season’s matches, this weighting predicted better than relying on this season alone. Players’ roles work the same way; for the coming gameweek, FPL’s own projection (40% of Lab points) and bookmaker odds (60% of team expected goals) are current-season too.</p></div>
-    <ul class="health">${Object.entries(S).map(([k, v]) => `<li>${toneDot(v ? "up" : "flat")}<span>${esc(k)}${v ? "" : ": not used this run"}${!v && N[k] ? `<small class="srcwhy">Why: ${esc(N[k])}</small>` : ""}${!v && SOURCE_ROLE[k] ? `<small class="srcrole">${esc(SOURCE_ROLE[k])}</small>` : ""}</span></li>`).join("")}</ul>
+    <ul class="health">${Object.entries(S).map(([k, v]) => `<li>${toneDot(v ? "up" : "flat")}<span>${esc(k)}${v ? "" : ": not used this run"}${!v && N[k] ? `<small class="srcwhy">Why: ${esc(N[k])}</small>` : v && N[k] ? `<small class="srcrole">Note: ${esc(N[k])}</small>` : ""}${!v && SOURCE_ROLE[k] ? `<small class="srcrole">${esc(SOURCE_ROLE[k])}</small>` : ""}</span></li>`).join("")}</ul>
     <p class="sub">Anything “not used this run” was unreachable or not yet published; the model carries on without it and picks it up next time.</p>`;
 }
 function labModel(){
