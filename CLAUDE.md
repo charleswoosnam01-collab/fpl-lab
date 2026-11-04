@@ -350,6 +350,15 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   finish this" (moves become buy-by/sell-by rules via `draftRules()`), and
   "Make GW moves my squad".
 
+## Changes in v6.17
+
+- Understat: requests getLeagueData the way the maintained understatapi fork
+  does (session, X-Requested-With, then with Referer and a browser
+  User-Agent), parses with r.json(), and records the status, content type
+  and first characters of the reply if nothing parses.
+- ClubElo: the last good ratings are saved to site/history/elo_last.json and
+  used for up to 14 days when the site is down (noted on the Model tab).
+
 ## Next tasks
 
 1. Run the engine with full internet access and fix any source that fails.
