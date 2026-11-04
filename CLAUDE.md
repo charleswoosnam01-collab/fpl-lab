@@ -324,6 +324,32 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   beside the summary row (`state.pl.dir`); when sorting by pick score the list
   is grouped under Buy, Watch, Hold, Sell and Don't buy headers.
 
+## Changes in v6.15
+
+- `note_source()` / SOURCE_NOTES: every data source that isn't used records
+  why (HTTP status, missing secret, not published yet) in `meta.source_notes`;
+  the Model tab shows the reason and what each source is for.
+- ClubElo fetch now tries https then http, today then yesterday, through the
+  shared session, and reports when team names don't match.
+- Model tab: "Where team ratings come from right now" bar (this-season share
+  = effective decayed matches / (that + TEAM_PRIOR_MATCHES)). Prior weight
+  re-tested on this season's matches (GW3-9 and GW7-9): 4 matches is about
+  optimal for goals; no prior was worse.
+
+## Changes in v6.16 (draft on the pitch)
+
+- Pitch shows the active draft's squad for the selected gameweek
+  (`draftIdsAt()`), with In and Sell badges on the shirt's corner and one
+  signal bar per player (Def for GK/DEF, Att for MID/FWD).
+- Tap a player > "Transfer out": replacements at that position within
+  selling price + draft bank, club limit and bans respected, sorted by pick
+  score with points gained to the end of the horizon (`openTransferOut()`).
+- Draft moves are stored per draft (`RULES.moves`); `draftState()` tracks free
+  transfers (FPL roll-over rules), hits and bank by gameweek; the draft bar
+  shows them with the six-week points change. Undo, reset, "Let the solver
+  finish this" (moves become buy-by/sell-by rules via `draftRules()`), and
+  "Make GW moves my squad".
+
 ## Next tasks
 
 1. Run the engine with full internet access and fix any source that fails.
