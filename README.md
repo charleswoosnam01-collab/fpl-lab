@@ -23,6 +23,7 @@ GitHub Pages.
   writes the explanations, backtests itself against FPL's own projections,
   and writes `site/data.json`.
 - `site/index.html` is the app.
+- `site/vendor/` holds the HiGHS optimiser (MIT licence) that the exact transfer solver runs on, in your browser.
 - `site/history/` holds the projections saved before each deadline. The live
   accuracy log scores these once each gameweek is played. Keep this folder.
 - `.github/workflows/update.yml` tells GitHub to rerun everything on a schedule.
@@ -111,3 +112,18 @@ Two sets of chips (Wildcard, Free Hit, Bench Boost, Triple Captain); the first
 set must be played before the GW19 deadline. Up to five free transfers can be
 banked; extra transfers cost 4 points. £100m budget, three players per club.
 Scoring values are at the top of `fpl_engine.py`; check them each summer.
+
+## Deadline reminder on your phone (optional)
+
+1. Install the free **ntfy** app (iPhone or Android) and subscribe to a topic name only you know, e.g. `fpl-lab-` followed by random letters.
+2. In GitHub: Settings > Secrets and variables > Actions > Secrets > New repository secret. Name `NTFY_TOPIC`, value your topic name.
+
+About a day before each deadline you'll get one notification: captain and vice, squad injuries and rotation risks, and price falls. Tap it to open FPL Lab.
+
+## Live gameweek
+
+`.github/workflows/live.yml` runs every 15 minutes during usual match times and only does work while a gameweek is in progress. It writes `site/live.json` (your live points, provisional bonus and auto-subs), shown at the top of the Week tab.
+
+## Install on your phone
+
+Open the site in Safari, tap Share, then "Add to Home Screen". It opens full screen with its own icon and keeps the last data for offline use.
