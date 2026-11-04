@@ -71,8 +71,21 @@ TEAM_ALIASES = {   # bookmaker spellings -> FPL names
     "coventry": "Coventry City", "afc bournemouth": "Bournemouth", "leicester city": "Leicester",
     "sheffield utd": "Sheffield Utd", "sheffield united": "Sheffield Utd", "luton town": "Luton",
 }
-DECAY = 0.92
+DECAY = 0.92                 # recency weight for player rates
+TEAM_DECAY = 0.95            # recency weight for team ratings (0.95 predicted goals best; heavier recency did worse)
+BREAKOUT_TEST = dict(n=123, beat_again=0.38, avg_next=-0.07, threshold=0.4)   # surprise runs: two games well above forecast
+FUTURE_TEST = dict(windows=540, seasons="2025/26 and 2026/27", mae_model=0.287, mae_last4=0.386, mae_season=0.300,
+                   rise_hit=0.89, rise_n=93, rise_avg=0.46, fall_hit=0.87, fall_n=94, fall_avg=-0.51,
+                   big_rise_hit=1.0, big_rise_n=17, hot_change=-0.43, hot_stayed=0.48, hot_n=123,
+                   cold_change=0.50, cold_stayed=0.41, cold_n=69, box_signal=0.028)   # next-4 team xG forecasts, tested
+FORM_TEST = dict(matches=370, loglik={"no extra form": -1.4489, "25% form": -1.4506, "50% form": -1.4537, "100% form": -1.4629},
+                 decay={"0.80": -1.4527, "0.88": -1.4500, "0.92": -1.4489, "0.95": -1.4484}, verdict="no extra form; team decay 0.95")
 TEAM_PRIOR_MATCHES = 4
+FORM_N = 4                   # recent-form window, in matches
+FORM_PRIOR_MATCHES = 2       # shrinks a team's recent-form ratio towards its overall rating
+FORM_W_ATT = 0.0             # how much recent attacking form moves expected goals (set by form_test)
+FORM_W_DEF = 0.0             # how much recent defensive form moves expected goals against
+PEN_PRIOR_MATCHES = 8        # shrinks each team's penalty rate towards the league average
 VENUE_PRIOR_MATCHES = 8      # shrinkage for each team's home/away split (shown as context)
 VENUE_IN_MODEL = False       # team-specific splits made predictions worse when tested (see VENUE_TEST)
 VENUE_TEST = dict(matches=369, seasons="2025/26 and 2026/27 to GW9",
@@ -330,16 +343,43 @@ def attribute_shots(sh, hist):
     return sh
 
 
+_FPL_SESSION = None
+
+
+def fpl_session():
+    """One shared HTTP session for the official FPL API: keeps connections open, identifies itself,
+    and retries politely (with backoff) when FPL is busy or updating between gameweeks."""
+    global _FPL_SESSION
+    if _FPL_SESSION is None:
+        import requests
+        from requests.adapters import HTTPAdapter
+        from urllib3.util.retry import Retry
+        s = requests.Session()
+        s.headers["User-Agent"] = "Mozilla/5.0 (FPL Lab)"
+        retry = Retry(total=4, backoff_factor=1.5, status_forcelist=(429, 500, 502, 503, 504), allowed_methods=("GET",))
+        s.mount("https://", HTTPAdapter(max_retries=retry, pool_connections=4, pool_maxsize=8))
+        _FPL_SESSION = s
+    return _FPL_SESSION
+
+
 def overlay_api(ds):
     """Replace prices, ownership and injury news with live official values, if reachable."""
     try:
         import requests
-        boot = requests.get(f"{API}/bootstrap-static/", timeout=20,
+        boot = fpl_session().get(f"{API}/bootstrap-static/", timeout=20,
                             headers={"User-Agent": "Mozilla/5.0 (FPL Lab)"}).json()
     except Exception as e:  # noqa: BLE001
         print("Official API not reachable, using dataset values:", e)
         return False
     live = pd.DataFrame(boot["elements"]).set_index("id")
+    try:   # is the match data behind the official game? (FPL Core Insights updates twice a day)
+        fpl_done = max((e["id"] for e in boot.get("events", []) if e.get("finished") and e.get("data_checked")), default=0)
+        core_done = int(ds.fixtures.loc[ds.fixtures["finished"], "event"].max())
+        ds.behind = max(0, fpl_done - core_done)
+        if ds.behind:
+            print(f"Match data is {ds.behind} gameweek(s) behind the official game")
+    except Exception:  # noqa: BLE001
+        ds.behind = 0
     p = ds.players.set_index("id")
     for col in ["status", "news", "chance_of_playing_next_round", "selected_by_percent", "penalties_order",
                 "corners_and_indirect_freekicks_order", "ep_next", "transfers_in_event", "transfers_out_event",
@@ -356,7 +396,7 @@ def overlay_api(ds):
     ds.players = p.reset_index()
     try:   # official fixture list: catches rearranged games (new doubles) and games awaiting a date (new blanks)
         import requests
-        fx = requests.get(f"{API}/fixtures/", timeout=20, headers={"User-Agent": "Mozilla/5.0 (FPL Lab)"}).json()
+        fx = fpl_session().get(f"{API}/fixtures/", timeout=20).json()
         pairs = {(r.team_h, r.team_a): r.Index for r in ds.fixtures.itertuples()}
         ds.unscheduled = []
         for f in fx:
@@ -402,7 +442,7 @@ def team_model(ds):
     dcs = ds.hist.groupby(["fixture", "team"])["defensive_contribution"].sum().to_dict() if len(ds.hist) else {}
 
     m = pd.DataFrame([dict(
-        id=r.id, h=r.team_h, a=r.team_a, ev=r.event, w=DECAY ** (last_gw - r.event),
+        id=r.id, h=r.team_h, a=r.team_a, ev=r.event, w=TEAM_DECAY ** (last_gw - r.event),
         ph=(1 - GOAL_BLEND) * r.xg_h + GOAL_BLEND * r.hs, pa=(1 - GOAL_BLEND) * r.xg_a + GOAL_BLEND * r.as_,
         xh=r.xg_h, xa=r.xg_a, gh=r.hs, ga=r.as_,
         dch=dcs.get((r.id, r.team_h), 0.0), dca=dcs.get((r.id, r.team_a), 0.0),
@@ -440,6 +480,7 @@ def team_model(ds):
     dfn = {t: float(Dv[i]) for i, t in enumerate(ids)}
 
     vf = venue_factors(m, ids, att, dfn, mu_h, mu_a)
+    form = recent_form(m, ids, att, dfn, mu_h, mu_a)
 
     mean_dc = float(np.average(np.r_[m.dch, m.dca], weights=np.r_[m.w, m.w])) or 1.0
     gen = {}
@@ -447,7 +488,41 @@ def team_model(ds):
         H, A = m[m.h == t], m[m.a == t]
         forced = (H.w * H.dca).sum() + (A.w * A.dch).sum()
         gen[t] = ((forced + 3 * mean_dc) / (H.w.sum() + A.w.sum() + 3)) / mean_dc
-    return dict(mu_h=mu_h, mu_a=mu_a, att=att, dfn=dfn, gen=gen, last_gw=last_gw, m=m, ids=ids, vf=vf)
+    return dict(mu_h=mu_h, mu_a=mu_a, att=att, dfn=dfn, gen=gen, last_gw=last_gw, m=m, ids=ids, vf=vf, form=form,
+                pen=penalty_rates(ds, m, ids))
+
+
+def recent_form(m, ids, att, dfn, mu_h, mu_a, n=FORM_N):
+    """Each team's last n matches against what its overall rating predicted for those games:
+    above 1 means hotter than its rating, below 1 colder. Shrunk towards 1 for small samples."""
+    out = {}
+    mu = (mu_h + mu_a) / 2
+    for t in ids:
+        g = m[(m.h == t) | (m.a == t)].sort_values("ev").tail(n)
+        if g.empty:
+            out[t] = dict(att=1.0, dfn=1.0, n=0, xg=0.0, xga=0.0)
+            continue
+        home = g.h == t
+        made = np.where(home, g.ph, g.pa).sum()
+        allowed = np.where(home, g.pa, g.ph).sum()
+        exp_made = np.where(home, mu_h * att[t] * g.a.map(dfn), mu_a * att[t] * g.h.map(dfn)).sum()
+        exp_allowed = np.where(home, mu_a * dfn[t] * g.a.map(att), mu_h * dfn[t] * g.h.map(att)).sum()
+        k = FORM_PRIOR_MATCHES * mu
+        out[t] = dict(att=float((made + k) / (exp_made + k)), dfn=float((allowed + k) / (exp_allowed + k)), n=int(len(g)),
+                      xg=float(np.where(home, g.xh, g.xa).sum()), xga=float(np.where(home, g.xa, g.xh).sum()))
+    return out
+
+
+def penalty_rates(ds, m, ids):
+    """Penalty xG each team wins per match, shrunk towards the league average."""
+    sh = ds.shots
+    if sh is None or not len(sh) or m.empty:
+        return {t: PEN_XG * 0.12 for t in ids}
+    fx = set(m.id)
+    pens = sh[sh["pen"] & sh["fixture"].isin(fx)].groupby("team")["xg"].sum().to_dict()
+    games = {t: int(((m.h == t) | (m.a == t)).sum()) for t in ids}
+    league = sum(pens.values()) / max(1, sum(games.values()))
+    return {t: (pens.get(t, 0.0) + PEN_PRIOR_MATCHES * league) / (games[t] + PEN_PRIOR_MATCHES) for t in ids}
 
 
 def venue_factors(m, ids, att, dfn, mu_h, mu_a):
@@ -557,8 +632,11 @@ def fixture_lambdas(tm, h, a, venue=None):
     vh, va = (vf.get(h), vf.get(a)) if vf else (None, None)
     one = {"ah": 1.0, "aa": 1.0, "dh": 1.0, "da": 1.0}
     vh, va = vh or one, va or one
-    return (tm["mu_h"] * tm["att"][h] * vh["ah"] * tm["dfn"][a] * va["da"],
-            tm["mu_a"] * tm["att"][a] * va["aa"] * tm["dfn"][h] * vh["dh"])
+    fm = tm.get("form") or {}
+    one_f = {"att": 1.0, "dfn": 1.0}
+    fh, fa = fm.get(h, one_f), fm.get(a, one_f)
+    return (tm["mu_h"] * tm["att"][h] * vh["ah"] * tm["dfn"][a] * va["da"] * fh["att"] ** FORM_W_ATT * fa["dfn"] ** FORM_W_DEF,
+            tm["mu_a"] * tm["att"][a] * va["aa"] * tm["dfn"][h] * vh["dh"] * fa["att"] ** FORM_W_ATT * fh["dfn"] ** FORM_W_DEF)
 
 
 # ========================================================== player model
@@ -591,6 +669,8 @@ def player_model(ds, tm):
     on_t = shots[shots["xgot"].notna()]
     placement = (on_t["xgot"] - on_t["xg"]).groupby(on_t["player"]).sum().to_dict()
     pen_xg = shots[shots["pen"]].groupby("player")["xg"].sum().to_dict()
+    pen_pf = shots[shots["pen"]].groupby(["player", "fixture"])["xg"].sum().to_dict()      # penalty xG by player and match
+    pen_tf = shots[shots["pen"]].groupby(["fixture", "team"])["xg"].sum().to_dict()        # penalty xG by team and match
 
     rates = {}
     for pid, g in hist.groupby("element"):
@@ -599,13 +679,15 @@ def player_model(ds, tm):
             continue
         w = DECAY ** (last_gw - g["event"])
         mins = g["minutes"]
-        txg = np.array([team_xg.get((f, t), 0.0) for f, t in zip(g.fixture, g.team)], dtype=float)
+        txg = np.array([team_xg.get((f, t), 0.0) - pen_tf.get((f, t), 0.0) for f, t in zip(g.fixture, g.team)], dtype=float)
+        pxg = np.array([pen_pf.get((pid, f), 0.0) for f in g.fixture], dtype=float)
+        np_xg_match = np.maximum(0.0, g.xg.to_numpy() - pxg)       # open-play and set-piece xG, penalties removed
         oxg = np.array([team_xg.get((f, o), 0.0) for f, o in zip(g.fixture, g.opp)], dtype=float)
         on = np.nan_to_num(txg) * mins / 90
         pp = (getattr(ds, "player_prior", {}) or {}).get(pid)
         prior_g = pp["share_g"] if pp else SHARE_PRIOR["g"][pos]
         prior_a = pp["share_a"] if pp else SHARE_PRIOR["a"][pos]
-        share_g = _shrink((w * g.xg).sum(), (w * on).sum(), prior_g, SHARE_PRIOR_WEIGHT)
+        share_g = _shrink((w * np_xg_match).sum(), (w * on).sum(), prior_g, SHARE_PRIOR_WEIGHT)
         share_a = _shrink((w * g.xa).sum(), (w * on).sum(), prior_a, SHARE_PRIOR_WEIGHT)
 
         full = g[mins >= 60]
@@ -754,11 +836,15 @@ def fixture_points(r, lam_for, lam_against, gen, avail, style=1.0, extra_xg=0.0)
     pos = r["pos"]
     p60, p1 = r["p60"] * avail, r["p1"] * avail
     mf = r["emins"] * avail / 90
-    xg = r["share_g"] * lam_for * mf * style + extra_xg * mf
+    pen_team = r.get("pen_rate", 0.0) * min(1.6, lam_for / 1.35)        # the team's expected penalty xG in this match
+    lam_np = max(0.05, lam_for - pen_team)
+    xg_pen = (pen_team + extra_xg) * mf if r.get("taker") else 0.0
+    xg_np = r["share_g"] * lam_np * mf * style
+    xg = xg_np + xg_pen
     xa = r["share_a"] * lam_for * mf
     cs_prob = math.exp(-lam_against)
     pts = {
-        "app": 2 * p60 + p1, "goals": GOAL[pos] * xg, "assists": ASSIST * xa,
+        "app": 2 * p60 + p1, "goals": GOAL[pos] * xg_np, "pens": GOAL[pos] * xg_pen, "assists": ASSIST * xa,
         "cs": CLEAN_SHEET[pos] * p60 * cs_prob,
         "gc": -p60 * e_floor_div(lam_against, 2) if pos in (1, 2) else 0.0,
         "saves": p60 * e_floor_div(r["save_ratio"] * lam_against, 3) if pos == 1 else 0.0,
@@ -770,7 +856,8 @@ def fixture_points(r, lam_for, lam_against, gen, avail, style=1.0, extra_xg=0.0)
         dc_p = odds / (1 + odds)
     pts["defcon"] = DEFCON_POINTS * p60 * dc_p
     detail = dict(xg=xg, xa=xa, cs=cs_prob, dc_p=dc_p * avail, dc_cond=dc_p, dc_proj=r["dc90"] * gen * mf,
-                  ret=1 - math.exp(-(xg + xa)), lf=lam_for, la=lam_against, style=style, pen_extra=extra_xg * mf)
+                  ret=1 - math.exp(-(xg + xa)), lf=lam_for, la=lam_against, style=style, pen_extra=extra_xg * mf,
+                  xg_np=xg_np, xg_pen=xg_pen, lam_np=lam_np)
     return pts, detail
 
 
@@ -799,12 +886,16 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
         r = rates.get(pid) or default_rates(pos)
         if str(p.get("status")) == "u" and r["season"] is None:
             continue
+        po = p.get("penalties_order")
+        r = dict(r, taker=po is not None and not pd.isna(po) and int(po) == 1, pen_rate=tm.get("pen", {}).get(team, 0.0))
         av = availability(p, gw_dates, gws)
         neutral, _ = fixture_points(r, mu, mu, 1.0, 1.0)
         neutral_ret = sum(v for k, v in neutral.items() if k not in ("app", "cards", "gc")) or 1e-6
-        ep, nxt, sims, rot_notes = [], None, [], []
+        ep, nxt, sims, rot_notes, epf = [], None, [], [], []
+        comp6 = {}
+        rf = dict(r, p60=1.0, p1=0.0, emins=88.0)      # the same player if he starts and plays 88 minutes
         for i, g in enumerate(gws):
-            total = 0.0
+            total, total_full = 0.0, 0.0
             sim_total = np.zeros(SIM_N) if simulate_gws else None
             for opp, home, lf, la in by_team[g].get(team, []):
                 cong = rot["fixture"].get((team, g, opp))
@@ -825,15 +916,24 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
                 quality = min(1.6, max(0.5, ret / (neutral_ret * max(av[i], 1e-6))))
                 pts["bonus"] = rr["bonus90"] * rr["emins"] * av[i] / 90 * quality
                 total += sum(pts.values())
+                if i < HORIZON:
+                    for k_, v_ in pts.items():
+                        comp6[k_] = comp6.get(k_, 0.0) + v_
+                    pf, _ = fixture_points(rf, lf, la, tm["gen"][opp], 1.0, sf, extra)
+                    qf = min(1.6, max(0.5, sum(v for k, v in pf.items() if k not in ("app", "cards", "gc")) / neutral_ret))
+                    total_full += sum(pf.values()) + r["bonus90"] * 88 / 90 * qf
                 if simulate_gws and ((i < HORIZON and (i == 0 or ep_hint(r))) or (i >= HORIZON and tc_candidate(r))):
                     sim_total += simulate_fixture(rr, lf, la, det["dc_cond"], pts["bonus"], av[i], sf, rng)
                 if i == 0 and nxt is None and keep_detail:
                     nxt = dict(det, opp=opp, home=home, drivers=drivers, rot=cong, rot_factor=f_rot, ref=ref,
                                breakdown={k: round(v, 2) for k, v in pts.items()})
             ep.append(round(total, 2))
+            if i < HORIZON:
+                epf.append(round(total_full, 2))
             if simulate_gws:
                 sims.append(sim_total)
-        out.append(dict(p=p, r=r, ep=ep, av=av, next=nxt, sims=sims, rot_notes=rot_notes))
+        out.append(dict(p=p, r=r, ep=ep, av=av, next=nxt, sims=sims, rot_notes=rot_notes, epf=epf,
+                        comp6={k_: round(v_, 2) for k_, v_ in comp6.items()}))
     return out
 
 
@@ -864,7 +964,8 @@ def simulate_fixture(r, lf, la, dc_cond, bonus_exp, avail, style, rng, n=SIM_N):
     full, sub = u < p60, (u >= p60) & (u < p60 + p1)
     m_sub = min(59.0, max(10.0, (r["emins"] - 87 * r["p60"]) / r["p1"])) if r["p1"] > 0.02 else 25.0
     mins = np.where(full, 87.0, np.where(sub, m_sub, 0.0))
-    g = rng.poisson(r["share_g"] * lf * style * mins / 90)
+    pen_team = r.get("pen_rate", 0.0) * min(1.6, lf / 1.35)
+    g = rng.poisson(r["share_g"] * max(0.05, lf - pen_team) * style * mins / 90) + (rng.poisson(pen_team * mins / 90) if r.get("taker") else 0)
     a = rng.poisson(r["share_a"] * lf * mins / 90)
     conc = rng.poisson(la, n)
     cs = full & (conc == 0)
@@ -971,6 +1072,9 @@ def explain(item, teams, ttab, prof, pct, tm=None):
     T, O = teams[team], teams[opp]
     tt, ot = ttab[team], ttab[opp]
     venue_for = "at home" if nx["home"] else "away"
+    ctx = (tm or {}).get("ctx", {}) if tm is not None else {}
+    why_opp = lambda side: (" Why: " + ctx[opp][side + "_short"]) if ctx.get(opp, {}).get(side + "_short") else ""
+    why_own = lambda side: (" Why: " + ctx[team][side + "_short"]) if ctx.get(team, {}).get(side + "_short") else ""
     s = r["season"]
     pc = pct.get(pid, {})
     why = []
@@ -988,7 +1092,7 @@ def explain(item, teams, ttab, prof, pct, tm=None):
         tone = "up" if q and q["p"] >= 75 else "down" if q and q["p"] <= 30 else "flat"
         rank_txt = f", {ordinal(q['rank'])} of {q['of']} {POS_NAME[pos]}" if q and q["ranked"] else ""
         add(tone, "Shot quality", f"{s['npxg90']:.2f} non-penalty xG per 90{rank_txt}. "
-            f"He takes {r['share_g']:.0%} of {T['name']}’s expected goals when he’s on the pitch.",
+            f"He takes {r['share_g']:.0%} of {T['name']}’s non-penalty expected goals when he’s on the pitch.",
             pstat("npxg90", "npxG per 90"), (3 if pos >= 3 else 1.5) if tone == "up" else 1.2)
         if s["box90"] > 0:
             add("up" if (pc.get("box90") or {}).get("p", 0) >= 80 else "flat", "Box presence",
@@ -1013,11 +1117,11 @@ def explain(item, teams, ttab, prof, pct, tm=None):
         tone = "up" if cs >= 0.38 else "down" if cs <= 0.22 else "flat"
         add(tone, "Clean sheet chance",
             f"{cs:.0%} chance of a clean sheet. {O['name']} create {ot['xgf']:.2f} xG per match, "
-            f"{most_phrase(ot['r_xgf'])}; the model expects {nx['la']:.2f} against {T['short']} {venue_for}.",
+            f"{most_phrase(ot['r_xgf'])}; the model expects {nx['la']:.2f} against {T['short']} {venue_for}." + why_opp("att"),
             None, 2.5)
         if tt.get("xga") is not None:
             add("up" if tt["r_xga"] <= 6 else "down" if tt["r_xga"] >= 15 else "flat", "Team defence",
-                f"{T['name']} concede {tt['xga']:.2f} xG per match, {most_phrase(21 - tt['r_xga'])}.",
+                f"{T['name']} concede {tt['xga']:.2f} xG per match, {most_phrase(21 - tt['r_xga'])}." + why_own("def"),
                 None, 1.2)
     if pos in DEFCON_THRESHOLD and r["dc_games"] >= 2 and (pos != 4):
         gen = O.get("gen", 1.0)
@@ -1034,7 +1138,7 @@ def explain(item, teams, ttab, prof, pct, tm=None):
         add("up" if nx["lf"] >= 1.9 else "down" if nx["lf"] <= 1.1 else "flat", "Fixture",
             f"{T['name']} are expected to score {nx['lf']:.2f} {venue_for} against {O['name']}. "
             f"{O['name']} concede {ot['xga']:.2f} xG per match, {most_phrase(21 - ot['r_xga'])}; "
-            f"{T['short']} create {tt['xgf']:.2f}, {most_phrase(tt['r_xgf'])}.",
+            f"{T['short']} create {tt['xgf']:.2f}, {most_phrase(tt['r_xgf'])}." + why_opp("def"),
             None, 2.2 if nx["lf"] >= 1.9 or nx["lf"] <= 1.1 else 1.0)
 
     # situational matchup: the strongest positive and negative style links
@@ -1099,6 +1203,9 @@ def explain(item, teams, ttab, prof, pct, tm=None):
             f"{BOOK_WEIGHT:.0%} to {1 - BOOK_WEIGHT:.0%} in favour of the market.", None, 1.6)
 
     pen = p.get("penalties_order")
+    if pen is not None and not pd.isna(pen) and int(pen) >= 2 and r.get("pen_xg", 0) >= 0.7:
+        add("down", "Penalties", f"He’s scored or taken penalties this season ({r['pen_xg']:.1f} xG from the spot), but FPL now lists him "
+            f"as {ordinal(int(pen))} choice, so the projection gives him no penalty threat.", None, 2.2)
     if pen is not None and not pd.isna(pen) and int(pen) == 1:
         add("up", "Penalties", "First-choice penalty taker." +
             (f" Penalties have added {r['pen_xg']:.2f} xG this season." if r["pen_xg"] > 0 else ""), None, 1.3)
@@ -1298,6 +1405,380 @@ def lab_tuning(rows):
                 cap=caps, cap_fpl=round(float(fpl_picks.pts.mean()), 3), cap_best=round(float(best_pick.pts.mean()), 3))
 
 
+
+# ======================================================== narratives
+def _list_names(items):
+    items = [x for x in items if x]
+    return items[0] if len(items) == 1 else ", ".join(items[:-1]) + " and " + items[-1] if items else ""
+
+
+def narratives(ds, tm, ttab, rates):
+    """Plain-English reasons behind the numbers: who a team has played, which games skew the averages,
+    where the chances come from, red cards, missing players and recent trends. Same for players."""
+    m = tm["m"]
+    if m.empty:
+        return {}, {}
+    names = dict(zip(ds.teams["id"], ds.teams["name"]))
+    short = dict(zip(ds.teams["id"], ds.teams["short_name"]))
+    att, dfn, ids = tm["att"], tm["dfn"], tm["ids"]
+    h = ds.hist.copy()
+    h["red_cards"] = pd.to_numeric(h.get("red_cards", 0), errors="coerce").fillna(0)
+    reds = h.groupby(["fixture", "team"])["red_cards"].sum().to_dict()
+    pos_of = dict(zip(ds.players["id"], ds.players["element_type"]))
+    pname = dict(zip(ds.players["id"], ds.players["web_name"]))
+    shots = ds.shots
+    pens_conceded = shots[shots["pen"]].groupby("opp").size().to_dict() if len(shots) else {}
+    pens_won = shots[shots["pen"]].groupby("team").size().to_dict() if len(shots) else {}
+    league_pens = np.mean([pens_conceded.get(t, 0) for t in ids]) if ids else 0
+
+    # each team's games, from its own side
+    games = {}
+    for r in m.itertuples():
+        games.setdefault(r.h, []).append(dict(fx=r.id, ev=r.ev, opp=r.a, home=True, xf=r.xh, xa=r.xa, gf=r.gh, ga=r.ga))
+        games.setdefault(r.a, []).append(dict(fx=r.id, ev=r.ev, opp=r.h, home=False, xf=r.xa, xa=r.xh, gf=r.ga, ga=r.gh))
+    tough_def = {t: np.mean([att[g["opp"]] for g in games.get(t, [])]) for t in ids if games.get(t)}   # attacks faced
+    tough_att = {t: np.mean([dfn[g["opp"]] for g in games.get(t, [])]) for t in ids if games.get(t)}   # defences faced
+    rank = lambda d, t, rev: 1 + sorted(d, key=lambda k: -d[k] if rev else d[k]).index(t)
+    adj_def_rank = {t: 1 + sorted(ids, key=lambda k: dfn[k]).index(t) for t in ids}     # 1 = best defence
+    adj_att_rank = {t: 1 + sorted(ids, key=lambda k: -att[k]).index(t) for t in ids}     # 1 = best attack
+
+    team_ctx = {}
+    for t in ids:
+        g = sorted(games.get(t, []), key=lambda x: x["ev"])
+        if len(g) < 3:
+            continue
+        tt = ttab[t]
+        out = {"def": [], "att": [], "def_short": None, "att_short": None}
+        for side in ("def", "att"):
+            key, avg = ("xa", tt["xga"]) if side == "def" else ("xf", tt["xgf"])
+            lines, scores = [], []
+            # schedule
+            if side == "def":
+                faced, frank = tough_def[t], rank(tough_def, t, True)
+                top = sorted(g, key=lambda x: -att[x["opp"]])[:3]
+                raw_rank, adj = tt["r_xga"], adj_def_rank[t]
+                kind = "attacks"
+            else:
+                faced, frank = tough_att[t], 21 - rank(tough_att, t, False)   # 1 = toughest defences faced
+                top = sorted(g, key=lambda x: dfn[x["opp"]])[:3]
+                raw_rank, adj = tt["r_xgf"], adj_att_rank[t]
+                kind = "defences"
+            who = _list_names([names[x["opp"]] for x in top])
+            if frank <= 5:
+                txt = (f"They’ve faced the {ordinal(frank) + '-' if frank > 1 else ''}toughest set of {kind} in the league so far, "
+                       f"including {who}. ")
+                txt += (f"Allowing for that, the model rates them {ordinal(adj)}, better than their raw "
+                        f"{ordinal(raw_rank)} suggests." if adj < raw_rank - 1 else
+                        f"Even allowing for that, the model still rates them {ordinal(adj)}.")
+                lines.append(("schedule", txt)); scores.append(3 if abs(adj - raw_rank) >= 3 else 2)
+            elif frank >= 16:
+                easy = _list_names([names[x["opp"]] for x in sorted(g, key=lambda x: att[x["opp"]] if side == "def" else -dfn[x["opp"]])[:3]])
+                txt = (f"Their fixtures have been kind: the {ordinal(21 - frank) + '-' if frank < 20 else ''}easiest set of {kind} "
+                       f"faced, including {easy}. ")
+                txt += (f"Allowing for that, the model rates them {ordinal(adj)}, not the {ordinal(raw_rank)} the raw numbers suggest."
+                        if adj > raw_rank + 1 else f"Even so, the model still rates them {ordinal(adj)}.")
+                lines.append(("schedule", txt)); scores.append(3 if abs(adj - raw_rank) >= 3 else 2)
+            else:
+                lines.append(("schedule", f"Their opponents so far have been about average in {kind[:-1] if kind == 'attacks' else 'defence'}, so the raw numbers are a fair guide: "
+                                          f"the model rates them {ordinal(adj)}."))
+                scores.append(0.5)
+            # one game skewing the average
+            big = max(g, key=lambda x: x[key])
+            rest = [x[key] for x in g if x is not big]
+            if big[key] >= 2.2 and big[key] / max(1e-6, sum(x[key] for x in g)) >= 0.22 and rest:
+                lines.append(("skew", f"One game does a lot of the work: {big[key]:.1f} xG "
+                                      f"{'against' if side == 'def' else 'for'} them "
+                                      f"{'at home to' if big['home'] else 'away at'} {names[big['opp']]} in GW{big['ev']}. "
+                                      f"Without it they average {np.mean(rest):.2f} a game rather than {avg:.2f}."))
+                scores.append(2.5)
+            # red cards
+            own_reds = [x for x in g if reds.get((x["fx"], t), 0) > 0]
+            opp_reds = [x for x in g if reds.get((x["fx"], x["opp"]), 0) > 0]
+            if side == "def" and own_reds:
+                lines.append(("reds", f"They’ve had a player sent off in {len(own_reds)} game{'s' if len(own_reds) > 1 else ''} "
+                                      f"({_list_names([names[x['opp']] + ' GW' + str(x['ev']) for x in own_reds])}), and "
+                                      f"playing with ten men pushes the xG against up: {np.mean([x['xa'] for x in own_reds]):.2f} a game in those, "
+                                      f"{np.mean([x['xa'] for x in g if x not in own_reds] or [0]):.2f} otherwise."))
+                scores.append(2)
+            if side == "att" and opp_reds:
+                lines.append(("reds", f"Opponents have been down to ten men in {len(opp_reds)} of their games "
+                                      f"({_list_names([names[x['opp']] + ' GW' + str(x['ev']) for x in opp_reds])}), which flatters the attacking "
+                                      f"numbers a little: {np.mean([x['xf'] for x in opp_reds]):.2f} xG a game in those."))
+                scores.append(1.5)
+            # where the chances come from
+            prof = tm.get("prof", {}).get(t, {}).get(side, {})
+            if prof:
+                best = max(("setpiece", "fast", "head"), key=lambda c: prof[c]["idx"])
+                worst = min(("setpiece", "fast", "head"), key=lambda c: prof[c]["idx"])
+                if prof[best]["idx"] >= 1.3:
+                    lines.append(("source", f"A lot of it comes from {CATS[best]}: {prof[best]['pm']:.2f} xG a game, "
+                                            f"{prof[best]['idx']:.1f}× the league average. "
+                                            + ({"setpiece": "Set-piece weakness usually comes from height or marking set-ups, so it tends to persist.",
+                                                "head": "Losing aerial duels in the box is usually about personnel and height, so it tends to persist.",
+                                                "fast": "That points to a team caught upfield when they lose the ball, which tends to persist unless the shape changes."}[best]
+                                               if side == "def" else "That’s a repeatable strength, so expect it to continue.")))
+                    scores.append(2.2)
+                elif prof[worst]["idx"] <= 0.7:
+                    lines.append(("source", f"They give little away from {CATS[worst]} ({prof[worst]['idx']:.1f}× the league average)."
+                                  if side == "def" else f"They rarely threaten from {CATS[worst]} ({prof[worst]['idx']:.1f}× the league average)."))
+                    scores.append(1)
+            if side == "def" and pens_conceded.get(t, 0) >= max(3, league_pens * 2):
+                lines.append(("pens", f"They’ve given away {pens_conceded[t]} penalties, worth about {0.76 * pens_conceded[t]:.1f} xG on their own."))
+                scores.append(2)
+            if side == "att" and pens_won.get(t, 0) >= 3:
+                lines.append(("pens", f"They’ve won {pens_won[t]} penalties, about {0.76 * pens_won[t]:.1f} of their xG."))
+                scores.append(1.5)
+            # missing players
+            team_h = h[h["team"] == t]
+            fx_ids = [x["fx"] for x in g]
+            if side == "def":
+                cands = team_h[team_h["element"].map(pos_of).isin([1, 2])].groupby("element")["minutes"].sum().nlargest(3).index
+            else:
+                cands = team_h[team_h["element"].map(pos_of).isin([3, 4])].groupby("element")["xg"].sum().nlargest(2).index
+            for pid in cands:
+                ph = team_h[team_h["element"] == pid].set_index("fixture")["minutes"]
+                played = [x for x in g if ph.get(x["fx"], 0) >= 60]
+                missed = [x for x in g if ph.get(x["fx"], 0) < 30]
+                if len(played) >= 2 and len(missed) >= 2:
+                    a1, a2 = np.mean([x[key] for x in played]), np.mean([x[key] for x in missed])
+                    if (side == "def" and a2 - a1 >= 0.4) or (side == "att" and a1 - a2 >= 0.4):
+                        lines.append(("absence", f"Losing {pname.get(pid, 'a key player')} has hurt: "
+                                                 f"{a2:.2f} xG {'against' if side == 'def' else 'for'} a game in the {len(missed)} without him, "
+                                                 f"{a1:.2f} in the {len(played)} with him."))
+                        scores.append(2.6)
+                        break
+            # trend
+            if len(g) >= 7:
+                last, before = np.mean([x[key] for x in g[-4:]]), np.mean([x[key] for x in g[:-4]])
+                ch = last / max(1e-6, before) - 1
+                if abs(ch) >= 0.25:
+                    better = (ch < 0) if side == "def" else (ch > 0)
+                    lines.append(("trend", f"The trend is {'improving' if better else 'getting worse'}: {last:.2f} xG "
+                                           f"{'against' if side == 'def' else 'for'} a game over the last four, "
+                                           f"against {before:.2f} before that."))
+                    scores.append(1.8)
+            # finishing and goalkeeping
+            gsum, xsum = int(sum(x["ga" if side == "def" else "gf"] for x in g)), sum(x[key] for x in g)
+            if abs(gsum - xsum) >= 3:
+                if side == "def":
+                    lines.append(("luck", f"They’ve conceded {gsum} from {xsum:.1f} xG. " + (
+                        "Good goalkeeping or luck is keeping the score down, and that rarely lasts." if gsum < xsum
+                        else "Bad luck or poor goalkeeping has cost them, so results should improve if the chances stay the same.")))
+                else:
+                    lines.append(("luck", f"They’ve scored {gsum} from {xsum:.1f} xG. " + (
+                        "Finishing above the chances usually cools off." if gsum > xsum
+                        else "The goals should come if they keep making these chances.")))
+                scores.append(1.6)
+            order = sorted(range(len(lines)), key=lambda i: -scores[i])
+            out[side] = [lines[i][1] for i in order]
+            notable = [i for i in order if scores[i] >= 2]
+            out[side + "_short"] = lines[notable[0]][1] if notable else None
+        team_ctx[t] = out
+
+    # players
+    sh = shots
+    pos_xg_per_shot = {}
+    if len(sh):
+        tmp = sh[~sh["pen"]].assign(pos=sh["player"].map(pos_of))
+        per = tmp.groupby("player")["xg"].agg(["sum", "count"])
+        per = per[per["count"] >= 8].join(tmp.groupby("player")["pos"].first())
+        pos_xg_per_shot = (per["sum"] / per["count"]).groupby(per["pos"]).median().to_dict()
+    player_ctx = {}
+    for pid, r in rates.items():
+        s_ = r.get("season") or {}
+        if s_.get("mins", 0) < 270:
+            continue
+        lines = []
+        g = h[(h["element"] == pid) & (h["minutes"] > 0)]
+        tot_xg = float(g["xg"].sum())
+        nm = pname.get(pid, "He")
+        if tot_xg >= 0.5 and len(sh):
+            ps0 = sh[sh["player"] == pid]
+            if len(ps0):
+                inbox = ps0[ps0["zone"].isin(["six", "central", "wide"]) & ~ps0["pen"]]
+                lines.append(f"Where it comes from: {len(ps0)} shots worth {ps0['xg'].sum():.1f} xG "
+                             f"({len(ps0) / max(1, s_["mins"]) * 90:.1f} per 90), with {len(inbox) / max(1, len(ps0)):.0%} taken inside the box"
+                             + (f" and {int(ps0['pen'].sum())} penalt{'y' if int(ps0['pen'].sum()) == 1 else 'ies'}" if ps0["pen"].any() else "") + ".")
+        if tot_xg >= 0.8:
+            ps = sh[sh["player"] == pid] if len(sh) else sh
+            pen = float(ps[ps["pen"]]["xg"].sum()) if len(ps) else 0
+            if pen / tot_xg >= 0.3:
+                lines.append(f"{pen / tot_xg:.0%} of his {tot_xg:.1f} xG has come from penalties, so his open-play threat is lower than the headline number.")
+            npx = ps[~ps["pen"]] if len(ps) else ps
+            if len(npx) >= 8 and pos_xg_per_shot.get(r["pos"]):
+                q, base = float(npx["xg"].mean()), pos_xg_per_shot[r["pos"]]
+                if q >= base * 1.35:
+                    lines.append(f"He gets into good positions: {q:.2f} xG per shot, against {base:.2f} for a typical {POS_NAME[r['pos']][:-1]}. "
+                                 f"That points to movement in the box, which is the most reliable kind of threat.")
+                elif q <= base * 0.7:
+                    lines.append(f"Lots of his shots are speculative: {q:.2f} xG per shot, against {base:.2f} for a typical {POS_NAME[r['pos']][:-1]}, "
+                                 f"so the volume flatters him.")
+            prof = r.get("profile") or {}
+            if prof.get("setpiece", 0) >= 0.45 and r["pos"] <= 2:
+                lines.append(f"Most of his threat ({prof['setpiece']:.0%}) comes from set pieces, so it depends on his team winning corners and free kicks.")
+            elif prof.get("head", 0) >= 0.45:
+                lines.append(f"{prof['head']:.0%} of his chances are headers, so he relies on crosses and set pieces reaching him.")
+            if len(g) >= 4:
+                best = g.loc[g["xg"].idxmax()]
+                if best["xg"] >= 1.0 and best["xg"] / tot_xg >= 0.3:
+                    lines.append(f"One game inflates it: {best['xg']:.1f} xG {'at home to' if best['was_home'] else 'away at'} "
+                                 f"{names.get(best['opp'], 'one opponent')} in GW{int(best['event'])}, "
+                                 f"{best['xg'] / tot_xg:.0%} of his season. Take that out and he averages "
+                                 f"{(tot_xg - best['xg']) / max(1, g['minutes'].sum() - best['minutes']) * 90:.2f} xG per 90.")
+        if len(g) >= 3:
+            w_ = g["minutes"].to_numpy()
+            faced = float(np.average([dfn[o] for o in g["opp"]], weights=w_))
+            if faced >= 1.12 and r["pos"] >= 3:
+                lines.append(f"He’s played against weaker defences than average so far (they’ve conceded {faced - 1:.0%} more than a typical side), "
+                             f"so his rates may dip as the fixtures get harder.")
+            elif faced <= 0.88 and r["pos"] >= 3:
+                lines.append(f"His numbers have come against tougher defences than average ({1 - faced:.0%} stingier than a typical side), "
+                             f"so there may be more to come.")
+            starts = int(s_.get("starts", 0))
+            subs_off = int(((g["minutes"] >= 45) & (g["minutes"] < 75)).sum())
+            if starts >= 4 and subs_off >= max(2, starts // 2):
+                lines.append(f"He’s often taken off early: {subs_off} of his {starts} starts ended before 75 minutes, which caps his minutes and his bonus.")
+        if r["pos"] in (2, 3) and r.get("dc_games", 0) >= 3 and r.get("dc_hits", 0) >= 2:
+            lines.append(f"DEFCON has been a steady source of points: {r['dc_hits']} of {r['dc_games']} full games over the line, "
+                         f"averaging {r['dc90']:.1f} actions per 90.")
+        if lines:
+            player_ctx[pid] = lines[:5]
+    return team_ctx, player_ctx
+
+
+def tier(rank, n=20):
+    return ("one of the best in the league" if rank <= 3 else "strong" if rank <= 7 else "around the middle"
+            if rank <= 13 else "below average" if rank <= 17 else "one of the weakest in the league")
+
+
+def plain_summaries(ds, tm, ttab, rates, gws, proj_by_id):
+    """'In plain terms' paragraphs: what a team's or player's numbers mean for FPL decisions."""
+    ids = tm["ids"]
+    names = dict(zip(ds.teams["id"], ds.teams["name"]))
+    adj_att = {t: 1 + sorted(ids, key=lambda k: -tm["att"][k]).index(t) for t in ids}
+    adj_def = {t: 1 + sorted(ids, key=lambda k: tm["dfn"][k]).index(t) for t in ids}
+    up = ds.fixtures[~ds.fixtures["finished"] & ds.fixtures["event"].isin(gws)]
+    run_f, run_a = {t: 0.0 for t in ids}, {t: 0.0 for t in ids}
+    for r in up.itertuples():
+        lh, la = fixture_lambdas(tm, r.team_h, r.team_a)
+        run_f[r.team_h] += lh; run_a[r.team_h] += la; run_f[r.team_a] += la; run_a[r.team_a] += lh
+    ease_att = {t: 1 + sorted(ids, key=lambda k: -run_f[k]).index(t) for t in ids}     # 1 = most goals expected
+    ease_def = {t: 1 + sorted(ids, key=lambda k: run_a[k]).index(t) for t in ids}      # 1 = fewest conceded
+    run_word = lambda r: "very kind" if r <= 4 else "good" if r <= 8 else "average" if r <= 13 else "tough" if r <= 17 else "very tough"
+    team_sum = {}
+    for t in ids:
+        a, d = adj_att[t], adj_def[t]
+        implic = []
+        if d <= 6:
+            implic.append("their goalkeeper and defenders are among the best clean sheet bets")
+        if a <= 6:
+            implic.append("their main attackers are worth owning")
+        if d >= 16:
+            implic.append("attackers playing against them are worth targeting")
+        if a >= 16:
+            implic.append("defenders playing against them are good picks")
+        if not implic:
+            implic.append("their players are only worth picking when the fixtures line up")
+        team_sum[t] = (f"In plain terms: {names[t]} are {tier(a)} going forward ({ordinal(a)} on the model’s rating) and "
+                       f"{tier(d)} at the back ({ordinal(d)}). For FPL, that means {_list_names(implic)}. "
+                       f"Over the next {len(gws)} gameweeks their fixtures are {run_word(ease_att[t])} for attackers "
+                       f"({ordinal(ease_att[t])} for expected goals) and {run_word(ease_def[t])} for defenders "
+                       f"({ordinal(ease_def[t])} for goals expected against).")
+    pos_rank = {}
+    for pos in (1, 2, 3, 4):
+        pool = sorted([pid for pid, it in proj_by_id.items() if it["r"]["pos"] == pos and it["ep"]], key=lambda k: -proj_by_id[k]["ep"][0])
+        for i, pid in enumerate(pool):
+            pos_rank[pid] = (i + 1, len(pool))
+    player_sum = {}
+    for pid, it in proj_by_id.items():
+        r = it["r"]
+        s_ = r.get("season") or {}
+        if s_.get("mins", 0) < 270 or not it["ep"]:
+            continue
+        pos = r["pos"]
+        team = names.get(int(it["p"]["team"]), "his team")
+        bits = []
+        if pos == 4 or r["share_g"] >= 0.25:
+            role = f"{team}’s main goal threat, taking {r['share_g']:.0%} of their expected goals"
+        elif pos == 3 and r["share_a"] >= 0.15:
+            role = f"one of {team}’s chief creators, with {r['share_a']:.0%} of their expected assists"
+        elif pos == 3:
+            role = f"a midfielder who chips in with {r['share_g']:.0%} of {team}’s expected goals"
+        elif pos == 2 and (r.get("profile") or {}).get("setpiece", 0) >= 0.4 and r["share_g"] >= 0.05:
+            role = f"a defender who carries a real goal threat from set pieces"
+        elif pos == 2 and r["dc_hit"] >= 0.45:
+            role = "a defender whose points come from clean sheets and DEFCON rather than goals"
+        elif pos == 2:
+            role = "a defender whose points depend mainly on clean sheets"
+        else:
+            role = "a goalkeeper whose points come from clean sheets and saves"
+        bits.append(f"In plain terms: {_text(it['p'].get('web_name'))} is {role}.")
+        if r["p60"] >= 0.9:
+            bits.append("He’s nailed on when fit.")
+        elif r["p60"] >= 0.6:
+            bits.append("He usually starts, but not always.")
+        elif r["emins"] > 0:
+            bits.append("His minutes are the big risk: he isn’t a regular starter right now.")
+        avg = sum(it["ep"][:len(gws)]) / max(1, len(it["ep"][:len(gws)]))
+        if avg > 0.5:
+            ch = it["ep"][0] / avg - 1
+            bits.append("This week looks better than his average over the next six." if ch >= 0.12 else
+                        "This week is weaker than his average over the next six, so he may be one to bench or rotate." if ch <= -0.12 else
+                        "This week is about his normal level.")
+        rk, n = pos_rank.get(pid, (None, None))
+        if rk:
+            bits.append((f"He’s the best {POS_NAME[pos][:-1]} this week on Lab points, out of {n}." if rk == 1 else
+                         f"He’s the {ordinal(rk)}-best {POS_NAME[pos][:-1]} this week out of {n}, on Lab points.") if rk <= 15 else "")
+        player_sum[pid] = " ".join(b for b in bits if b)
+    return team_sum, player_sum
+
+# ======================================================== trend spotter
+def trend_signals(ds, tm, n_calls=3):
+    """Forecast track record this season (calls made a few weeks ago against what happened) and each team's
+    'surprise': how far its last two games beat what the model expected before each one."""
+    fx = ds.fixtures
+    done = fx[fx["finished"]]
+    last = tm["last_gw"]
+    models = {}
+
+    def model_at(k):
+        if k not in models:
+            models[k] = team_model(SimpleNamespace(teams=ds.teams, fixtures=fx.assign(finished=fx["finished"] & (fx["event"] <= k)),
+                                                   hist=ds.hist[ds.hist["event"] <= k], shots=ds.shots[ds.shots["event"] <= k],
+                                                   team_prior=getattr(ds, "team_prior", {}), player_prior={}))
+        return models[k]
+    xg_for = lambda r, t: r.xg_h if r.team_h == t else r.xg_a
+    surprise = {}
+    for t in tm["ids"]:
+        g = done[(done.team_h == t) | (done.team_a == t)].sort_values("event").tail(2)
+        if len(g) < 2:
+            continue
+        diffs = []
+        for r in g.itertuples():
+            if r.event - 1 < 1:
+                continue
+            lh, la = fixture_lambdas(model_at(r.event - 1), r.team_h, r.team_a)
+            diffs.append(xg_for(r, t) - (lh if r.team_h == t else la))
+        if diffs:
+            surprise[int(t)] = round(float(np.mean(diffs)), 3)
+    calls = []
+    for k in range(max(2, last - 5), last - 1):
+        m = model_at(k)
+        rows = []
+        for t in m["ids"]:
+            past = done[((done.team_h == t) | (done.team_a == t)) & (done.event <= k)].sort_values("event").tail(4)
+            fut = done[((done.team_h == t) | (done.team_a == t)) & (done.event > k) & (done.event <= k + 4)]
+            if len(past) < 3 or len(fut) < 2:
+                continue
+            l4 = float(np.mean([xg_for(r, t) for r in past.itertuples()]))
+            pred = float(np.mean([fixture_lambdas(m, r.team_h, r.team_a)[0 if r.team_h == t else 1] for r in fut.itertuples()]))
+            act = float(np.mean([xg_for(r, t) for r in fut.itertuples()]))
+            rows.append(dict(t=int(t), made=k, last4=round(l4, 2), pred=round(pred, 2), actual=round(act, 2), games=int(len(fut))))
+        rows.sort(key=lambda r: -(r["pred"] - r["last4"]))
+        calls += [r for r in rows[:n_calls] if r["pred"] - r["last4"] >= 0.2]
+    return surprise, calls
+
+
 # ======================================================== live record
 def write_snapshot(folder, data):
     """Save this run's projections for the coming gameweek. Runs after the deadline move on to the
@@ -1347,8 +1828,10 @@ def player_form(ds, n=8):
     names = dict(zip(ds.teams["id"], ds.teams["short_name"]))
     for pid, g in ds.hist.groupby("element"):
         g = g.tail(n)
+        # [gw, opponent, home, minutes, xG, xA, FPL points, started, goals, assists]
         out[int(pid)] = [[int(r.event), names.get(r.opp, "?"), int(r.was_home), int(r.minutes), round(float(r.xg), 2),
-                          round(float(r.xa), 2), int(r.event_points)] for r in g.itertuples()]
+                          round(float(r.xa), 2), int(r.event_points), int(r.starts > 0 or r.minutes >= 60),
+                          int(r.goals_scored), int(r.assists)] for r in g.itertuples()]
     return out
 
 
@@ -1375,6 +1858,7 @@ def team_extras(ds, tm):
             if col in pl else []
         out[t] = dict(
             form=[[int(x[0]), x[1], x[2], round(float(x[3]), 2), round(float(x[4]), 2), int(x[5]), int(x[6])] for x in rows[-8:]],
+            results=[[int(x[0]), x[1], x[2], round(float(x[3]), 2), round(float(x[4]), 2), int(x[5]), int(x[6])] for x in rows],
             luck=dict(gf=int(gf), xgf=round(float(xgf), 1), ga=int(ga), xga=round(float(xga), 1)),
             sp=dict(
                 pens=[[int(pid), int(v)] for pid, v in pens.sort_values(ascending=False).head(3).items() if pd.notna(pid)],
@@ -1391,15 +1875,115 @@ def import_team(team_id, next_gw):
     """Your squad, bank, free transfers and chips from the official FPL API (public endpoints)."""
     try:
         import requests
-        s = requests.Session()
-        s.headers["User-Agent"] = "Mozilla/5.0 (FPL Lab)"
+        s = fpl_session()
         get = lambda path: s.get(f"{API}/{path}", timeout=20).json()
         entry = get(f"entry/{team_id}/")
         history = get(f"entry/{team_id}/history/")
     except Exception as e:  # noqa: BLE001
         print("Could not import team:", e)
         return None
-    return team_from_api(team_id, next_gw, entry, history, lambda gw: get(f"entry/{team_id}/event/{gw}/picks/"))
+    my = team_from_api(team_id, next_gw, entry, history, lambda gw: get(f"entry/{team_id}/event/{gw}/picks/"))
+    try:
+        transfers = get(f"entry/{team_id}/transfers/")
+        picks = {}
+        for row in history.get("current", []):
+            try:
+                picks[row["event"]] = get(f"entry/{team_id}/event/{row['event']}/picks/")
+            except Exception:  # noqa: BLE001
+                pass
+        my["raw"] = dict(history=history, transfers=transfers, picks=picks)
+    except Exception as e:  # noqa: BLE001
+        print("Could not load transfer history:", e)
+    return my
+
+
+def selling_prices(raw, ds, ids):
+    """FPL selling price for each player you own: what you paid plus half of any rise, rounded down to £0.1m.
+    Purchase price comes from your transfer history, or the price when he first appears in your team."""
+    now = dict(zip(ds.players["id"], ds.players["now_cost"]))
+    snaps = ds.snaps.dropna(subset=["now_cost"]) if "now_cost" in ds.snaps else pd.DataFrame()
+    price_at = {(int(r.id), int(r.gw)): float(r.now_cost) for r in snaps.itertuples()} if len(snaps) else {}
+    bought = {}
+    for t in sorted(raw.get("transfers", []), key=lambda t: (t["event"], t.get("time", ""))):
+        bought[t["element_in"]] = t.get("element_in_cost", 0) / 10
+    first_seen = {}
+    for gw, pk in sorted(raw.get("picks", {}).items(), key=lambda kv: int(kv[0])):
+        for p in pk.get("picks", []):
+            first_seen.setdefault(p["element"], int(gw))
+    out = {}
+    for pid in ids:
+        cur = now.get(pid)
+        if cur is None:
+            continue
+        paid = bought.get(pid)
+        if paid is None and pid in first_seen:
+            g = first_seen[pid]
+            paid = price_at.get((pid, g - 1)) or price_at.get((pid, g))
+        if paid is None:
+            continue
+        sell = cur if cur <= paid else paid + math.floor(round((cur - paid) * 10) / 2) / 10
+        out[int(pid)] = round(sell, 1)
+    return out
+
+
+def season_audit(raw, ds):
+    """How your decisions have worked out: every transfer against keeping the player, every captain
+    against the best option in your XI, points left on the bench, and rank week by week."""
+    if not raw:
+        return None
+    pts = ds.hist.groupby(["element", "event"])["event_points"].sum().to_dict()
+    name = dict(zip(ds.players["id"], ds.players["web_name"]))
+    last = int(ds.fixtures.loc[ds.fixtures["finished"], "event"].max()) if ds.fixtures["finished"].any() else 0
+    hist = sorted(raw.get("history", {}).get("current", []), key=lambda r: r["event"])
+    chips = {c["event"]: c["name"] for c in raw.get("history", {}).get("chips", [])}
+    hits = {r["event"]: int(r.get("event_transfers_cost", 0)) for r in hist}
+    n_by_gw = {}
+    tr = sorted(raw.get("transfers", []), key=lambda t: (t["event"], t.get("time", "")))
+    for t in tr:
+        n_by_gw[t["event"]] = n_by_gw.get(t["event"], 0) + 1
+    rows = []
+    for k, t in enumerate(tr):
+        gw, pin, pout = t["event"], t["element_in"], t["element_out"]
+        if chips.get(gw) in ("wildcard", "freehit"):
+            continue
+        end = next((u["event"] - 1 for u in tr[k + 1:] if u["element_out"] == pin), last)
+        weeks = [g for g in range(gw, end + 1) if g <= last]
+        a = sum(pts.get((pin, g), 0) for g in weeks)
+        b = sum(pts.get((pout, g), 0) for g in weeks)
+        cost = hits.get(gw, 0) / max(1, n_by_gw.get(gw, 1))
+        rows.append(dict(gw=gw, inn=name.get(pin, str(pin)), out=name.get(pout, str(pout)), pin=pin, pout=pout,
+                         weeks=len(weeks), pts_in=int(a), pts_out=int(b), hit=round(cost, 1), net=round(a - b - cost, 1),
+                         price_in=t.get("element_in_cost", 0) / 10, price_out=t.get("element_out_cost", 0) / 10))
+    caps = []
+    for gw, pk in sorted(raw.get("picks", {}).items(), key=lambda kv: int(kv[0])):
+        gw = int(gw)
+        if gw > last:
+            continue
+        picks = pk.get("picks", [])
+        xi = [p for p in picks if p.get("multiplier", 0) > 0]
+        cap = next((p for p in picks if p.get("is_captain")), None)
+        if not cap or not xi:
+            continue
+        mult = cap.get("multiplier", 2) or 2
+        cpts = pts.get((cap["element"], gw), 0)
+        best = max(xi, key=lambda p: pts.get((p["element"], gw), 0))
+        bpts = pts.get((best["element"], gw), 0)
+        caps.append(dict(gw=gw, cap=name.get(cap["element"], ""), cap_pts=int(cpts), mult=int(mult),
+                         best=name.get(best["element"], ""), best_pts=int(bpts), lost=int((bpts - cpts) * (mult - 1))))
+    weeks = [dict(gw=r["event"], pts=r.get("points"), total=r.get("total_points"), rank=r.get("overall_rank"),
+                  gw_rank=r.get("rank"), bench=r.get("points_on_bench"), hits=r.get("event_transfers_cost"),
+                  chip=chips.get(r["event"])) for r in hist]
+    done_tr = [r for r in rows if r["weeks"] >= 1]
+    return dict(
+        transfers=rows, captains=caps, weeks=weeks,
+        summary=dict(
+            transfers=len(done_tr), net=round(sum(r["net"] for r in done_tr), 1),
+            good=sum(1 for r in done_tr if r["net"] > 0), hits=int(sum(hits.values())),
+            cap_best=sum(1 for c in caps if c["lost"] == 0), cap_n=len(caps), cap_lost=int(sum(c["lost"] for c in caps)),
+            bench=int(sum((w["bench"] or 0) for w in weeks)),
+            best_rank=min((w["rank"] for w in weeks if w["rank"]), default=None),
+        ),
+    )
 
 
 def team_from_api(team_id, next_gw, entry, history, picks_for):
@@ -1612,8 +2196,7 @@ def import_elite(gw, folder, n=ELITE_N, delay=0.12):
         return json.loads(path.read_text())
     try:
         import requests
-        s = requests.Session()
-        s.headers["User-Agent"] = "Mozilla/5.0 (FPL Lab)"
+        s = fpl_session()
         entries = []
         for page in range(1, n // 50 + 1):
             res = s.get(f"{API}/leagues-classic/314/standings/", params={"page_standings": page}, timeout=20).json()
@@ -1650,7 +2233,7 @@ def import_elite(gw, folder, n=ELITE_N, delay=0.12):
 def fetch_set_piece_notes():
     try:
         import requests
-        js = requests.get(f"{API}/team/set-piece-notes/", timeout=20, headers={"User-Agent": "Mozilla/5.0 (FPL Lab)"}).json()
+        js = fpl_session().get(f"{API}/team/set-piece-notes/", timeout=20).json()
     except Exception as e:  # noqa: BLE001
         print("Set-piece notes not reachable:", e)
         return {}
@@ -1872,8 +2455,7 @@ def import_league(league_id, my_id, cur_gw, limit=20):
     """Rivals in a classic mini-league: their squads, captains and chips (public FPL endpoints)."""
     try:
         import requests
-        s = requests.Session()
-        s.headers["User-Agent"] = "Mozilla/5.0 (FPL Lab)"
+        s = fpl_session()
         get = lambda path: s.get(f"{API}/{path}", timeout=20).json()
         standings = get(f"leagues-classic/{league_id}/standings/")
     except Exception as e:  # noqa: BLE001
@@ -1993,12 +2575,28 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     sources["FPL set-piece notes"] = bool(sp_notes)
     us = match_understat(fetch_understat(int(SEASON[:4])), ds.players, ds.teams) if online else {}
     sources["Understat (second opinion)"] = bool(us)
+    sources["Match data up to date with the official game"] = not getattr(ds, "behind", 0)
 
     tm, prof, league, rates, rot, proj = fit_and_project(ds, long_gws, detail=True, simulate=True, book=book, refs=refs)
+    # the same projections with each team's home and away splits switched on, for the app's venue view
+    global VENUE_IN_MODEL
+    VENUE_IN_MODEL = True
+    try:
+        proj_v = project(ds, tm, rates, prof, gws, keep_detail=False, rot=rot, simulate_gws=False)
+        ep_venue = {int(it["p"]["id"]): it["ep"][:HORIZON] for it in proj_v}
+        venue_lams = {(r.team_h, r.team_a): blended_lambdas(tm, r.team_h, r.team_a)
+                      for r in ds.fixtures[~ds.fixtures["finished"]].itertuples()}
+    finally:
+        VENUE_IN_MODEL = False
+    surprise, calls = trend_signals(ds, tm)
     ttab = team_table(ds, tm)
     pct = percentiles(rates, ["npxg90", "xa90", "box90", "shots90", "dc90", "aerial90", "share_g"])
     form = player_form(ds)
     extras = team_extras(ds, tm)
+    tm["prof"] = prof
+    team_ctx, player_ctx = narratives(ds, tm, ttab, rates)
+    tm["ctx"] = team_ctx
+    team_sum, player_sum = plain_summaries(ds, tm, ttab, rates, gws, {int(it["p"]["id"]): it for it in proj})
 
     att = np.array([tm["att"][t] for t in tm["ids"]])
     dfn = np.array([tm["dfn"][t] for t in tm["ids"]])
@@ -2016,6 +2614,9 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             **extras.get(t, {}),
             elo=round(elo[t]) if t in elo else None,
             notes=sp_notes.get(int(t), []),
+            ctx=team_ctx.get(t), summary=team_sum.get(t), surprise=surprise.get(int(t)),
+            pen=round(tm.get("pen", {}).get(t, 0.0), 3),
+            rform={k_: (round(v_, 3) if isinstance(v_, float) else v_) for k_, v_ in tm.get("form", {}).get(t, {}).items()},
         )
     cong = {}
     for (team, g, opp), c in rot["fixture"].items():
@@ -2064,6 +2665,10 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             form=form.get(pid, []) if s.get("mins", 0) >= 90 else [],
             rot=dict(n_c=rp.get("n_c", 0), s_c=rp.get("s_c", 0), n_n=rp.get("n_n", 0), s_n=rp.get("s_n", 0),
                      last_cup=rp.get("last_cup")) if rp.get("n_c") or rp.get("last_cup") else None,
+            epf=it.get("epf") if r["emins"] >= 1 or (r.get("season") or {}).get("mins") else None,
+            bd6=it.get("comp6"), taker=bool(r.get("taker")),
+            epv=[round(x, 2) for x in ep_venue.get(pid, [])] or None,
+            ctx=player_ctx.get(pid), summary=player_sum.get(pid),
             why=why,
         ))
     w_fpl, kappa = (lab["w_fpl"], lab["kappa"]) if lab else (0.0, 1.0)
@@ -2092,7 +2697,9 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
         lh, la = blended_lambdas(tm, r.team_h, r.team_a)
         mh, ma = fixture_lambdas(tm, r.team_h, r.team_a)
         b = book.get((r.team_h, r.team_a))
+        vl = venue_lams.get((r.team_h, r.team_a), (lh, la))
         fixtures.append(dict(gw=int(r.event), h=int(r.team_h), a=int(r.team_a), lh=round(lh, 2), la=round(la, 2),
+                             lhv=round(vl[0], 2), lav=round(vl[1], 2),
                              mh=round(mh, 2), ma=round(ma, 2), book=b, ref=refs.get((r.team_h, r.team_a)),
                              ko=r.kickoff.isoformat() if pd.notna(r.kickoff) else None))
     special = []
@@ -2117,7 +2724,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   rules=dict(ft_max=5, hit=4, chip_half_end=19, squad_max_per_club=3),
                   horizon=HORIZON, long_gws=long_gws, special=special,
                   unscheduled=getattr(ds, "unscheduled", []),
-                  venue=VENUE_TEST, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
+                  venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
@@ -2128,10 +2735,94 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
         live=live_record(history, ds),
         my=import_team(team_id, gws[0]) if team_id else None,
     )
+    if data["my"] and data["my"].get("raw"):
+        data["my"]["sell"] = selling_prices(data["my"]["raw"], ds, data["my"]["ids"])
+        data["my"]["audit"] = season_audit(data["my"].pop("raw"), ds)
     if league_id:
         cur = data["my"]["gw"] if data["my"] else gws[0] - 1
         data["rivals"] = import_league(league_id, int(team_id) if team_id else None, cur)
     return data
+
+
+def run_changes(folder, data):
+    """What moved since the previous run: projections, injury news, prices and fixtures. Saves this run for next time."""
+    if not folder:
+        return None
+    path = Path(folder) / "last_run.json"
+    snap = dict(generated=data["meta"]["generated"], gw=data["meta"]["gws"][0],
+                special=[x["gw"] for x in data["meta"].get("special", [])],
+                players={p["id"]: [p["ep"][0] if p["ep"] else 0, p["ep6"], p["st"], p["news"], p["price"]] for p in data["players"]})
+    old = json.loads(path.read_text()) if path.exists() else None
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(snap, separators=(",", ":")))
+    if not old:
+        return None
+    rows = []
+    for p in data["players"]:
+        o = old["players"].get(str(p["id"]))
+        if not o:
+            continue
+        e0, e6, st, news, price = o
+        if p["news"] != news and (p["news"] or news):
+            rows.append(dict(id=p["id"], kind="news", text=p["news"] or "Injury flag removed", w=3 + p["ep6"] / 10))
+        if round(p["price"] - price, 1):
+            rows.append(dict(id=p["id"], kind="price", text=f"Price {'up' if p['price'] > price else 'down'} to £{p['price']:.1f}m",
+                             w=1 + p["own"] / 20))
+        if abs(p["ep6"] - e6) >= 3 and max(p["ep6"], e6) >= 15:
+            rows.append(dict(id=p["id"], kind="proj", text=f"Next six gameweeks {e6:.1f} → {p['ep6']:.1f}", w=abs(p["ep6"] - e6) / 2,
+                             up=p["ep6"] > e6))
+    new_special = [g for g in snap["special"] if g not in old.get("special", [])]
+    rows.sort(key=lambda r: -r["w"])
+    return dict(since=old["generated"], new_gw=snap["gw"] != old["gw"], special=new_special, rows=rows[:25])
+
+
+def deadline_reminder(data, folder, topic, url=None, now=None):
+    """A phone notification about a day before the deadline (via ntfy.sh): captain, squad warnings and price falls.
+    Sent once per gameweek; the gameweeks already notified are kept in site/history/notified.json."""
+    if not topic or not data.get("my"):
+        return None
+    ko = data["meta"].get("first_kickoff")
+    if not ko:
+        return None
+    gw = data["meta"]["gws"][0]
+    dl = pd.Timestamp(ko).tz_convert("UTC") - pd.Timedelta(minutes=90)
+    now = now or pd.Timestamp.now(tz="UTC")
+    hours = (dl - now).total_seconds() / 3600
+    path = Path(folder) / "notified.json"
+    sent = json.loads(path.read_text()) if path.exists() else []
+    if gw in sent or not (10 <= hours <= 34):
+        return None
+    P = {p["id"]: p for p in data["players"]}
+    squad = [P[i] for i in data["my"]["ids"] if i in P]
+    fit = [p for p in squad if p["st"] == "a"]
+    caps = sorted(fit, key=lambda p: -(p.get("cap") if p.get("cap") is not None else p["ep"][0]))
+    lines = []
+    if caps:
+        lines.append(f"Captain: {caps[0]['n']}" + (f" (vice {caps[1]['n']})" if len(caps) > 1 else ""))
+    warn = [f"{p['n']} {('injured' if p['st'] == 'i' else 'suspended' if p['st'] == 's' else 'doubtful')}" for p in squad if p["st"] in ("i", "s", "d")]
+    warn += [f"{p['n']} rotation risk" for p in squad if p.get("next") and p["next"].get("rot", 1) < 0.9]
+    falls = [p["n"] for p in squad if (p.get("pc") or {}).get("src") == "fpl" and ((p["pc"].get("steps") or [0])[0] <= -100)]
+    if warn:
+        lines.append("Watch: " + ", ".join(warn[:4]))
+    if falls:
+        lines.append("Price falls tonight: " + ", ".join(falls[:4]))
+    if len(lines) == 1:
+        lines.append("No injuries or price falls in your squad.")
+    body = "\n".join(lines)
+    title = f"FPL Lab: GW{gw} deadline {dl.tz_convert('Europe/London').strftime('%a %H:%M')}"
+    try:
+        import requests
+        headers = {"Title": title, "Tags": "soccer"}
+        if url:
+            headers["Click"] = url
+        requests.post(f"https://ntfy.sh/{topic}", data=body.encode("utf-8"), headers=headers, timeout=15)
+    except Exception as e:  # noqa: BLE001
+        print("Reminder not sent:", e)
+        return None
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(json.dumps(sorted(set(sent + [gw]))))
+    print("Deadline reminder sent:", title)
+    return body
 
 
 def main():
@@ -2158,6 +2849,8 @@ def main():
     data = build(ds, history=args.history, team_id=args.team_id, league_id=args.league_id, odds=not args.no_odds,
                  prev=prev, cache=cache, online=not args.offline)
     write_snapshot(args.history, data)
+    data["changes"] = run_changes(args.history, data)
+    deadline_reminder(data, args.history, os.environ.get("NTFY_TOPIC"), os.environ.get("PAGES_URL"))
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(data, separators=(",", ":"), default=str))
