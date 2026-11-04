@@ -533,6 +533,23 @@ nav.tabs a{font-size:10.5px}
 .vgroup{display:flex;justify-content:space-between;align-items:baseline;padding:14px 2px 6px;border-bottom:2px solid var(--line);list-style:none}
 .vgroup b{font-size:14px}.vgroup span{font-size:12px;font-weight:800;color:var(--muted)}
 .vgroup.up b{color:var(--up)}.vgroup.down b{color:var(--down)}.vgroup.warn b{color:#B7860B}.vgroup.flat b{color:#0C447C}
+.seasonbar{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.seasonbar .head{display:flex;justify-content:space-between;gap:8px}.seasonbar .head span{font-weight:800;color:var(--up)}
+.sbar{height:12px;border-radius:6px;background:var(--chalk);overflow:hidden;margin:8px 0 4px}.sbar i{display:block;height:100%;background:var(--up)}
+.srcwhy,.srcrole{display:block;font-size:12px;color:var(--muted);margin-top:2px}.srcwhy{color:var(--down)}
+
+/* v6.15 draft on the pitch */
+.shirtwrap{position:relative;display:inline-block}
+.pbadge{position:absolute;top:-6px;left:-14px;font-size:9.5px;font-weight:800;border-radius:999px;padding:1px 6px;color:#fff;line-height:1.4;box-shadow:0 0 0 1.5px var(--surface)}
+.pbadge.sell{background:var(--down)}.pbadge.in{background:var(--up)}
+.pp .vb{display:none}
+.pp .psig{display:block;line-height:1;margin-top:1px}.pp .psig .sig{margin-left:0}.pp .psig small{font-size:8.5px}
+.pp .pf{max-width:100%;overflow:hidden;text-overflow:ellipsis}
+.draftbar{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px 0;text-align:center}
+.draftbar small{display:block;font-size:11px;color:var(--muted)}.draftbar b{font-size:14px}
+.draftbar.empty{display:block;text-align:left;font-size:13px;color:var(--muted)}
+.upc{color:var(--up)}.downc{color:var(--down)}
+.draftacts{margin:0 0 6px}.draftacts .optrow{min-height:40px;font-size:13px}
 </style>
 </head>
 <body>
@@ -1222,9 +1239,23 @@ function addToSquad(id){
 function removeFromSquad(id){ state.squad.ids = state.squad.ids.filter(x => x !== id); state.plan = null; state.chipPlan = null; saveSquad(); toast(`${P[id].n} removed`); }
 
 /* ---------- model ---------- */
+const SOURCE_ROLE = {
+  "ClubElo ratings": "Part of each team’s starting rating. Elo updates after every result, so it’s current-season information.",
+  "Bookmaker odds for the next round": "The biggest current-season input for the coming gameweek: 60% of each team’s expected goals.",
+  "Referee appointments for the next round": "Small effect: penalty and card chances for the first-choice taker.",
+  "Understat (second opinion)": "Display only: a second set of xG figures on player pages. It doesn’t change any projection.",
+};
+function seasonShare(){
+  const n = D.meta.last_gw || 0, eff = (1 - Math.pow(0.95, n)) / 0.05, prior = 4;
+  return n ? eff / (eff + prior) : 0;
+}
 function sourcesList(){
-  const S = D.meta.sources || {};
-  return `<ul class="health">${Object.entries(S).map(([k, v]) => `<li>${toneDot(v ? "up" : "flat")}<span>${esc(k)}${v ? "" : ": not used this run"}</span></li>`).join("")}</ul>
+  const S = D.meta.sources || {}, N = D.meta.source_notes || {};
+  const share = seasonShare();
+  return `<div class="seasonbar"><div class="head"><b>Where team ratings come from right now</b><span>${pct(share)} this season</span></div>
+      <div class="sbar"><i style="width:${100 * share}%"></i></div>
+      <p class="sub">After ${D.meta.last_gw} gameweeks, ${pct(share)} of each team’s rating comes from this season’s matches and ${pct(1 - share)} from its starting point (last season, pulled a third of the way to average, blended with ClubElo when available). The starting point fades every week: about 76% this season by GW19 and 80% by the end. Tested on this season’s matches, this weighting predicted better than relying on this season alone. Players’ roles work the same way; for the coming gameweek, FPL’s own projection (40% of Lab points) and bookmaker odds (60% of team expected goals) are current-season too.</p></div>
+    <ul class="health">${Object.entries(S).map(([k, v]) => `<li>${toneDot(v ? "up" : "flat")}<span>${esc(k)}${v ? "" : ": not used this run"}${!v && N[k] ? `<small class="srcwhy">Why: ${esc(N[k])}</small>` : ""}${!v && SOURCE_ROLE[k] ? `<small class="srcrole">${esc(SOURCE_ROLE[k])}</small>` : ""}</span></li>`).join("")}</ul>
     <p class="sub">Anything “not used this run” was unreachable or not yet published; the model carries on without it and picks it up next time.</p>`;
 }
 function labModel(){
@@ -1707,7 +1738,7 @@ function radar(players){
 state.pitchGw = 0; state.lu = {};
 function lineupFor(squad, i){
   const auto = bestXI(squad, i), o = state.lu[i];
-  if (!o) return auto;
+  if (!o || o.xi.some(id => !squad.some(p => p.id === id))) return auto;
   const xi = o.xi.map(id => P[id]).filter(Boolean), bench = squad.filter(p => !o.xi.includes(p.id)).sort((a,b) => (b.pos===1) - (a.pos===1) || b.ep[i]-a.ep[i]);
   const cap = P[o.cap] && o.xi.includes(o.cap) ? P[o.cap] : [...xi].sort((a,b) => b.ep[i]-a.ep[i])[0];
   const vice = P[o.vice] && o.xi.includes(o.vice) && o.vice !== cap.id ? P[o.vice] : [...xi].filter(p => p !== cap).sort((a,b) => b.ep[i]-a.ep[i])[0];
@@ -1718,29 +1749,36 @@ function validXI(ids){
   const c = {1:0,2:0,3:0,4:0}; ids.forEach(id => c[P[id].pos]++);
   return ids.length === 11 && c[1] === 1 && c[2] >= 3 && c[2] <= 5 && c[3] >= 2 && c[3] <= 5 && c[4] >= 1 && c[4] <= 3;
 }
-function pitchView(squad){
-  const i = state.pitchGw, g = GWS[i], L = lineupFor(squad, i);
-  const card = (p, bench) => `<button class="pp ${bench ? "bench" : ""}" data-pitch="${p.id}" aria-label="${esc(p.n)}, ${f1(p.ep[i])} points">
-    ${p === L.cap ? '<span class="cb">C</span>' : p === L.vice ? '<span class="cb v">V</span>' : ""}${verdict(p) && verdict(p).word === "Sell" ? '<span class="vb">Sell</span>' : ""}${p.edited ? '<span class="eb" aria-label="Minutes edited">✎</span>' : ""}
-    ${shirt(p.t)}<span class="pn">${msDot(p)}${esc(p.n)}</span><span class="pf">${(FX[p.t][g] || []).map(f => `${esc(T[f.opp].short)} ${f.home ? "H" : "A"}<span class="sigmini">${sig(xgClass(f.lf), "A")}${sig(csClass(Math.exp(-f.la)), "D")}</span>`).join(" ") || "Blank"}</span><span class="pe">${f1(p.ep[i] * (p === L.cap ? 2 : 1))}</span></button>`;
+function pitchView(baseSquad){
+  const i = state.pitchGw, g = GWS[i], squad = draftSquadAt(i), L = lineupFor(squad, i), base = new Set(state.squad.ids);
+  const card = (p, bench) => { const isIn = !base.has(p.id), v = verdict(p);
+    const corner = isIn ? '<span class="pbadge in">In</span>' : v && v.word === "Sell" ? '<span class="pbadge sell">Sell</span>' : "";
+    const f0 = (FX[p.t][g] || [])[0];
+    const sg = f0 ? (p.pos >= 3 ? sig(xgClass(f0.lf), "Att") : sig(csClass(Math.exp(-f0.la)), "Def")) : "";
+    return `<button class="pp ${bench ? "bench" : ""}" data-pitch="${p.id}" aria-label="${esc(p.n)}, ${f1(p.ep[i])} points">
+    ${p === L.cap ? '<span class="cb">C</span>' : p === L.vice ? '<span class="cb v">V</span>' : ""}${p.edited ? '<span class="eb" aria-label="Minutes edited">✎</span>' : ""}
+    <span class="shirtwrap">${shirt(p.t)}${corner}</span><span class="pn">${msDot(p)}${esc(p.n)}</span>
+    <span class="pf">${(FX[p.t][g] || []).map(f => `${esc(T[f.opp].short)} ${f.home ? "H" : "A"}`).join(", ") || "Blank"}</span><span class="psig">${sg}</span>
+    <span class="pe">${f1(p.ep[i] * (p === L.cap ? 2 : 1))}</span></button>`; };
   const rows = [1,2,3,4].map(pos => `<div class="prow">${L.xi.filter(p => p.pos === pos).map(p => card(p)).join("")}</div>`).join("");
-  return `<div class="gwstep"><button class="ghost" data-gwstep="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${g}</b><button class="ghost" data-gwstep="1" ${i === GWS.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button></div>
+  return `${draftBar()}<div class="gwstep"><button class="ghost" data-gwstep="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${g}</b><button class="ghost" data-gwstep="1" ${i === GWS.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button></div>
     <div class="pitch">${rows}</div><div class="prow benchrow">${L.bench.map(p => card(p, true)).join("")}</div>
-    <p class="sub" style="text-align:center">${f1(L.total)} projected with ${esc(L.cap.n)} as captain${L.custom ? " (your line-up)" : " (best line-up)"}. Tap a player to captain, swap or edit his minutes.${L.custom ? ` <button class="term" data-luclear="1">Reset line-up</button>` : ""}</p>`;
+    <p class="sub" style="text-align:center">${f1(L.total)} projected with ${esc(L.cap.n)} as captain${L.custom ? " (your line-up)" : " (best line-up)"}. Tap a player to transfer him out, captain him, swap him or edit his minutes.${L.custom ? ` <button class="term" data-luclear="1">Reset line-up</button>` : ""}</p>`;
 }
 function openPitchPlayer(id){
-  const squad = state.squad.ids.map(x => P[x]), i = state.pitchGw, L = lineupFor(squad, i), p = P[id];
+  const i = state.pitchGw, squad = draftSquadAt(i), L = lineupFor(squad, i), p = P[id];
   const inXI = L.xi.includes(p);
   const swaps = (inXI ? L.bench : L.xi).filter(q => validXI((inXI ? L.xi.map(x => x === p ? q : x) : L.xi.map(x => x === q ? p : x)).map(x => x.id)));
   $("#sheetBody").innerHTML = `<h2 id="sheetTitle">${dot(p.t)}${esc(p.n)}</h2><p class="sub">${f1(p.ep[i])} projected for GW${GWS[i]}, ${esc(fxText(p.t, GWS[i]))}</p>
-    <div class="optgrid" style="margin-top:12px">${inXI ? `<button class="optrow" data-luact="cap" data-pid="${id}">Make captain</button><button class="optrow" data-luact="vice" data-pid="${id}">Make vice-captain</button>` : ""}
+    <button class="primary" style="margin-top:12px" data-draftoutsheet="${id}">Transfer out in GW${GWS[i]}</button>
+    <div class="optgrid" style="margin-top:10px">${inXI ? `<button class="optrow" data-luact="cap" data-pid="${id}">Make captain</button><button class="optrow" data-luact="vice" data-pid="${id}">Make vice-captain</button>` : ""}
     <button class="optrow" data-open="${id}">Full details and minutes</button>
     <button class="optrow" data-ruletoggle="lock" data-pid="${id}" aria-pressed="${RULES.lock.includes(id)}">${RULES.lock.includes(id) ? "Unlock in planner" : "Lock in planner"}</button></div>
     <h3>${inXI ? "Move to the bench for" : "Bring on for"}</h3><div class="optgrid">${swaps.map(q => `<button class="optrow" data-luact="swap" data-pid="${id}" data-with="${q.id}">${esc(q.n)} <span class="sub">${f1(q.ep[i])}</span></button>`).join("") || `<p class="sub">No swap keeps a legal formation.</p>`}</div>${sheetFoot()}`;
   showSheet();
 }
 function lineupAction(act, id, other){
-  const squad = state.squad.ids.map(x => P[x]), i = state.pitchGw, L = lineupFor(squad, i);
+  const i = state.pitchGw, squad = draftSquadAt(i), L = lineupFor(squad, i);
   const o = {xi: L.xi.map(p => p.id), cap: L.cap.id, vice: L.vice ? L.vice.id : null};
   if (act === "cap"){ if (o.vice === id) o.vice = o.cap; o.cap = id; }
   if (act === "vice" && id !== o.cap) o.vice = id;
@@ -1830,10 +1868,11 @@ async function solveExact(squad, bank, ft, opts = {}){
   const chips = {};
   if (!opts.noChips) CHIP_KEYS.forEach(k => { const c = RULES.chips[k]; if (!c || c === "off" || !hasChip(k)) return;
     if (c === "auto") chips[k] = "auto"; else { const i = idx(+c); if (i < H) chips[k] = i; } });
+  const dr = draftRules();
   const rules = {
     forced: RULES.lock.filter(id => owned.has(id)), banned: RULES.ban.filter(id => !owned.has(id)),
-    buyBy: RULES.buy.filter(r => !owned.has(r.id) && idx(r.gw) < H).map(r => ({id: r.id, t: idx(r.gw)})),
-    sellBy: RULES.sell.filter(r => owned.has(r.id) && idx(r.gw) < H).map(r => ({id: r.id, t: idx(r.gw)})),
+    buyBy: RULES.buy.filter(r => !owned.has(r.id) && idx(r.gw) < H).map(r => ({id: r.id, t: idx(r.gw)})).concat(dr.buys.filter(r => r.t < H)),
+    sellBy: RULES.sell.filter(r => owned.has(r.id) && idx(r.gw) < H).map(r => ({id: r.id, t: idx(r.gw)})).concat(dr.sells.filter(r => r.t < H)),
   };
   const hitsMode = opts.noHits ? "off" : (opts.hits || RULES.hits);
   let lastErr = null;
@@ -1888,6 +1927,7 @@ function rulesSummary(r){
   if (r.sell.length) bits.push("selling " + r.sell.map(x => `${nm(x.id)} by GW${x.gw}`).join(", "));
   if (r.buy.length) bits.push("buying " + r.buy.map(x => `${nm(x.id)} by GW${x.gw}`).join(", "));
   if (r.ban.length) bits.push("banning " + r.ban.map(nm).join(", "));
+  if (r.moves && r.moves.length) bits.push("your drafted moves: " + r.moves.map(m => `${nm(m.out)} → ${nm(m.in)} (GW${m.gw})`).join(", "));
   if (r.hits !== "on") bits.push(r.hits === "off" ? "no hits" : "at most one hit");
   const ch = CHIP_KEYS.filter(k => r.chips[k] && r.chips[k] !== "off" && hasChip(k)).map(k => `${CHIP_LONG[k]} ${r.chips[k] === "auto" ? "when best" : "in GW" + r.chips[k]}`);
   if (ch.length) bits.push(ch.join(", "));
@@ -2927,9 +2967,83 @@ function pointBlocks(p){
     <p class="sub">Each block is ${six ? "one point" : "half a point"}. Outlined blocks show what he’s missing compared with a typical nailed ${POS_LONG[p.pos]}; a small line marks where a typical one stops when he’s above. ${state.pbView === "six" && !p.bd6 ? "" : ""}Our model’s split; the total uses Lab points.</p></div>`;
 }
 
+/* ---------- v6.15: draft transfers on the pitch ---------- */
+// Moves live in the active planner draft: RULES.moves = [{gw, out, in}]. Your real squad is never changed by them.
+function draftMoves(){ if (!RULES.moves) RULES.moves = []; return RULES.moves; }
+function draftIdsAt(i){
+  let ids = [...state.squad.ids];
+  draftMoves().filter(m => GWS.indexOf(m.gw) <= i && GWS.indexOf(m.gw) >= 0).sort((a,b) => a.gw - b.gw).forEach(m => { ids = ids.map(x => x === m.out ? m.in : x); });
+  return ids;
+}
+const draftSquadAt = i => draftIdsAt(i).map(id => P[id]).filter(Boolean);
+function draftState(){
+  // free transfers, hits and bank for each gameweek of the draft
+  const out = [], base = new Set(state.squad.ids);
+  let ft = Number(state.squad.ft || 1), bank = Number(state.squad.bank || 0), hits = 0;
+  GWS.forEach((g, i) => {
+    const ms = draftMoves().filter(m => m.gw === g);
+    ms.forEach(m => { const o = P[m.out], c = P[m.in]; bank += ((base.has(m.out) ? sellPriceOf(o) : null) || (o ? o.price : 0)) - (c ? c.price : 0); });
+    const h = Math.max(0, ms.length - ft); hits += h;
+    out.push({gw: g, n: ms.length, ftBefore: ft, hits: h, bank: +bank.toFixed(1)});
+    ft = ms.length >= ft ? 1 : Math.min(5, ft - ms.length + 1);
+  });
+  return {weeks: out, hits};
+}
+function draftGain(){
+  const base = state.squad.ids.map(id => P[id]); let d = 0;
+  for (let i = 0; i < GWS.length; i++) d += bestXI(draftSquadAt(i), i).total - bestXI(base, i).total;
+  return d - 4 * draftState().hits;
+}
+function draftBar(){
+  const i = state.pitchGw, st = draftState(), w = st.weeks[i], n = draftMoves().length;
+  if (!n) return `<div class="draftbar empty"><span><b>${esc(RULES.name)}</b>: tap any player to try a transfer. Your real squad isn’t changed.</span></div>`;
+  const gain = draftGain();
+  return `<div class="draftbar"><div><small>${esc(RULES.name)}, GW${w.gw}</small><b>${w.n} move${w.n === 1 ? "" : "s"}${w.hits ? `, −${w.hits * 4}` : ""}</b></div>
+    <div><small>Free transfers, bank</small><b>${Math.max(0, w.ftBefore - w.n)} left, ${money(w.bank)}</b></div>
+    <div><small>Next ${GWS.length} GWs</small><b class="${gain >= 0 ? "upc" : "downc"}">${gain >= 0 ? "+" : "−"}${f1(Math.abs(gain))}</b></div></div>
+    <div class="optgrid draftacts"><button class="optrow" data-draftundo="1">Undo last move</button><button class="optrow" data-draftreset="1">Reset draft</button>
+      <button class="optrow" data-draftsolve="1">Let the solver finish this</button><button class="optrow" data-draftapply="1">Make GW${GWS[0]} moves my squad</button></div>
+    ${w.bank < 0 ? `<p class="sub" style="color:var(--down)">Over budget by ${money(-w.bank)} in GW${w.gw}.</p>` : ""}`;
+}
+function openTransferOut(outId){
+  const i = state.pitchGw, g = GWS[i], o = P[outId], ids = new Set(draftIdsAt(i)), st = draftState().weeks[i];
+  const base = new Set(state.squad.ids), sell = (base.has(outId) ? sellPriceOf(o) : null) || o.price;
+  const budget = +(sell + st.bank).toFixed(1), banned = new Set(RULES.ban || []);
+  const clubs = {}; draftIdsAt(i).forEach(id => { if (P[id] && id !== outId) clubs[P[id].t] = (clubs[P[id].t] || 0) + 1; });
+  const q = (state.tq || "").trim().toLowerCase();
+  const gainOf = c => { let d = 0; for (let k = i; k < GWS.length; k++) d += (c.ep[k] || 0) - (o.ep[k] || 0); return d; };
+  const list = D.players.filter(c => c.pos === o.pos && !ids.has(c.id) && !banned.has(c.id) && available(c) && c.price <= budget + 1e-9 && (clubs[c.t] || 0) < 3
+    && (!q || c.n.toLowerCase().includes(q) || T[c.t].short.toLowerCase() === q || T[c.t].name.toLowerCase().includes(q)))
+    .sort((a,b) => ((pick(b) || {}).score || 0) - ((pick(a) || {}).score || 0) || gainOf(b) - gainOf(a)).slice(0, 30);
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Replace ${esc(o.n)}</h2>
+    <p class="sub">${POS_LONG[o.pos]}s up to ${money(budget)} for GW${g} (${money(sell)} from selling him plus ${money(st.bank)} in the bank). Sorted by pick score; the number is points gained from GW${g} to GW${GWS[GWS.length - 1]}. Banned players and clubs you already have three from are left out.</p>
+    <input type="search" id="tq" placeholder="Search a name or club" value="${esc(state.tq || "")}" aria-label="Search replacements" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0;background:var(--bg)">
+    <ul class="list" id="tqlist">${list.map(c => { const d = gainOf(c); return `<li><button class="row" data-draftin="${c.id}" data-draftout="${outId}"><div><div class="name">${msDot(c)}${dot(c.t)}${esc(c.n)} ${verdictPill(c)}</div><div class="sub">${T[c.t].short}, ${money(c.price)}, ${esc(fxText(c.t, g))}</div></div><div class="metric" style="color:var(--${d >= 0 ? "up" : "down"})">${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}<small>pts</small></div></button></li>`; }).join("") || `<li class="lede">Nobody fits the budget and club limit.</li>`}</ul>${sheetFoot()}`;
+  showSheet();
+  const inp = $("#tq"); if (inp && state.tq) { inp.focus(); inp.setSelectionRange(inp.value.length, inp.value.length); }
+}
+function addDraftMove(outId, inId){
+  const g = GWS[state.pitchGw], ms = draftMoves();
+  // if the player going out was brought in earlier in this draft, change that earlier move instead of adding another
+  const earlier = ms.find(m => m.in === outId && m.gw === g);
+  if (earlier) { earlier.in = inId; if (earlier.in === earlier.out) ms.splice(ms.indexOf(earlier), 1); }
+  else ms.push({gw: g, out: outId, in: inId});
+  delete state.lu[state.pitchGw];
+  saveRules();
+}
+// planner rules from the draft: players kept in until the end become "buy by", players gone for good "sell by"
+function draftRules(){
+  const last = draftIdsAt(GWS.length - 1), base = new Set(state.squad.ids), buys = [], sells = [];
+  draftMoves().forEach(m => {
+    if (last.includes(m.in) && !base.has(m.in)) buys.push({id: m.in, t: Math.max(0, GWS.indexOf(m.gw))});
+    if (!last.includes(m.out) && base.has(m.out)) sells.push({id: m.out, t: Math.max(0, GWS.indexOf(m.gw))});
+  });
+  return {buys, sells};
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-flipdir],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-alts],[data-paidsave]");
+  const el = e.target.closest("[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-alts],[data-paidsave]");
   if (!el){ if (e.target === $("#sheet")) closeSheet(); return; }
   const d = el.dataset;
   if (d.gwview){ state.gwView = d.gwview; render(); }
@@ -2990,6 +3104,15 @@ document.addEventListener("click", e => {
   else if (d.plverdict !== undefined){ state.pl.verdict = d.plverdict; state.pl.limit = 50; render(); openFilters(); }
   else if (d.filters){ openFilters(); }
   else if (d.sortpick){ if (state.pl.sort === d.sortpick) state.pl.dir = state.pl.dir === "asc" ? "desc" : "asc"; else { state.pl.sort = d.sortpick; state.pl.dir = "desc"; } state.pl.limit = 50; render(); openFilters(); }
+  else if (d.draftoutsheet){ state.tq = ""; state.tqOut = +d.draftoutsheet; openTransferOut(+d.draftoutsheet); }
+  else if (d.draftin){ addDraftMove(+d.draftout, +d.draftin); closeSheet(); render(); toast(`${P[+d.draftout].n} → ${P[+d.draftin].n} added to ${RULES.name}`); }
+  else if (d.draftundo){ draftMoves().pop(); saveRules(); render(); }
+  else if (d.draftreset){ RULES.moves = []; state.lu = {}; saveRules(); render(); toast("Draft cleared"); }
+  else if (d.draftsolve){ const b = $("[data-solve]"); if (b){ b.scrollIntoView({behavior: "smooth", block: "center"}); b.click(); toast("Keeping your moves and solving the rest…"); } }
+  else if (d.draftapply){ const now = draftMoves().filter(m => m.gw === GWS[0]); if (!now.length){ toast(`No moves in GW${GWS[0]} yet`); }
+    else if (confirm(`Make ${now.length} GW${GWS[0]} move${now.length === 1 ? "" : "s"} part of your squad? Only do this once you’ve made them in FPL.`)){
+      const st = draftState().weeks[0]; state.squad.ids = draftIdsAt(0); state.squad.bank = st.bank; state.squad.ft = Math.max(1, st.ftBefore - st.n);
+      RULES.moves = draftMoves().filter(m => m.gw !== GWS[0]); saveRules(); saveSquad(); state.plan = null; state.chipPlan = null; render(); toast("Squad updated"); } }
   else if (d.flipdir){ state.pl.dir = state.pl.dir === "asc" ? "desc" : "asc"; state.pl.limit = 50; render(); }
   else if (d.maxpick !== undefined){ state.pl.max = +d.maxpick; state.pl.limit = 50; render(); openFilters(); }
   else if (d.pos !== undefined){ state.pl.pos = +d.pos; state.pl.limit = 50; render(); if ($("#sheet").open && $("#sheetTitle") && $("#sheetTitle").textContent === "Sort and filter") openFilters(); }
@@ -3018,6 +3141,8 @@ document.addEventListener("click", e => {
 });
 document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches("[data-open][role=button]")){ e.preventDefault(); openPlayer(+e.target.dataset.open); } });
 document.addEventListener("input", e => {
+  if (e.target.id === "tq"){ state.tq = e.target.value; const out = $("#tqlist [data-draftout]"); const oid = out ? +out.dataset.draftout : (state.tqOut || null);
+      if (out) state.tqOut = +out.dataset.draftout; if (state.tqOut) { const sc = $(".sheet").scrollTop; openTransferOut(state.tqOut); $(".sheet").scrollTop = sc; } }
   if (e.target.id === "ruleq"){ state.ruleQ = e.target.value; const box = $("#rulefound"); if (box){ const sq = state.squad.ids.map(id => P[id]);
       const tmp = document.createElement("div"); tmp.innerHTML = plannerPanel(sq); const nb = tmp.querySelector("#rulefound"); if (nb) box.innerHTML = nb.innerHTML; } }
   if (e.target.id === "minsr"){ const v = $("#minsv"); if (v) v.textContent = e.target.value; }
