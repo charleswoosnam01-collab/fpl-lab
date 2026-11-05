@@ -35,6 +35,7 @@ import argparse
 import datetime as dt
 import hashlib
 import json
+import sys
 import math
 import re
 import time
@@ -73,7 +74,13 @@ TEAM_ALIASES = {   # bookmaker spellings -> FPL names
 }
 DECAY = 0.92                 # recency weight for player rates
 TEAM_DECAY = 0.95            # recency weight for team ratings (0.95 predicted goals best; heavier recency did worse)
+HAUL_TEST = dict(n=1516, fpl_proj=5.77, ours=3.81, actual=3.55, best_w=0.0)   # players with a 10+ score in their last three
 BREAKOUT_TEST = dict(n=123, beat_again=0.38, avg_next=-0.07, threshold=0.4)   # surprise runs: two games well above forecast
+# Availability over time: how much less often a player who's in the team today is still playing 60+ minutes
+# each week further ahead (2025/26, expected starters, share playing 60+ minutes by week ahead; nailed players
+# declined at the same rate). Applied to weeks two onwards only; next week is unchanged.
+AVAIL_DECAY = {1: 0.03, 2: 0.04, 3: 0.045, 4: 0.035}
+AVAIL_FLOOR = 0.78
 FUTURE_TEST = dict(windows=540, seasons="2025/26 and 2026/27", mae_model=0.287, mae_last4=0.386, mae_season=0.300,
                    rise_hit=0.89, rise_n=93, rise_avg=0.46, fall_hit=0.87, fall_n=94, fall_avg=-0.51,
                    big_rise_hit=1.0, big_rise_n=17, hot_change=-0.43, hot_stayed=0.48, hot_n=123,
@@ -279,7 +286,8 @@ def build_history(pg, pm, players, fixtures):
 
     if not pm.empty:
         extra = ["xg", "xa", "touches_opposition_box", "total_shots", "aerial_duels_won", "accurate_crosses",
-                 "chances_created", "xgot", "goals_prevented", "corners", "penalties_scored"]
+                 "chances_created", "xgot", "goals_prevented", "corners", "penalties_scored", "touches", "accurate_passes",
+                 "final_third_passes"]
         for c in extra:
             if c not in pm.columns:
                 pm[c] = np.nan
@@ -288,7 +296,8 @@ def build_history(pg, pm, players, fixtures):
         pm["fixture"] = pm["fixture"].astype(str)
         h = h.merge(pm.drop_duplicates(["element", "fixture"]), on=["element", "fixture"], how="left")
     for c in ["xg", "xa", "touches_opposition_box", "total_shots", "aerial_duels_won", "accurate_crosses",
-              "chances_created", "xgot", "goals_prevented", "corners", "penalties_scored"]:
+              "chances_created", "xgot", "goals_prevented", "corners", "penalties_scored", "touches", "accurate_passes",
+              "final_third_passes"]:
         if c not in h:
             h[c] = np.nan
     h["xg"] = h["xg"].where(h["minutes"] > 0, 0).fillna(h["expected_goals"])
@@ -343,6 +352,14 @@ def attribute_shots(sh, hist):
     return sh
 
 
+# Switched off after testing (November 2026):
+# - ClubElo: an Elo rating built from every result since August 2025 made this season's predictions slightly worse
+#   (goals log-likelihood -1.4863 against -1.4822 on GW3-9, -1.3733 against -1.3705 on GW7-9); ClubElo is the same
+#   kind of results-based rating, and the site was returning HTTP 502 to GitHub's servers anyway.
+# - Understat: now answers its data address from GitHub's servers with an ordinary web page instead of data, and it
+#   only ever fed the "second opinion" figures on player pages, never the projections.
+USE_CLUBELO = False
+USE_UNDERSTAT = False
 SOURCE_NOTES = {}           # why a data source wasn't used this run, shown on the Model tab
 
 
@@ -786,7 +803,9 @@ def availability(p, gw_dates, gws):
     if status in ("u", "n"):
         return [0.0] * len(gws)
     if status == "a":
-        return [chance] + [1.0] * (len(gws) - 1)
+        # an available player is fully available: FPL leaves the chance blank for them, but some saved snapshots
+        # record that blank as 0, which made backtests think nobody would play
+        return [1.0] * len(gws)
     if status == "s":
         return [0.0] + [1.0] * (len(gws) - 1)
     news = _text(p.get("news"))
@@ -923,6 +942,9 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
                 ret = sum(v for k, v in pts.items() if k not in ("app", "cards", "gc"))
                 quality = min(1.6, max(0.5, ret / (neutral_ret * max(av[i], 1e-6))))
                 pts["bonus"] = rr["bonus90"] * rr["emins"] * av[i] / 90 * quality
+                if i >= 1:   # injuries, bans, rotation and dropped players add up the further ahead you look
+                    fa = max(AVAIL_FLOOR, 1 - AVAIL_DECAY.get(pos, 0.04) * min(i, 5))
+                    pts = {k_: v_ * fa for k_, v_ in pts.items()}
                 total += sum(pts.values())
                 if i < HORIZON:
                     for k_, v_ in pts.items():
@@ -1394,7 +1416,7 @@ def lab_tuning(rows):
     best_w, best_err, errs = 0.0, None, {}
     for w in [x / 20 for x in range(0, 11)]:
         pred = (1 - w) * df.ours + w * df.fpl
-        e = float(((pred - df.pts) ** 2).mean())
+        e = float((pred - df.pts).abs().mean())      # average error, the measure the app reports
         errs[w] = e
         if best_err is None or e < best_err - 1e-9:
             best_w, best_err = w, e
@@ -1403,7 +1425,10 @@ def lab_tuning(rows):
     for kappa in KAPPAS:
         picks = df.assign(score=df.lab + kappa * df.xgi).sort_values("score", ascending=False).groupby("gw").head(1)
         caps[kappa] = round(float(picks.pts.mean()), 3)
-    best_k = max(caps, key=lambda k: (caps[k], -k))
+    # with ~35 captain picks, a gap of under half a point a week is one lucky pick, so keep the simplest setting
+    # (no bonus) unless a bonus is clearly better
+    top = max(caps.values())
+    best_k = min(k for k in caps if caps[k] >= top - 0.5)
     fpl_picks = df.sort_values("fpl", ascending=False).groupby("gw").head(1)
     best_pick = df.sort_values("pts", ascending=False).groupby("gw").head(1)
     return dict(w_fpl=best_w, kappa=best_k, n=len(df), gws=int(df.gw.nunique()),
@@ -1836,10 +1861,12 @@ def player_form(ds, n=8):
     names = dict(zip(ds.teams["id"], ds.teams["short_name"]))
     for pid, g in ds.hist.groupby("element"):
         g = g.tail(n)
-        # [gw, opponent, home, minutes, xG, xA, FPL points, started, goals, assists]
+        # [gw, opponent, home, minutes, xG, xA, FPL points, started, goals, assists, touches, passes, box touches]
+        num_ = lambda v: None if v is None or pd.isna(v) else int(v)
         out[int(pid)] = [[int(r.event), names.get(r.opp, "?"), int(r.was_home), int(r.minutes), round(float(r.xg), 2),
                           round(float(r.xa), 2), int(r.event_points), int(r.starts > 0 or r.minutes >= 60),
-                          int(r.goals_scored), int(r.assists)] for r in g.itertuples()]
+                          int(r.goals_scored), int(r.assists), num_(getattr(r, "touches", None)),
+                          num_(getattr(r, "accurate_passes", None)), num_(getattr(r, "touches_opposition_box", None))] for r in g.itertuples()]
     return out
 
 
@@ -2583,8 +2610,9 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     up = ds.fixtures[~ds.fixtures["finished"] & ds.fixtures["event"].isin(long_gws)]
 
     # 1. ClubElo and last season: starting points for teams and players
-    elo = fetch_elo(ds.teams) if online else {}
-    sources["ClubElo ratings"] = bool(elo)
+    elo = fetch_elo(ds.teams) if (online and USE_CLUBELO) else {}
+    if USE_CLUBELO:
+        sources["ClubElo ratings"] = bool(elo)
     if prev is not None:
         build_priors(ds, prev, elo)
     elif elo:
@@ -2644,8 +2672,9 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     sources["Top 500 managers' teams"] = bool(elite)
     sp_notes = fetch_set_piece_notes() if online and live_ok else {}
     sources["FPL set-piece notes"] = bool(sp_notes)
-    us = match_understat(fetch_understat(int(SEASON[:4])), ds.players, ds.teams) if online else {}
-    sources["Understat (second opinion)"] = bool(us)
+    us = match_understat(fetch_understat(int(SEASON[:4])), ds.players, ds.teams) if (online and USE_UNDERSTAT) else {}
+    if USE_UNDERSTAT:
+        sources["Understat (second opinion)"] = bool(us)
     sources["Match data up to date with the official game"] = not getattr(ds, "behind", 0)
 
     tm, prof, league, rates, rot, proj = fit_and_project(ds, long_gws, detail=True, simulate=True, book=book, refs=refs)
@@ -2743,10 +2772,16 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             why=why,
         ))
     w_fpl, kappa = (lab["w_fpl"], lab["kappa"]) if lab else (0.0, 1.0)
+    recent = ds.hist[ds.hist["event"] > tm["last_gw"] - 3].groupby(["element", "event"])["event_points"].sum()
+    hauled = {int(e) for (e, _), v in recent.items() if v >= 10}
     for x in players:   # FPL Lab points and captain score for the coming gameweek
         model0 = x["ep"][0]
         x["model_ep"] = model0
-        x["lab"] = round((1 - w_fpl) * model0 + w_fpl * x["fpl_ep"], 2) if x["fpl_ep"] is not None else model0
+        # FPL's figure leans on recent points, so straight after a haul it overrates players (tested: it projected 5.8
+        # for players with a 10+ score in their last three, who went on to average 3.6; our model said 3.8)
+        wf = 0.0 if x["id"] in hauled else w_fpl
+        x["hot_fpl_off"] = x["id"] in hauled and x["fpl_ep"] is not None and w_fpl > 0
+        x["lab"] = round((1 - wf) * model0 + wf * x["fpl_ep"], 2) if x["fpl_ep"] is not None else model0
         x["ep"][0] = x["lab"]
         x["ep6"] = round(sum(x["ep"]), 1)
         if x["ep_long"]:
@@ -2795,7 +2830,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   rules=dict(ft_max=5, hit=4, chip_half_end=19, squad_max_per_club=3),
                   horizon=HORIZON, long_gws=long_gws, special=special,
                   unscheduled=getattr(ds, "unscheduled", []),
-                  source_notes=SOURCE_NOTES, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
+                  source_notes=SOURCE_NOTES, avail_decay=AVAIL_DECAY, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
@@ -2896,6 +2931,30 @@ def deadline_reminder(data, folder, topic, url=None, now=None):
     return body
 
 
+def sanity_checks(data):
+    """Checks a run must pass before it replaces the live data. Returns (passed, failed) lists of plain-English lines."""
+    ok, bad = [], []
+    def check(cond, good, fail):
+        (ok if cond else bad).append(good if cond else fail)
+    ps = data.get("players", [])
+    check(len(ps) >= 400, f"{len(ps)} players loaded", f"only {len(ps)} players loaded (expected 400+)")
+    gw0 = data["meta"]["gws"][0] if data["meta"].get("gws") else None
+    fx = [f for f in data.get("fixtures", []) if f.get("gw") == gw0]
+    check(len(fx) >= 6, f"{len(fx)} fixtures in GW{gw0}", f"only {len(fx)} fixtures found for GW{gw0}")
+    regular = [p for p in ps if p.get("st") == "a" and (p.get("season") or {}).get("mins", 0) >= 270]
+    live = [p for p in regular if p.get("ep") and (p["ep"][0] or 0) >= 1.0]
+    share = len(live) / max(1, len(regular))
+    check(share >= 0.6, f"{share:.0%} of regular players have a sensible projection",
+          f"only {share:.0%} of regular players have a projection of 1+ point (expected most)")
+    bad_num = sum(1 for p in ps for x in (p.get("ep") or []) if x is None or x != x or x < 0 or x > 30)
+    check(bad_num == 0, "no impossible projections", f"{bad_num} impossible projections (blank, negative or over 30)")
+    acc = (data.get("accuracy") or {}).get("summary") or {}
+    if acc.get("mae") is not None:
+        check(1.0 <= acc["mae"] <= 3.5, f"backtest error {acc['mae']} is in the normal range",
+              f"backtest error {acc['mae']} is outside the normal range (1.0 to 3.5)")
+    return ok, bad
+
+
 def main():
     import os
     ap = argparse.ArgumentParser()
@@ -2924,6 +2983,18 @@ def main():
     deadline_reminder(data, args.history, os.environ.get("NTFY_TOPIC"), os.environ.get("PAGES_URL"))
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
+    passed, failed = sanity_checks(data)
+    data["meta"]["checks"] = dict(passed=passed, failed=failed, at=data["meta"]["generated"])
+    if failed:
+        # keep yesterday's numbers live; record why, and fail the run so GitHub emails you
+        report = dict(at=data["meta"]["generated"], failed=failed, passed=passed)
+        if args.history:
+            Path(args.history).mkdir(parents=True, exist_ok=True)
+            (Path(args.history) / "last_failed.json").write_text(json.dumps(report, indent=1))
+        print("Safety net: this run's results look wrong, so the live data was NOT replaced:")
+        for f in failed:
+            print("  -", f)
+        sys.exit(1)
     out.write_text(json.dumps(data, separators=(",", ":"), default=str))
     acc = data["accuracy"]["summary"] if data["accuracy"] else {}
     print(f"Wrote {out}: {len(data['players'])} players, GW{data['meta']['gws'][0]}-{data['meta']['gws'][-1]}, "
