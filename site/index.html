@@ -550,6 +550,90 @@ nav.tabs a{font-size:10.5px}
 .draftbar.empty{display:block;text-align:left;font-size:13px;color:var(--muted)}
 .upc{color:var(--up)}.downc{color:var(--down)}
 .draftacts{margin:0 0 6px}.draftacts .optrow{min-height:40px;font-size:13px}
+
+/* v6.19 layout fixes */
+dialog{max-height:calc(100dvh - 10px);max-height:min(92vh, calc(100dvh - 10px))}
+.sheet{max-height:inherit}
+.sheet-foot{display:grid;grid-template-columns:1.3fr 1fr 1fr;gap:8px;align-items:stretch}
+.sheet-foot:has(> :only-child){grid-template-columns:1fr}
+.sheet-foot:has(> :nth-child(2):last-child){grid-template-columns:1.3fr 1fr}
+.sheet-foot > button{min-height:48px;height:48px;padding:0 10px;font-size:15px;font-weight:700;border-radius:999px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex:none}
+.ftable2{width:100%;border-collapse:collapse;font-size:14px;margin-top:8px}
+.ftable2 th{font-size:12px;color:var(--muted);font-weight:700;text-align:right;padding:6px 4px;border-bottom:2px solid var(--line)}
+.ftable2 td{padding:9px 3px;border-bottom:1px solid var(--line);text-align:right;vertical-align:middle}
+.ftable2 .tl{text-align:left}.ftable2 .rk{color:var(--muted);font-weight:700;width:22px;text-align:left}
+.ftable2 td.tl b{display:block;white-space:nowrap}.ftable2 td.tl small{display:block;font-size:11.5px;color:var(--muted);margin-top:2px;white-space:nowrap}
+.ftable2 tbody tr{cursor:pointer}
+.fsq{display:inline-flex;gap:1px}
+.fsq i{font-style:normal;display:inline-flex;align-items:center;justify-content:center;width:15px;height:16px;border-radius:4px;font-size:10px;font-weight:800;color:#fff}
+.fsq i.W{background:#1D9E75}.fsq i.D{background:#888780}.fsq i.L{background:#D6453A}
+.splitt td.split{padding:3px 3px;min-width:80px}
+.splitt td:first-child,.splitt th:first-child{position:sticky;left:0;background:var(--bg);z-index:2;font-weight:800;padding-right:8px;box-shadow:6px 0 6px -4px rgba(0,0,0,.35)}
+.sp2{border-radius:8px;overflow:hidden;border:1px solid var(--line);margin:1px 0;background:var(--surface)}
+.sp2 .opp{display:block;font-size:12px;font-weight:800;padding:3px 2px;text-align:center}
+.sp2 .opp small{font-size:10px;font-weight:700;opacity:.7;margin-left:2px}
+.sp2 .two{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 2px 2px}
+.sp2 .two em{font-style:normal;font-size:12px;font-weight:800;text-align:center;padding:4px 0;border-radius:5px}
+.rstrip{display:flex;gap:4px;overflow-x:auto;padding:4px 0 8px}
+.rr{flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1px;min-width:58px;border-radius:8px;padding:5px 4px;font-size:11px;font-weight:800;color:#fff}
+.rr b{font-size:10px;opacity:.85}.rr em{font-style:normal;font-size:10px}
+.rr.advanced{background:#D85A30}.rr.mixed{background:#8a6a3d}.rr.deep{background:#5F5E5A}
+.rtab td,.rtab th{padding:6px 6px}
+.fmap .mlab,.dumb .mlab{paint-order:stroke;stroke:var(--bg);stroke-width:3px;stroke-linejoin:round}
+.tick td.c .sp2 .two{display:grid;grid-template-columns:1fr 1fr;gap:2px;padding:0 2px 2px;font-size:12px;opacity:1;font-weight:800}
+.tick td.c .sp2 .two em{display:block}
+.tick td.c .sp2 .opp{opacity:1;font-weight:800;font-size:12px}
+
+/* v6.21 glanceable fixtures and form table */
+.hchips{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}
+.hchip{font-size:12.5px;border-radius:999px;padding:4px 11px}
+.hchip b{font-weight:800;margin-right:3px}.hchip .term{font-weight:700;text-decoration:none}
+.hchip.up{background:var(--up-soft);color:var(--up)}.hchip.down{background:var(--down-soft);color:var(--down)}
+.hchip.info{background:#E6F1FB;color:#0C447C}.hchip.warn{background:#FAEEDA;color:#854F0B}
+.rtag{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:1px 8px;white-space:nowrap}
+.rtag.up{background:var(--up-soft);color:var(--up)}.rtag.up2{background:var(--up-soft);color:var(--up);opacity:.8}
+.rtag.down{background:var(--down-soft);color:var(--down)}.rtag.info{background:#E6F1FB;color:#0C447C}
+.rtag.warn{background:#FAEEDA;color:#854F0B}.rtag.flat{background:var(--sunk);color:var(--muted)}
+.onet td.one{padding:3px;min-width:64px}
+.onec{border-radius:8px;padding:4px 2px;margin:1px 0;text-align:center}
+.onec span{display:block;font-size:11px;font-weight:700;opacity:.9}.onec span small{font-size:9.5px}
+.onec b{display:block;font-size:15px;font-weight:800;line-height:1.15}
+.tick td.c .onec span{display:block;opacity:.9}
+.runc{min-width:94px;text-align:left;padding:4px 6px !important}
+.runc small{display:block;font-size:10.5px;color:var(--muted);margin-top:2px}
+.tbar1{height:5px;border-radius:3px;background:var(--sunk);margin-top:4px;overflow:hidden}.tbar1 i{display:block;height:100%;background:var(--up)}
+.ft3{display:grid;margin-top:6px}
+.ftrow{display:grid;grid-template-columns:22px 92px 1fr 62px;gap:8px;align-items:center;padding:9px 2px;border:0;border-bottom:1px solid var(--line);background:none;color:inherit;text-align:left;cursor:pointer;font:inherit}
+.ftrow .rk{color:var(--muted);font-weight:800;font-size:13px}
+.ftrow .tm b{display:block;font-size:14px;white-space:nowrap}.ftrow .tm small{display:flex;align-items:center;gap:4px;font-size:11px;color:var(--muted);margin-top:3px;white-space:nowrap}
+.ftrow .fsq i{width:12px;height:13px;font-size:8px;border-radius:3px}
+.ptsbar{position:relative;display:block;height:18px;background:var(--sunk);border-radius:9px}
+.ptsbar i{position:absolute;left:0;top:0;bottom:0;border-radius:9px}
+.ptsbar em{position:absolute;top:-4px;bottom:-4px;width:3px;margin-left:-1px;background:var(--ink);border-radius:2px}
+.ptsbar b{position:absolute;left:7px;top:0;line-height:18px;font-size:12px;font-weight:800;color:#fff;text-shadow:0 0 3px rgba(0,0,0,.4)}
+.ptsbar small{position:absolute;right:0;top:20px;font-size:10px;color:var(--muted);white-space:nowrap}
+.ftrow .rtag{justify-self:end}
+.glance .sig small{font-size:9px}
+
+/* v6.22 captain swipe, compass, outcome tags, checks */
+.capswipe{display:flex;gap:10px;overflow-x:auto;scroll-snap-type:x mandatory;padding:2px 2px 8px;scrollbar-width:none;margin:0 -2px}
+.capswipe::-webkit-scrollbar{display:none}
+.capcard{flex:0 0 84%;scroll-snap-align:center;display:grid;gap:5px;text-align:left;background:var(--surface);border:1px solid var(--line);border-radius:16px;padding:12px 14px;cursor:pointer;color:var(--ink)}
+.capcard.on{border:2px solid var(--ink)}
+.capcard .cl{font-size:12.5px;font-weight:800;color:var(--muted)}
+.capcard .cn{font-size:19px;font-weight:800;display:flex;align-items:center;gap:6px;flex-wrap:wrap}
+.capcard .cb{font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:30px;line-height:1}
+.capcard .cb small{font-family:var(--body);font-size:12px;font-weight:700;color:var(--muted);margin-left:6px}
+.obar{display:flex;height:9px;border-radius:5px;overflow:hidden;background:var(--sunk)}.obar i{display:block;height:100%}
+.capcard .cw{font-size:13px;color:var(--muted);line-height:1.4}.capcard .cw em{font-style:normal;font-weight:700}
+.capdots{display:flex;gap:6px;justify-content:center;margin:2px 0 6px}.capdots i{width:7px;height:7px;border-radius:50%;background:var(--line);display:block}.capdots i.on{background:var(--ink)}
+.capbar{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:4px}
+.capbar .leg{display:inline-block;width:10px;height:8px;border-radius:2px;margin:0 3px 0 6px}.capbar .leg.r{background:#E24B4A}.capbar .leg.g{background:#1D9E75}
+.ghost.small{min-height:38px;font-size:13px;padding:0 12px}
+.otag{display:inline-block;font-size:11px;font-weight:800;border-radius:999px;padding:1px 8px;vertical-align:1px;white-space:nowrap}
+.otag.boom{background:#FAECE7;color:#993C1D}.otag.safe{background:#E6F1FB;color:#0C447C}.otag.ceil{background:var(--up-soft);color:var(--up)}
+.checks{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.checks ul{margin:6px 0 0;padding-left:4px;list-style:none;font-size:13px}.checks li{margin:2px 0;color:var(--up)}.checks li.bad{color:var(--down)}
 </style>
 </head>
 <body>
@@ -705,8 +789,8 @@ const chipLabel = h => h.replace(/^Matchup: (.)(.*)$/, (m, a, b) => a.toUpperCas
 const reasonChips = (p, n = 2) => (p.why || []).filter(w => w.t !== "flat").slice(0, n).map(w => `<span class="chip ${w.t}">${TONE[w.t]} ${esc(chipLabel(w.h))}</span>`).join("");
 function playerRow(p, value, label, chips = true, extra = ""){
   return `<li><button class="row ${variance(p) && variance(p).unlucky ? "due" : ""}" data-open="${p.id}"><div><div class="name">${msDot(p)}${dot(p.t)}${trendArrow(p.t)}${esc(p.n)}${flag(p)}${penTag(p)}${p.edited ? ' <span class="pen">✎</span>' : ""}${varianceChip(p)}${formMark(p)} ${verdictPill(p)}</div>
-    <div class="sub">${T[p.t].short} ${POS[p.pos]}, ${money(p.price)}, ${f1(p.own)}% owned ${gradeChips(p.t, GWS[0])}</div>
-    ${p.next ? `<div class="rowtype">${typeTag(p)}</div>` : ""}
+    <div class="sub">${T[p.t].short} ${POS[p.pos]}, ${money(p.price)}, ${f1(p.own)}% owned ${gradeChips(p.t, GWS[0], p.pos)}</div>
+    ${p.next ? `<div class="rowtype">${typeTag(p)} ${outcomeTag(p)}</div>` : ""}
     ${whatIfChips(p) ? `<div class="wchips">${whatIfChips(p)}</div>` : ""}
     ${extra}${chips ? `<div class="chips">${reasonChips(p)}</div>` : ""}</div><div class="metric">${value}<small>${label}</small></div></button></li>`;
 }
@@ -715,11 +799,16 @@ const seg = (name, items, cur, label) => `<div class="seg" role="group" aria-lab
 /* ---------- views ---------- */
 const VIEWS = {future:viewFuture, week:viewWeek, players:viewPlayers, fixtures:viewFixtures, teams:viewTeams, squad:viewSquad, model:viewModel};
 function render(){
-  VERDICTS = null; PICK = null; TYPICAL = null;
+  VERDICTS = null; PICK = null; TYPICAL = null; OUTCOME = null;
   const tab = (location.hash || "#week").slice(1), name = VIEWS[tab] ? tab : "week";
   document.querySelectorAll("nav.tabs a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + name ? "page" : "false"));
   $("#view").innerHTML = (name === "week" ? thisWeekStrip() : "") + VIEWS[name]();
   if (name === "week" && state.squad.ids.length === 15) { try { saveForecastSnapshot(); } catch(e) {} }
+  const cs = $("#capswipe");
+  if (cs){ const on = cs.querySelector(".capcard.on"); if (on) cs.scrollLeft = on.offsetLeft - (cs.clientWidth - on.clientWidth) / 2;
+    cs.addEventListener("scroll", () => { const cards = [...cs.children], mid = cs.scrollLeft + cs.clientWidth / 2;
+      const i = cards.reduce((best, c, k) => Math.abs(c.offsetLeft + c.clientWidth / 2 - mid) < Math.abs(cards[best].offsetLeft + cards[best].clientWidth / 2 - mid) ? k : best, 0);
+      [...document.querySelectorAll("#capdots i")].forEach((d, k) => d.classList.toggle("on", k === i)); }, {passive: true}); }
   const h2 = $("#view h2");
   if (h2){
     h2.insertAdjacentHTML("beforeend", ` <button class="infobtn" data-key="1" aria-label="Colour key">i</button>`);
@@ -728,32 +817,100 @@ function render(){
   renderCompareBar();
 }
 
+const blank = p => (p.sim && p.sim.blank) || 0;
+const eliteCaptainsKnown = () => !!(D.meta.elite && D.meta.elite.gw === GWS[0]);
 const CAP_MODES = {
-  lab:["Lab score", p => p.cap ?? p.ep[0], p => f1(p.cap ?? p.ep[0]), "Lab captain score", ""],
-  expected:["Expected", p => p.ep[0], p => f1(p.ep[0]), "projected", "Ranked by projected points: the best bet on average."],
-  ceiling:["Ceiling", p => haul(p), p => pct(haul(p)), "chance of 10+", "Ranked by the chance of 10 or more points (20 as captain), from 3,000 simulated matches each. Higher variance, bigger upside."],
-  differential:["Differential", p => haul(p) * (1 - own(p)), p => f1(100 * haul(p) * (1 - own(p))), "rank-gain score", "Haul chance weighted by how few managers own him. A haul from a 5% player moves your rank far more than one from a 60% player. Score = haul chance × share of managers without him. Uses ownership among the top managers when the app has that sample."],
-  safe:["Safe", p => p.ep[0] * own(p), p => f1(p.ep[0] * own(p)), "points shielded", "Expected points multiplied by ownership: what you stand to lose against the field by not captaining him. Uses ownership among the top managers when the app has that sample, since that’s who you’re competing with near the top."],
+  lab:["FPL Lab pick", p => p.cap ?? p.ep[0], p => f1(p.cap ?? p.ep[0]), "projected", "flask",
+    p => `Our best captain this week: ${esc(p.n)} projects ${f1(p.ep[0])} points.`],
+  easy:["The easy choice", p => (p.ep[0] || 0) * (1 - blank(p)) - 6 * blank(p), p => pct(blank(p)), "chance of a blank", "shield",
+    p => `The captain least likely to let you down: only a ${pct(blank(p))} chance of 2 points or fewer, and ${pct(p.sim.ret)} chance of 4+.`],
+  ceiling:["Ceiling", p => haul(p), p => pct(haul(p)), "chance of 10+", "flame",
+    p => `The highest chance of a haul this week: ${pct(haul(p))} chance of 10 or more (20+ as captain), from 3,000 simulated matches.`],
+  gain:["Gain rank", p => haul(p) * (1 - own(p)), p => pct(haul(p)), "chance of 10+", "up",
+    p => `A haul few others will have: ${pct(haul(p))} chance of 10+, and only ${pct(own(p))} of ${ownLabel()} own him, so a big week moves you up. ${blank(p) >= 0.35 ? `Risky: ${pct(blank(p))} chance of a blank.` : ""}`],
+  top500:["Top 500’s pick", p => p.el ? (eliteCaptainsKnown() ? p.el.cap * 10 + p.el.own : p.el.own) + p.ep[0] / 100 : p.own / 100 + p.ep[0] / 1000, p => pct(p.el ? (eliteCaptainsKnown() ? p.el.cap : p.el.own) : p.own / 100), "", "users",
+    p => p.el ? (eliteCaptainsKnown() ? `What the best managers are doing: ${pct(p.el.cap)} of the top ${D.meta.elite.n} have captained ${esc(p.n)} this week.` : `What the best managers are backing: ${pct(p.el.own)} of the top ${D.meta.elite.n} own ${esc(p.n)}. Their actual captains appear after the deadline.`)
+      : `The most-owned strong option (${f1(p.own)}% of all managers). The top 500 sample loads with the next GitHub update.`],
 };
+const CAP_ICONS = {flask: "⚗", shield: "🛡", flame: "🔥", up: "📈", users: "👥"};
+const capLabel = k => k === "top500" ? (eliteCaptainsKnown() ? "of the top 500 captain him" : D.meta.elite ? "of the top 500 own him" : "of managers own him") : CAP_MODES[k][3];
+function capTop(k, pool){ const m = CAP_MODES[k]; return pool.filter(p => p.sim && p.ep[0] >= 3).sort((a,b) => m[1](b) - m[1](a)); }
+function captainSwipe(pool){
+  const keys = Object.keys(CAP_MODES), labTop = capTop("lab", pool)[0];
+  const cards = keys.map(k => { const list = capTop(k, pool), p = list[0]; if (!p) return "";
+    const alt = list.find(q => q !== p), same = k !== "lab" && labTop && p.id === labTop.id;
+    const b = blank(p), h = haul(p), mid = Math.max(0, 1 - b - h);
+    return `<button class="capcard ${state.capMode === k ? "on" : ""}" data-capmode="${k}" aria-pressed="${state.capMode === k}">
+      <span class="cl">${CAP_ICONS[CAP_MODES[k][4]]} ${esc(CAP_MODES[k][0])}</span>
+      <span class="cn">${dot(p.t)}${esc(p.n)} ${outcomeTag(p)}</span>
+      <span class="cb">${CAP_MODES[k][2](p)}<small>${capLabel(k)}</small></span>
+      <span class="obar"><i style="width:${100 * b}%;background:#E24B4A"></i><i style="width:${100 * mid}%;background:var(--chalk)"></i><i style="width:${100 * h}%;background:#1D9E75"></i></span>
+      <span class="cw">${CAP_MODES[k][5](p)}${same ? " Also the Lab pick, so it’s a simple call." : ""}${alt ? ` <em>Next: ${esc(alt.n)}.</em>` : ""}</span></button>`; }).join("");
+  return `<p class="sub" style="margin:0 0 6px">What do you want from your captain? Swipe, then tap one to see the full card below.</p>
+    <div class="capswipe" id="capswipe">${cards}</div>
+    <div class="capdots" id="capdots">${keys.map((k, i) => `<i class="${state.capMode === k ? "on" : ""}"></i>`).join("")}</div>
+    <div class="capbar"><span class="sub"><i class="leg r"></i>2 or fewer <i class="leg g"></i>10+</span><button class="ghost small" data-compass="1">Open captain compass</button></div>`;
+}
+function openCompass(){
+  const pool = D.players.filter(p => available(p) && p.sim && p.ep[0] >= 3.5).sort((a,b) => b.ep[0] - a.ep[0]).slice(0, 10);
+  const W = 360, H = 270, L = 40, R = 350, Tp = 12, B = 230;
+  const bs = pool.map(blank), hs = pool.map(haul), bmin = Math.min(...bs) - 0.03, bmax = Math.max(...bs) + 0.03, hmin = Math.min(...hs) - 0.02, hmax = Math.max(...hs) + 0.02;
+  const xs = b => L + (R - L) * (bmax - b) / Math.max(0.01, bmax - bmin), ys = h => B - (B - Tp) * (h - hmin) / Math.max(0.01, hmax - hmin);
+  const midX = (L + R) / 2, midY = (Tp + B) / 2;
+  const dots = mapDots(pool.map(p => ({id: p.id, label: p.n, x: xs(blank(p)), y: ys(haul(p)), fill: colours(p.t)[0] === "#F5F5F5" ? colours(p.t)[1] : colours(p.t)[0]})), [L, R, Tp, B]).replace(/data-team=/g, "data-open=");
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Captain compass</h2><p class="lede">This week’s ten strongest captain options. Further right is safer (less chance of 2 or fewer); higher up is a bigger chance of 10+. Tap a player for his page.</p>
+    <svg class="fmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Captain options by safety and haul chance">
+      <rect x="${L}" y="${Tp}" width="${midX - L}" height="${midY - Tp}" fill="#FAEEDA" opacity=".55"/><rect x="${midX}" y="${Tp}" width="${R - midX}" height="${midY - Tp}" fill="#E1F5EE" opacity=".8"/>
+      <rect x="${L}" y="${midY}" width="${midX - L}" height="${B - midY}" fill="#F1EFE8" opacity=".7"/><rect x="${midX}" y="${midY}" width="${R - midX}" height="${B - midY}" fill="#E6F1FB" opacity=".8"/>
+      <text x="${L + 6}" y="${Tp + 14}" class="qlab" fill="#633806">Risky but explosive</text><text x="${R - 6}" y="${Tp + 14}" class="qlab" text-anchor="end" fill="#085041">Safe and explosive</text>
+      <text x="${L + 6}" y="${B - 6}" class="qlab" fill="#444441">Weakest</text><text x="${R - 6}" y="${B - 6}" class="qlab" text-anchor="end" fill="#0C447C">Safe but steady</text>
+      ${dots}
+      <text x="${(L + R) / 2}" y="${H - 14}" class="alab" text-anchor="middle">Safer (less chance of a blank) →</text>
+      <text x="14" y="${(Tp + B) / 2}" class="alab" text-anchor="middle" transform="rotate(-90 14 ${(Tp + B) / 2})">More chance of 10+ →</text></svg>
+    <ul class="list">${pool.map(p => playerRow(p, pct(haul(p)), `10+, ${pct(blank(p))} blank`)).join("")}</ul>${sheetFoot()}`;
+  showSheet();
+}
+// boom or bust: haul and blank chances against others in his position
+let OUTCOME = null;
+function outcomeTags(){
+  if (OUTCOME) return OUTCOME;
+  OUTCOME = {};
+  // haul chance is judged against his position; blank chance in plain terms, so the tags read the way they sound
+  [1,2,3,4].forEach(pos => {
+    const ps = D.players.filter(p => p.pos === pos && p.sim && available(p) && p.ep[0] >= 2.5);
+    const hs = ps.map(haul).sort((a,b) => a - b), pc = v => hs.length ? hs.filter(x => x < v).length / hs.length : 0;
+    ps.forEach(p => { const hp = pc(haul(p)), b = blank(p);
+      OUTCOME[p.id] = hp >= 0.85 && haul(p) >= 0.12 && b < 0.3 ? {t: "Ceiling", c: "ceil", why: "one of the best haul chances in his position, without much blank risk"}
+        : hp >= 0.7 && b >= 0.35 ? {t: "Boom or bust", c: "boom", why: "a real chance of a haul, but blanks often"}
+        : b <= 0.22 ? {t: "Safe floor", c: "safe", why: "points most weeks, rarely a big haul"} : null; });
+  });
+  return OUTCOME;
+}
+const outcomeTag = p => { const o = outcomeTags()[p.id]; return o ? `<span class="otag ${o.c}" title="${esc(o.why)}: ${pct(haul(p))} chance of 10+, ${pct(blank(p))} chance of 2 or fewer">${o.t}</span>` : ""; };
 function viewWeek(){
   const g = GWS[0], pool = D.players.filter(available);
   let body = changesCard() + specialBanner(10) + seg("gwview", [["captains","Captains"],["differentials","Differentials"],["defcon","DEFCON"],["prices","Prices"],["form","In form"],["luck","Luck"],["disagree","Model vs FPL"],["positions","By position"]], state.gwView, "Gameweek view");
   if (state.gwView === "captains"){
+    if (!CAP_MODES[state.capMode]) state.capMode = "lab";
     const m = CAP_MODES[state.capMode], L = D.meta.lab;
-    if (state.capMode === "lab") m[4] = L ? `Our own captain ranking: Lab points plus ${L.kappa} × expected goals and assists, because goal involvements are where hauls come from. That weighting was chosen by testing every option on ${L.gws} past gameweeks: its pick averaged ${f1(L.cap[L.kappa])} points, against ${f1(L.cap["0"] ?? L.cap[0])} for simply taking the highest expected points and ${f1(L.cap_fpl)} for FPL’s own top pick.` : "Lab points plus a bonus for expected goals and assists, where hauls come from.";
-    const top = pool.filter(p => p.sim).sort((a,b) => m[1](b) - m[1](a)).slice(0, 8), c = top[0];
-    body += `<h2>Who to captain in GW${g}</h2>${seg("capmode", Object.entries(CAP_MODES).map(([k,v]) => [k, v[0]]), state.capMode, "Captain ranking")}<p class="lede">${m[4]}</p>
+    let lede = "";
+    if (state.capMode === "lab") lede = L ? (L.kappa ? `Our own captain ranking: Lab points plus ${L.kappa} × expected goals and assists, because goal involvements are where hauls come from. That weighting was chosen by testing every option on ${L.gws} past gameweeks: its pick averaged ${f1(L.cap[L.kappa])} points, against ${f1(L.cap["0"] ?? L.cap[0])} for simply taking the highest expected points and ${f1(L.cap_fpl)} for FPL’s own top pick.`
+      : `Our own captain ranking: the highest Lab points. Tested on ${L.gws} past gameweeks, adding a bonus for goals and assists didn’t pick better captains; this ranking’s pick averaged ${f1(L.cap["0"] ?? L.cap[0])} points, against ${f1(L.cap_fpl)} for FPL’s own top pick.`) : "";
+    const top = capTop(state.capMode, pool).slice(0, 8), c = top[0];
+    if (state.capMode !== "lab") lede = m[5](c);
+    body += `<h2>Who to captain in GW${g}</h2>${captainSwipe(pool)}<h3 style="margin-top:14px">${esc(m[0])}: ${esc(c.n)}</h3><p class="lede">${lede}</p>
     <article class="hero" data-open="${c.id}" tabindex="0" role="button">
       <div class="row1"><div><div class="pn"><span class="band" aria-label="Captain">C</span>${esc(c.n)}${flag(c)}${penTag(c)}</div>
         <div class="sub">${esc(T[c.t].name)}, ${esc(fxText(c.t, g))}, ${f1(c.own)}% owned. ${c.pos <= 2 ? `${pct(c.next.cs)} clean sheet chance.` : `${f2(c.next.xg)} xG, ${f2(c.next.xa)} xA.`}</div></div>
-        <div class="ep">${m[2](c)}<small>${m[3]}${state.capMode !== "expected" ? `<br>${f1(c.ep[0])} projected` : c.fpl_ep != null ? `<br>FPL says ${f1(c.fpl_ep)}` : ""}</small></div></div>
+        <div class="ep">${m[2](c)}<small>${capLabel(state.capMode)}${state.capMode !== "lab" ? `<br>${f1(c.ep[0])} projected` : ""}</small></div></div>
+      <div style="margin-top:4px">${outcomeTag(c)}</div>
       ${c.model_ep != null && c.fpl_ep != null && D.meta.lab && D.meta.lab.w_fpl > 0 ? `<p class="sub" style="margin:6px 0 0">Lab points ${f1(c.lab)}: our model says ${f1(c.model_ep)}, FPL says ${f1(c.fpl_ep)}, blended ${pct(1 - D.meta.lab.w_fpl)} to ${pct(D.meta.lab.w_fpl)}.</p>` : ""}
       ${c.el ? `<p class="sub" style="margin:4px 0 0">Owned by ${pct(c.el.own)} of the top ${D.meta.elite.n} managers and captained by ${pct(c.el.cap)} of them.</p>` : ""}
       <div class="mini"><span class="up">${pct(c.sim.haul)} chance of 10+</span><span>${pct(c.sim.ret)} chance of 4+</span><span class="down">${pct(c.sim.blank)} chance of 2 or fewer</span><span>Range ${c.sim.q[0]} to ${c.sim.q[2]}</span></div>
       ${histogram(c.sim)}
       <ul class="reasons">${(c.why || []).slice(0, 4).map(w => `<li>${toneDot(w.t)}<span><b>${esc(w.h)}.</b> ${esc(w.s)}</span></li>`).join("")}</ul>
       <span class="more-link">Full reasoning</span></article>
-    <ul class="list">${top.slice(1).map(p => playerRow(p, m[2](p), state.capMode === "expected" ? `GW${g}` : state.capMode === "lab" ? "captain score" : m[3], true,
+    <h3>Next best for ${esc(m[0].toLowerCase())}</h3><ul class="list">${top.slice(1).map(p => playerRow(p, m[2](p), capLabel(state.capMode), true,
       `<div class="sub">${pct(haul(p))} haul, ${pct(p.sim.blank)} blank, ${f1(p.ep[0])} projected</div>`)).join("")}</ul>`;
   } else if (state.gwView === "differentials"){
     const top = pool.filter(p => p.own < 10 && p.mins >= 45).sort((a,b) => b.ep6-a.ep6).slice(0, 15);
@@ -853,11 +1010,11 @@ function viewPlayers(){
 function openFilters(){
   const pl = state.pl, prices = [0,4.5,5,5.5,6,6.5,7,7.5,8,9,10,12];
   const groups = [["Verdicts", ["pick"]], ["Projections", ["next","adj","pie","six","haul","cap","value","gap"]], ["Variance", ["due","luck"]], ["Underlying stats", ["xgt","xat","xgit","npxg","xa","box","dc"]],
-    ["Market and price", ["pricemove","price","own","elite","luck","understat"]]];
+    ["Market and price", ["pricemove","price","own","elite","luck"].concat(D.players.some(p => p.us) ? ["understat"] : [])]];
   const used = new Set();
   const opt = k => { used.add(k); return SORTS[k] ? `<button class="optrow" data-sortpick="${k}" aria-pressed="${pl.sort === k}">${esc(SORTS[k][0])}${pl.sort === k ? ` <span class="dirtag">${pl.dir === "asc" ? "↑ lowest first" : "↓ highest first"}</span>` : ""}</button>` : ""; };
   const grp = groups.map(([t, ks]) => `<h3>${t}</h3><div class="optgrid">${ks.map(opt).join("")}</div>`).join("");
-  const rest = Object.keys(SORTS).filter(k => !used.has(k));
+  const rest = Object.keys(SORTS).filter(k => !used.has(k) && !(k === "understat" && !D.players.some(p => p.us)));
   $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Sort and filter</h2>
     <h3>Position</h3>${seg("pos", [[0,"All"],[1,"GK"],[2,"DEF"],[3,"MID"],[4,"FWD"]], pl.pos, "Position")}
     <h3>Verdict</h3>${seg("plverdict", [["","Everyone"],["buy","Buys only"],["watch","Buys and watch"],["mine","My players"]], pl.verdict || "", "Verdict")}
@@ -1254,15 +1411,18 @@ function sourcesList(){
   const share = seasonShare();
   return `<div class="seasonbar"><div class="head"><b>Where team ratings come from right now</b><span>${pct(share)} this season</span></div>
       <div class="sbar"><i style="width:${100 * share}%"></i></div>
-      <p class="sub">After ${D.meta.last_gw} gameweeks, ${pct(share)} of each team’s rating comes from this season’s matches and ${pct(1 - share)} from its starting point (last season, pulled a third of the way to average, blended with ClubElo when available). The starting point fades every week: about 76% this season by GW19 and 80% by the end. Tested on this season’s matches, this weighting predicted better than relying on this season alone. Players’ roles work the same way; for the coming gameweek, FPL’s own projection (40% of Lab points) and bookmaker odds (60% of team expected goals) are current-season too.</p></div>
+      <p class="sub">After ${D.meta.last_gw} gameweeks, ${pct(share)} of each team’s rating comes from this season’s matches and ${pct(1 - share)} from its starting point (last season, pulled a third of the way to average, blended with ClubElo when available). The starting point fades every week: about 76% this season by GW19 and 80% by the end. Tested on this season’s matches, this weighting predicted better than relying on this season alone. Players’ roles work the same way; for the coming gameweek, FPL’s own projection (${D.meta.lab ? Math.round(100 * D.meta.lab.w_fpl) : 0}% of Lab points) and bookmaker odds (60% of team expected goals) are current-season too.</p></div>
+    ${D.meta.checks ? `<div class="checks"><b>${D.meta.checks.failed && D.meta.checks.failed.length ? "Some checks failed" : "Safety checks passed"}</b><span class="sub"> Every update is checked before it goes live; if anything looks wrong, yesterday’s numbers stay up and GitHub emails you.</span>
+      <ul>${(D.meta.checks.passed || []).map(x => `<li>✓ ${esc(x)}</li>`).join("")}${(D.meta.checks.failed || []).map(x => `<li class="bad">✗ ${esc(x)}</li>`).join("")}</ul></div>` : ""}
     <ul class="health">${Object.entries(S).map(([k, v]) => `<li>${toneDot(v ? "up" : "flat")}<span>${esc(k)}${v ? "" : ": not used this run"}${!v && N[k] ? `<small class="srcwhy">Why: ${esc(N[k])}</small>` : v && N[k] ? `<small class="srcrole">Note: ${esc(N[k])}</small>` : ""}${!v && SOURCE_ROLE[k] ? `<small class="srcrole">${esc(SOURCE_ROLE[k])}</small>` : ""}</span></li>`).join("")}</ul>
-    <p class="sub">Anything “not used this run” was unreachable or not yet published; the model carries on without it and picks it up next time.</p>`;
+    <p class="sub">Anything “not used this run” was unreachable or not yet published; the model carries on without it and picks it up next time.</p>
+    <p class="sub"><b>Switched off after testing:</b> ClubElo (an Elo rating built from every result since August 2025 made this season’s predictions slightly worse, because results are noisier than expected goals) and Understat (its site now blocks automated requests from GitHub, and it only ever supplied second-opinion figures on player pages, never the projections).</p>`;
 }
 function labModel(){
   const L = D.meta.lab, P0 = D.accuracy_prev && D.accuracy_prev.summary;
   if (!L) return "";
   const ks = Object.keys(L.cap).map(Number).sort((a,b) => a - b), mx = Math.max(...ks.map(k => L.cap[k]));
-  return `<h3>The FPL Lab score</h3><p class="verdict">Our own points system, learned from <b>${L.gws} past gameweeks</b> (${L.n.toLocaleString("en-GB")} player projections). Lab points blend the model with FPL’s figure ${pct(1 - L.w_fpl)} to ${pct(L.w_fpl)}. The captain score adds <b>${L.kappa} × expected goal involvements</b>, the setting whose pick scored most.</p>
+  return `<h3>The FPL Lab score</h3><p class="verdict">Our own points system, learned from <b>${L.gws} past gameweeks</b> (${L.n.toLocaleString("en-GB")} player projections). Lab points blend the model with FPL’s figure ${pct(1 - L.w_fpl)} to ${pct(L.w_fpl)}. ${L.kappa ? `The captain score adds <b>${L.kappa} × expected goal involvements</b>, the setting whose pick scored most.` : "For captains, plain Lab points picked best; adding a bonus for goal involvements didn’t help."}</p>
   <dl class="kv"><dt>Average error: model alone</dt><dd>${f2(L.mae_model)}</dd><dt>Average error: Lab points</dt><dd>${f2(L.mae_lab)}</dd><dt>Average error: FPL’s projections</dt><dd>${f2(L.mae_fpl)}</dd></dl>
   <h3>Captain picks by setting</h3><p class="lede">Average actual points of the top-ranked captain each gameweek. The best possible pick averaged ${f1(L.cap_best)}; FPL’s top pick averaged ${f1(L.cap_fpl)}.</p>
   <div class="bd">${ks.map(k => `<span class="sub">${k === 0 ? "Expected points only" : `+ ${k} × xGI`}</span><div><div class="bar" style="width:${Math.max(4, 100 * L.cap[k] / mx)}%;${k === L.kappa ? "background:var(--up)" : ""}"></div></div><b>${f1(L.cap[k])}</b>`).join("")}</div>
@@ -1311,7 +1471,7 @@ function viewModel(){
   <h3>Captain log</h3><div class="scroller"><table class="log"><thead><tr><th>GW</th><th>FPL Lab</th><th class="n">Pts</th><th>FPL’s pick</th><th class="n">Pts</th><th>Top scorer</th><th class="n">Pts</th></tr></thead>
   <tbody>${W.map(w => `<tr><td>${w.gw}</td><td>${esc(w.cap.n)}</td><td class="n">${w.cap.pts}</td><td>${w.cap_fpl ? esc(w.cap_fpl.n) : "–"}</td><td class="n">${w.cap_fpl ? w.cap_fpl.pts : "–"}</td><td>${esc(w.best.n)}</td><td class="n">${w.best.pts}</td></tr>`).join("")}</tbody></table></div>
   <h3>Biggest misses in GW${last.gw}</h3><dl class="kv">${last.under.map(m => `<dt>${esc(m.n)} scored more than expected</dt><dd>${m.proj} → ${m.pts}</dd>`).join("")}${last.over.map(m => `<dt>${esc(m.n)} scored less than expected</dt><dd>${m.proj} → ${m.pts}</dd>`).join("")}</dl>
-  ${how}${wholeAppViews()}${glossaryList()}<h3>Data sources this run</h3>${sourcesList()}<p class="lede">${esc(D.meta.source)}. ${D.meta.matches} league matches, every shot in them, and cup and European minutes feed the model. Rebuilt ${dayTime(D.meta.generated)}.</p>`;
+  ${how}${wholeAppViews()}${backupHtml()}${glossaryList()}<h3>Data sources this run</h3>${sourcesList()}<p class="lede">${esc(D.meta.source)}. ${D.meta.matches} league matches, every shot in them, and cup and European minutes feed the model. Rebuilt ${dayTime(D.meta.generated)}.</p>`;
 }
 
 /* ---------- sheets ---------- */
@@ -1338,8 +1498,8 @@ function openPlayer(id){
     ${p.rot.last_cup ? `<dt>Last ${esc(p.rot.last_cup.comp)} match</dt><dd>${p.rot.last_cup.mins} mins</dd>` : ""}${T[p.t].cong && T[p.t].cong[GWS[0]] ? `<dt>Next to GW${GWS[0]}</dt><dd>${esc(T[p.t].cong[GWS[0]].comp)}, ${new Date(T[p.t].cong[GWS[0]].ko).toLocaleDateString("en-GB",{weekday:"short", day:"numeric"})}</dd>` : ""}</dl>` : "";
   $("#sheetBody").innerHTML = `
   <h2 id="sheetTitle">${msDot(p)}${dot(p.t)}${esc(p.n)}${penTag(p)}${p.edited ? ' <span class="chip">Your minutes</span>' : ""}</h2><p class="sub">${esc(T[p.t].name)}, ${POS_LONG[p.pos]}, ${money(p.price)}, ${f1(p.own)}% owned</p>
-  ${verdictLine(p)}${betterOptions(p)}${playerWeek(p)}${p.summary ? `<p class="lede">${esc(p.summary)}</p>` : ""}
-  ${plainCard(p)}${p.pos >= 2 ? pieLine(p) : ""}
+  ${verdictLine(p)}${betterOptions(p)}${playerWeek(p)}${p.hot_fpl_off ? `<p class="sub">FPL’s own projection (${f1(p.fpl_ep)}) is left out this week because he scored 10+ in one of his last three games; straight after a haul it has overrated players by about 60% in testing.</p>` : ""}${p.summary ? `<p class="lede">${esc(p.summary)}</p>` : ""}
+  ${plainCard(p)}${p.pos >= 2 ? pieLine(p) : ""}${roleTracker(p)}
   <div class="statline"><span>${term("ms", "Minutes security")}: <b class="ms-t ${minutesSecurity(p).level}">${{green: "High", yellow: "Medium", red: "Low"}[minutesSecurity(p).level]}</b>. ${esc(minutesSecurity(p).text)}.</span>
 
     ${(() => { const v = variance(p); return v ? `<span>Last ${v.games} games: ${f1(v.xg)} xG and ${f1(v.xa)} xA, for ${v.goals} goal${v.goals === 1 ? "" : "s"} and ${v.ast} assist${v.ast === 1 ? "" : "s"}. ${v.unlucky ? `<b>${term("variance", "Due a return")}</b>: about ${f1(v.gap)} points of returns missing.` : v.lucky ? "He’s scored well above his chances lately, which rarely lasts." : "Returns are in line with his chances."}</span>` : ""; })()}
@@ -1376,7 +1536,7 @@ function labBlock(p){
   const rows = [`<dt>Our model</dt><dd>${f1(p.model_ep ?? p.ep[0])}</dd>`];
   if (p.fpl_ep != null) rows.push(`<dt>FPL’s own projection</dt><dd>${f1(p.fpl_ep)}</dd>`);
   rows.push(`<dt><b>Lab points</b></dt><dd>${f1(p.ep[0])}</dd>`);
-  if (p.cap != null) rows.push(`<dt><b>Lab captain score</b> (adds ${L ? L.kappa : 1} × ${f2(p.next.xg + p.next.xa)} expected goal involvements)</dt><dd>${f1(p.cap)}</dd>`);
+  if (p.cap != null && L && L.kappa) rows.push(`<dt><b>Lab captain score</b> (adds ${L.kappa} × ${f2(p.next.xg + p.next.xa)} expected goal involvements)</dt><dd>${f1(p.cap)}</dd>`);
   return `<h3>How the Lab score is built</h3><dl class="kv">${rows.join("")}</dl>
     <p class="sub">${L ? `The blend weights come from testing on ${L.gws} past gameweeks: the model gets ${pct(1 - L.w_fpl)} and FPL gets ${pct(L.w_fpl)}, because that mix predicted actual points best.` : "Lab points are the model’s projection."} Bookmaker odds and the referee are already inside the model figure when they’re available.</p>`;
 }
@@ -1453,8 +1613,18 @@ function openPicker(pos){
     <div class="filters"><input type="search" id="pickq" placeholder="Search player or team" aria-label="Search player or team"></div><ul class="list" id="pickList"></ul>${sheetFoot()}`;
   draw(); $("#pickq").addEventListener("input", e => { pk.q = e.target.value; draw(); }); showSheet();
 }
-function showSheet(){ const d = $("#sheet"); if (!d.open) d.showModal(); d.querySelector(".sheet").scrollTop = 0; }
-function closeSheet(){ $("#sheet").close(); }
+let SHEET_KEY = null;
+function showSheet(){
+  const d = $("#sheet"), sh = d.querySelector(".sheet"), t = $("#sheetTitle"), key = t ? t.textContent : "";
+  const same = d.open && key === SHEET_KEY, keep = same ? sh.scrollTop : 0;
+  if (!d.open) d.showModal();
+  SHEET_KEY = key;
+  // opening a sheet focuses its first button, which can scroll it to the middle; put it back
+  if (document.activeElement && d.contains(document.activeElement)) document.activeElement.blur();
+  sh.scrollTop = keep;
+  requestAnimationFrame(() => { sh.scrollTop = keep; });
+}
+function closeSheet(){ $("#sheet").close(); SHEET_KEY = null; }
 
 // FPL Lab exact transfer solver: a mixed-integer programme solved with HiGHS.
 // Plans up to H gameweeks: squad, starting XI, captain, transfers, banked free transfers, hits and chips.
@@ -1607,8 +1777,8 @@ const GLOSSARY = {
   box:["Box touches", "Times a player touches the ball inside the opposition penalty area.", "Players who live in the box get the high-quality chances, so this predicts goals well."],
   defcon:["DEFCON", "Defensive contributions: clearances, blocks, interceptions and tackles (plus recoveries for midfielders and forwards). Reach 10 as a defender, or 12 otherwise, and FPL gives 2 points.", "A steady source of points for busy defenders and holding midfielders, especially against teams that attack a lot."],
   cs:["Clean sheet chance", "The model’s chance that a team concedes no goals, worked out from the expected goals against them in that match.", "Worth 4 points to goalkeepers and defenders who play 60 minutes, and 1 to midfielders."],
-  lab:["Lab points", "FPL Lab’s projected points: 60% our own model and 40% FPL’s published projection.", "That mix was picked because it predicted actual points better than either on its own over 35 past gameweeks."],
-  cap:["Lab captain score", "Lab points plus three times a player’s expected goals and assists.", "Captain hauls come from goals and assists, and testing showed this ranking picks better captains than projected points alone."],
+  lab:["Lab points", "FPL Lab’s projected points.", ""],
+  cap:["Lab captain score", "The captain ranking.", ""],
   haul:["Haul chance", "The chance of 10 or more points, from playing the gameweek 3,000 times in simulation.", "Useful for captaincy and for chasing rank, where ceiling matters more than the average."],
   blank:["Blank chance", "The chance of 2 points or fewer: an appearance and nothing else, or no minutes.", "A safe pick has a low blank chance; a risky one has a high one."],
   own:["Ownership", "The share of all FPL managers who own a player.", "High ownership protects your rank (a shield); low ownership can gain you rank if he scores (a sword)."],
@@ -1632,12 +1802,21 @@ const GLOSSARY = {
   robust:["Stress test", "The solver re-run with the projections randomly shaken, to see which moves hold up.", "A move picked in most runs is robust; one picked only once relies on the projections being exactly right."],
 };
 const term = (key, label) => `<button class="term" data-term="${key}">${label || GLOSSARY[key][0]}</button>`;
+function refreshGlossary(){
+  const L = D && D.meta && D.meta.lab;
+  GLOSSARY.lab = ["Lab points", `FPL Lab’s projected points: ${L ? `${Math.round(100 * (1 - L.w_fpl))}% our own model and ${Math.round(100 * L.w_fpl)}% FPL’s published projection` : "our own model"}. Straight after a player scores 10 or more, FPL’s figure is left out entirely.`,
+    "The mix was picked by testing on past gameweeks. FPL’s figure leans on recent points, so after a haul it overrates players: tested on 1,516 cases, it projected 5.8 and they averaged 3.6, while our model said 3.8."];
+  GLOSSARY.cap = ["Lab captain score", L && L.kappa ? `Lab points plus ${L.kappa} times a player’s expected goals and assists.` : "The same as Lab points: tested on past gameweeks, adding a bonus for goals and assists didn’t pick better captains.",
+    "The captain ranking was chosen by which setting’s top pick scored the most actual points in testing."];
+}
 function openGlossary(key){
+  refreshGlossary();
   const g = GLOSSARY[key]; if (!g) return;
   $("#sheetBody").innerHTML = `<h2 id="sheetTitle">${esc(g[0])}</h2><p class="verdict">${esc(g[1])}</p><p class="lede"><b>Why it matters.</b> ${esc(g[2])}</p>${sheetFoot()}`;
   showSheet();
 }
 function glossaryList(){
+  refreshGlossary();
   return `<h3>Glossary</h3><ul class="why">${Object.entries(GLOSSARY).map(([k, g]) => `<li>${toneDot("flat")}<div><h4>${esc(g[0])}</h4><p>${esc(g[1])} ${esc(g[2])}</p></div></li>`).join("")}</ul>`;
 }
 
@@ -1758,7 +1937,7 @@ function pitchView(baseSquad){
     return `<button class="pp ${bench ? "bench" : ""}" data-pitch="${p.id}" aria-label="${esc(p.n)}, ${f1(p.ep[i])} points">
     ${p === L.cap ? '<span class="cb">C</span>' : p === L.vice ? '<span class="cb v">V</span>' : ""}${p.edited ? '<span class="eb" aria-label="Minutes edited">✎</span>' : ""}
     <span class="shirtwrap">${shirt(p.t)}${corner}</span><span class="pn">${msDot(p)}${esc(p.n)}</span>
-    <span class="pf">${(FX[p.t][g] || []).map(f => `${esc(T[f.opp].short)} ${f.home ? "H" : "A"}`).join(", ") || "Blank"}</span><span class="psig">${sg}</span>
+    <span class="pf">${(FX[p.t][g] || []).map(f => `${esc(T[f.opp].short)} ${f.home ? "H" : "A"}`).join(", ") || "Blank"}</span><span class="psig">${sg.replace(/<small>[^<]*<\/small>/, "")}</span>
     <span class="pe">${f1(p.ep[i] * (p === L.cap ? 2 : 1))}</span></button>`; };
   const rows = [1,2,3,4].map(pos => `<div class="prow">${L.xi.filter(p => p.pos === pos).map(p => card(p)).join("")}</div>`).join("");
   return `${draftBar()}<div class="gwstep"><button class="ghost" data-gwstep="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${g}</b><button class="ghost" data-gwstep="1" ${i === GWS.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button></div>
@@ -2042,27 +2221,6 @@ function rankRows(rows, key){
 }
 function leaguePositions(){ const m = {}; rankRows(tableRows("season", "all"), "pts").forEach(r => m[r.t.id] = r.rank); return m; }
 state.ft = state.ft || {win: 5, venue: "all", key: "pts"};
-function viewFormTable(){
-  const f = state.ft, rows = rankRows(tableRows(f.win, f.venue), f.key), league = leaguePositions();
-  const vname = {all: "all games", home: "home games", away: "away games"}[f.venue];
-  const wname = f.win === "season" ? "this season" : `their last ${f.win} ${f.venue === "all" ? "games" : vname}`;
-  const diff = r => r.pts - r.xpts;
-  const lucky = [...rows].filter(r => r.p >= 3).sort((a,b) => diff(b) - diff(a)).slice(0, 2), unlucky = [...rows].filter(r => r.p >= 3).sort((a,b) => diff(a) - diff(b)).slice(0, 2);
-  const insight = `<p class="verdict" style="font-size:16px">${f.win === "season" ? "This season" : `Over ${wname}`}, <b>${esc(rows[0].t.name)}</b> top the ${f.key === "xpts" ? "performance" : "form"} table. 
-    ${lucky.filter(r => diff(r) >= 2).map(r => `${esc(r.t.name)} have ${r.pts} points from performances worth about ${f1(r.xpts)}, so their results are flattering them.`).join(" ")}
-    ${unlucky.filter(r => diff(r) <= -2).map(r => `${esc(r.t.name)} have only ${r.pts} from performances worth about ${f1(r.xpts)}, so better results should come.`).join(" ")}</p>`;
-  return `<p class="lede">A league table built only from recent matches. Switch between all games, home and away, and between real points and ${term("xg", "expected")} points. Expected points are what each team would average from the chances created and allowed in those games.</p>
-    ${seg("ftvenue", [["all","All games"],["home","Home"],["away","Away"]], f.venue, "Venue")}
-    ${seg("ftwin", [[5,"Last 5"],[8,"Last 8"],["season","Season"]], f.win, "Window")}
-    ${seg("ftkey", [["pts","Points"],["xpts","Expected points"]], f.key, "Rank by")}
-    ${insight}
-    <div class="scroller"><table class="log ftable"><thead><tr><th>#</th><th>Team</th><th class="n">P</th><th class="n">W-D-L</th><th class="n">GD</th><th class="n">Pts</th><th class="n">xPts</th><th class="n">xGD</th><th>Form</th><th class="n">Table</th></tr></thead>
-    <tbody>${rows.map(r => { const mv = league[r.t.id] - r.rank;
-      return `<tr data-team="${r.t.id}" style="cursor:pointer"><td>${r.rank}</td><td style="white-space:nowrap">${dot(r.t.id)}${esc(r.t.short)}</td><td class="n">${r.p}</td><td class="n">${r.w}-${r.d}-${r.l}</td><td class="n">${r.gd > 0 ? "+" : ""}${r.gd}</td>
-        <td class="n">${r.pts}</td><td class="n">${f1(r.xpts)}</td><td class="n">${sgn(r.xgd)}</td><td style="white-space:nowrap">${formDots(r.form.slice(-5))}</td>
-        <td class="n">${league[r.t.id]}${mv ? ` <span class="sub" style="color:var(--${mv > 0 ? "up" : "down"})">${mv > 0 ? "▲" : "▼"}${Math.abs(mv)}</span>` : ""}</td></tr>`; }).join("")}</tbody></table></div>
-    <p class="sub">Table shows their position in the real league table; the arrow shows how far ${f.key === "xpts" ? "their performances" : "their recent form"} would move them. Tap a team for the full picture.</p>`;
-}
 function teamOutlook(t){
   const league = leaguePositions(), pos = league[t.id];
   const attR = 1 + [...D.teams].sort((a,b) => b.att - a.att).findIndex(x => x.id === t.id);
@@ -2181,16 +2339,6 @@ function viewTeamH2H(){
     <div class="maps" style="margin-top:12px"><figure class="map" style="margin:0"><figcaption>${esc(A.short)} concede</figcaption>${teamMap(A, "def")}</figure><figure class="map" style="margin:0"><figcaption>${esc(B.short)} concede</figcaption>${teamMap(B, "def")}</figure></div>
     ${meetTxt}`;
 }
-function viewSplit(){
-  const win = LONG.slice(0, state.fxWin);
-  const key = t => win.reduce((s, g) => s + (FX[t.id][g] || []).reduce((a, f) => a + (state.splitSort === "def" ? Math.exp(-f.la) : f.lf), 0), 0);
-  const teams = [...D.teams].sort((a,b) => key(b) - key(a));
-  return `<p class="lede">Read the bars like phone signal: more bars is a better fixture. <b>Att</b> is the chance to score (the goals the team is expected to get); <b>Def</b> is the chance of a clean sheet. The numbers sit next to the bars. Attackers want full Att bars, defenders and keepers full Def bars. Switch on Home/away at the top to use each team’s home and away record, including xGC.</p>
-    ${seg("fxwin", [[3,"Next 3"],[6,"Next 6"],[10,"Next 10"]], state.fxWin, "Window")}${seg("splitsort", [["att","Most goals expected"],["def","Best clean sheet odds"]], state.splitSort || "att", "Sort")}
-    <div class="scroller"><table class="tick"><thead><tr><th scope="col">Team</th>${win.map(g => `<th scope="col">GW${g}</th>`).join("")}<th scope="col">Total</th></tr></thead>
-    <tbody>${teams.map(t => `<tr><td>${dot(t.id)}${t.short}</td>${win.map(g => splitCell(FX[t.id][g] || [])).join("")}<td class="c" style="font-weight:800">${state.splitSort === "def" ? f1(key(t)) : f1(key(t))}<span>${state.splitSort === "def" ? "exp. CS" : "xG"}</span></td></tr>`).join("")}</tbody></table></div>
-    <div class="legend">Better <i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i> Worse. Left number: expected goals. Right: clean sheet chance.</div>`;
-}
 function viewScores(){
   const g = GWS[0], fx = D.fixtures.filter(f => f.gw === g);
   return `<p class="lede">The three most likely scores in each GW${g} match, from the model’s expected goals${D.meta.odds && D.meta.odds.n ? " blended with bookmaker odds where available" : ""}. Even the most likely score usually happens less than one time in seven, so read these as a guide to how open or tight a game should be.</p>
@@ -2274,7 +2422,9 @@ function minutesSecurity(p){
   const starts = g.reduce((s, r) => s + (r[7] != null ? r[7] : (r[3] >= 60 ? 1 : 0)), 0), mins = g.reduce((s, r) => s + r[3], 0), cap = 90 * g.length;
   let level = starts >= Math.max(3, g.length - 1) && mins >= 0.7 * cap ? "green" : starts <= 1 || mins < 0.35 * cap ? "red" : "yellow";
   if (p.st === "d" && level === "green") level = "yellow";
-  return {level, starts, games: g.length, mins, text: `Started ${starts} of his last ${g.length}, ${mins} minutes${p.st === "d" ? ", and he’s flagged as doubtful" : ""}`};
+  const rot = p.next && p.next.rot != null && p.next.rot < 0.85;
+  if (rot && level === "green") level = "yellow";
+  return {level, starts, games: g.length, mins, text: `Started ${starts} of his last ${g.length}, ${mins} minutes${p.st === "d" ? ", and he’s flagged as doubtful" : ""}${rot ? `, and he’s a rotation risk this week (start chance down ${pct(1 - p.next.rot)})` : ""}`};
 }
 const msDot = p => { const m = minutesSecurity(p); return `<i class="ms ${m.level}" title="${esc(m.text)}" aria-label="Minutes security ${m.level === "green" ? "high" : m.level === "yellow" ? "medium" : "low"}: ${esc(m.text)}"></i>`; };
 
@@ -2322,7 +2472,10 @@ const xgClass = v => { diffBins(); const b = XG_BINS; return v >= b[3] ? 1 : v >
 const csClass = v => { diffBins(); const b = CS_BINS; return v >= b[3] ? 1 : v >= b[2] ? 2 : v >= b[1] ? 3 : v >= b[0] ? 4 : 5; };
 function splitCell(list){
   if (!list.length) return `<td class="c d0">Blank</td>`;
-  return `<td class="c split">${list.map(f => { const cs = Math.exp(-f.la); return `<div class="sp"><span class="spa d${xgClass(f.lf)}" title="${esc(T[f.opp].name)}: expected goals for, clean sheet chance">${esc(T[f.opp].short)} ${f.home ? "H" : "A"}</span><span class="spd3">${sig(xgClass(f.lf), "Att")}<em>${f1(f.lf)}</em>${sig(csClass(cs), "Def")}<em>${pct(cs)}</em></span></div>`; }).join("")}</td>`;
+  return `<td class="c split">${list.map(f => { const cs = Math.exp(-f.la), a = xgClass(f.lf), d = csClass(cs);
+    return `<div class="sp2" title="${esc(T[f.opp].name)} ${f.home ? "at home" : "away"}: ${f1(f.lf)} goals expected, ${pct(cs)} clean sheet chance">
+      <span class="opp">${esc(T[f.opp].short)}<small>${f.home ? "H" : "A"}</small></span>
+      <span class="two"><em class="d${a}">${f1(f.lf)}</em><em class="d${d}">${pct(cs)}</em></span></div>`; }).join("")}</td>`;
 }
 function splitBadge(t, gw, p){
   const l = FX[t][gw] || []; if (!l.length) return "";
@@ -2396,12 +2549,37 @@ let formMark = p => { if (!state.formMode) return ""; const d = formDelta(p); re
 let formSwitch = () => "";
 
 // form map: attack quality against recent trend
+// dots and labels for the team maps: nudges overlapping dots apart and places each label where it doesn't collide
+function mapDots(pts, bounds){
+  const [L, R, Tp, B] = bounds, r = 7;
+  // spread dots that sit on top of each other
+  for (let it = 0; it < 30; it++) for (let i = 0; i < pts.length; i++) for (let j = i + 1; j < pts.length; j++){
+    const a = pts[i], b = pts[j], dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 0.01, min = 2 * r + 2;
+    if (d < min){ const push = (min - d) / 2, ux = dx / d || 1, uy = dy / d; a.x -= ux * push; a.y -= uy * push; b.x += ux * push; b.y += uy * push; }
+  }
+  pts.forEach(p => { p.x = Math.max(L + r, Math.min(R - r, p.x)); p.y = Math.max(Tp + r, Math.min(B - r, p.y)); });
+  const boxes = pts.map(p => ({x0: p.x - r, x1: p.x + r, y0: p.y - r, y1: p.y + r}));
+  const hit = (b) => boxes.some(o => b.x0 < o.x1 && b.x1 > o.x0 && b.y0 < o.y1 && b.y1 > o.y0);
+  const out = [];
+  [...pts].sort((a,b) => a.y - b.y).forEach(p => {
+    const w = 6.4 * p.label.length + 2, h = 11;
+    const tries = [[0, -11, "middle"], [0, 19, "middle"], [10, 4, "start"], [-10, 4, "end"], [0, -21, "middle"], [0, 29, "middle"], [14, -8, "start"], [-14, -8, "end"]];
+    let best = null;
+    for (const [ox, oy, anchor] of tries){
+      const x = p.x + ox, y = p.y + oy, x0 = anchor === "middle" ? x - w / 2 : anchor === "start" ? x : x - w, b = {x0, x1: x0 + w, y0: y - h + 2, y1: y + 2};
+      if (b.x0 < L - 30 || b.x1 > R + 8 || b.y0 < 0) continue;
+      if (!hit(b)){ best = {x, y, anchor, b}; break; }
+      if (!best) best = {x, y, anchor, b};
+    }
+    boxes.push(best.b); out.push(Object.assign({}, p, {lx: best.x, ly: best.y, anchor: best.anchor}));
+  });
+  return out.map(p => `<g data-team="${p.id}" style="cursor:pointer"><circle cx="${p.x.toFixed(1)}" cy="${p.y.toFixed(1)}" r="${r}" fill="${p.fill}" stroke="var(--surface)" stroke-width="1.5"/><text x="${p.lx.toFixed(1)}" y="${p.ly.toFixed(1)}" class="mlab" text-anchor="${p.anchor}">${esc(p.label)}</text></g>`).join("");
+}
 function formMap(){
   const W = 360, H = 270, L = 34, R = 350, Tp = 12, B = 232, xs = v => L + (R - L) * v / 100, ys = r => { const c = Math.max(0.55, Math.min(1.45, r)); return Tp + (B - Tp) * (1.45 - c) / 0.9; };
   const midY = ys(1), midX = xs(50);
-  const dots = D.teams.map(t => { const x = teamTrend(t.id), cx = xs(t.att_score), cy = ys(x.ratio), [, , ] = TREND_STYLE[x.trend];
-    const col = x.ratio >= 1.08 ? "#D85A30" : x.ratio <= 0.92 ? "#378ADD" : "#888780";
-    return `<g data-team="${t.id}" style="cursor:pointer"><circle cx="${cx}" cy="${cy}" r="7" fill="${col}" stroke="var(--surface)" stroke-width="1.5"/><text x="${cx}" y="${cy - 10}" class="mlab">${esc(t.short)}</text></g>`; }).join("");
+  const dots = mapDots(D.teams.map(t => { const x = teamTrend(t.id);
+    return {id: t.id, label: t.short, x: xs(t.att_score), y: ys(x.ratio), fill: x.ratio >= 1.08 ? "#D85A30" : x.ratio <= 0.92 ? "#378ADD" : "#888780"}; }), [L, R, Tp, B]);
   return `<svg class="fmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Form map: attack quality across, recent trend up">
     <rect x="${L}" y="${Tp}" width="${midX - L}" height="${midY - Tp}" fill="#FAEEDA" opacity=".55"/><rect x="${midX}" y="${Tp}" width="${R - midX}" height="${midY - Tp}" fill="#E1F5EE" opacity=".8"/>
     <rect x="${L}" y="${midY}" width="${midX - L}" height="${B - midY}" fill="#F1EFE8" opacity=".7"/><rect x="${midX}" y="${midY}" width="${R - midX}" height="${B - midY}" fill="#E6F1FB" opacity=".8"/>
@@ -2429,7 +2607,7 @@ function openKey(){
   const sw = c => `<i class="ksw" style="background:${c}"></i>`;
   $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Colour key</h2>
     <h3>Fixtures and grades</h3><p class="lede">${[1,2,3,4,5].map(k => `<span class="gchip d${k}">${k}</span>`).join(" ")} Green is good for that team, red is bad.</p>
-    <dl class="kv"><dt>${sig(1, "Att")} ${sig(3, "Att")} ${sig(5, "Att")}</dt><dd>Attack: chance to score. Five bars is the best fixture, one bar the worst</dd><dt>${sig(1, "Def")} ${sig(4, "Def")}</dt><dd>Defence: clean sheet chance, same scale</dd></dl>
+    <dl class="kv"><dt>${sig(1, "Att")} ${sig(5, "Att")}</dt><dd>How good this fixture is for the team’s attackers (goals expected). Five bars is a great week, one a poor one</dd><dt>${sig(1, "Def")} ${sig(4, "Def")}</dt><dd>How good it is for the team’s defenders and keeper (clean sheet chance), same scale</dd></dl>
     <h3>Minutes</h3><dl class="kv"><dt><i class="ms green"></i>Green</dt><dd>Nailed</dd><dt><i class="ms yellow"></i>Yellow</dt><dd>Some benchings</dd><dt><i class="ms red"></i>Red</dt><dd>Rarely starts, injured or banned</dd></dl>
     <h3>Team form</h3><p class="lede">${["hot","warming up","steady","cooling","cold"].map(k => `<span class="tpill" style="background:${TREND_STYLE[k][0]};color:${TREND_STYLE[k][1]}">${TREND_STYLE[k][2]} ${k[0].toUpperCase() + k.slice(1)}</span>`).join(" ")}</p>
     <p class="sub">Arrows by a player’s name show his team’s trend. Mini bars are xG in each of the last ${FORM_N} games; the dashed line is the season average.</p>
@@ -2498,12 +2676,15 @@ function viewFuture(){
 // fixture grades as phone-signal bars: more bars = better fixture for that player
 function sig(grade, label){
   const bars = 6 - grade, col = `var(--f${grade})`;
-  return `<span class="sig" title="${label === "Att" ? "Attack" : "Defence"}: grade ${grade} of 5 (${bars} bar${bars === 1 ? "" : "s"})"><small>${label}</small><svg viewBox="0 0 22 14" width="22" height="14" aria-hidden="true">${[0,1,2,3,4].map(i => `<rect x="${i * 4.4}" y="${12 - (i + 1) * 2.4}" width="3.2" height="${(i + 1) * 2.4}" rx="0.8" fill="${i < bars ? col : "var(--line)"}"/>`).join("")}</svg></span>`;
+  const who = label === "Att" ? "Attackers" : label === "Def" ? "Defenders" : label;
+  return `<span class="sig" title="${who === "Attackers" ? "How good this fixture is for the team’s attackers" : who === "Defenders" ? "How good this fixture is for the team’s defenders and keeper" : ""}: ${bars} of 5 bars">${who ? `<small>${who}</small>` : ""}<svg viewBox="0 0 22 14" width="22" height="14" aria-hidden="true">${[0,1,2,3,4].map(i => `<rect x="${i * 4.4}" y="${12 - (i + 1) * 2.4}" width="3.2" height="${(i + 1) * 2.4}" rx="0.8" fill="${i < bars ? col : "var(--line)"}"/>`).join("")}</svg></span>`;
 }
-function gradeChips(t, gw){
+function gradeChips(t, gw, pos){
   const l = (FX[t] || {})[gw] || []; if (!l.length) return `<span class="gchip d0">Blank</span>`;
+  // on player rows show only the bar that matters for him; elsewhere show both
   return l.map(f => { const a = xgClass(f.lf), dd = csClass(Math.exp(-f.la));
-    return `<span class="glance" title="${esc(T[f.opp].name)} ${f.home ? "(home)" : "(away)"}: ${f1(f.lf)} goals expected, ${pct(Math.exp(-f.la))} clean sheet chance"><b>${esc(T[f.opp].short)} ${f.home ? "H" : "A"}</b>${sig(a, "Att")}${sig(dd, "Def")}</span>`; }).join("");
+    const bars = pos == null ? sig(a, "Att") + sig(dd, "Def") : pos >= 3 ? sig(a, "Att") : sig(dd, "Def");
+    return `<span class="glance" title="${esc(T[f.opp].name)} ${f.home ? "(home)" : "(away)"}: ${f1(f.lf)} goals expected, ${pct(Math.exp(-f.la))} clean sheet chance"><b>${esc(T[f.opp].short)} ${f.home ? "H" : "A"}</b>${bars}</span>`; }).join("");
 }
 // home/away what-if and xGC
 state.venueMode = (() => { try { return localStorage.getItem("fpllab.venue.v1") === "on"; } catch(e) { return false; } })();
@@ -2631,6 +2812,24 @@ function scenarioCard(p){
     ${row("Normal", w.base, null, "")}${row("If form continues", fc, w.form, formNote)}${row("On home/away record", vc, w.venue, venueNote)}
     <div class="tline">${trendPill(p.t)}${formStrip(p.t, 84)}</div></div>`;
 }
+function backupHtml(){
+  return `<h3>Back up your settings</h3><p class="lede">Your squad, planner drafts, locks and bans, minute edits and prices paid are saved only in this browser. Export them to a file to keep them safe, or to move them to another phone.</p>
+    <div class="optgrid"><button class="optrow" data-backup="export">Export settings</button><label class="optrow" style="display:flex;align-items:center;justify-content:center;cursor:pointer">Import settings<input type="file" id="importfile" accept="application/json,.json" style="display:none"></label></div>`;
+}
+function exportSettings(){
+  const out = {app: "FPL Lab", saved: new Date().toISOString(), data: {}};
+  for (let i = 0; i < localStorage.length; i++){ const k = localStorage.key(i); if (k && k.startsWith("fpllab.")) out.data[k] = localStorage.getItem(k); }
+  const blob = new Blob([JSON.stringify(out, null, 1)], {type: "application/json"}), a = document.createElement("a");
+  a.href = URL.createObjectURL(blob); a.download = `fpl-lab-settings-${new Date().toISOString().slice(0, 10)}.json`; document.body.appendChild(a); a.click(); a.remove();
+  setTimeout(() => URL.revokeObjectURL(a.href), 2000); toast(`Exported ${Object.keys(out.data).length} saved items`);
+}
+function importSettings(file){
+  const r = new FileReader();
+  r.onload = () => { try { const j = JSON.parse(r.result); if (!j || j.app !== "FPL Lab" || !j.data) throw new Error("not an FPL Lab settings file");
+      Object.entries(j.data).forEach(([k, v]) => { if (k.startsWith("fpllab.")) localStorage.setItem(k, v); }); toast("Settings restored. Reloading…"); setTimeout(() => location.reload(), 700); }
+    catch(e){ toast("That file couldn’t be read: " + e.message); } };
+  r.readAsText(file);
+}
 function wholeAppViews(){
   return `<h3>Whole-app views</h3><p class="lede">Show every projection in the app, including the pitch, captain picks and the planner, as if recent form continues or using each team’s home and away record. You won’t need these often: player rows already flag the players these views would move by half a point or more.</p>
     <div class="switches" style="margin:6px 0 4px">${formSwitch()}</div>`;
@@ -2739,8 +2938,8 @@ function teamTile(t){
     <div class="tcall ${c.tone}">${esc(c.txt)}</div></button>`;
 }
 function qualityMap(){
-  const W = 360, H = 270, L = 34, R = 350, Tp = 12, B = 232, xs = v => L + (R - L) * v / 100, ys = v => B - (B - Tp) * v / 100, midX = xs(55), midY = ys(55);
-  const dots = D.teams.map(t => `<g data-team="${t.id}" style="cursor:pointer"><circle cx="${xs(t.att_score)}" cy="${ys(t.def_score)}" r="7" fill="${colours(t.id)[0] === "#F5F5F5" ? colours(t.id)[1] : colours(t.id)[0]}" stroke="var(--surface)" stroke-width="1.5"/><text x="${xs(t.att_score)}" y="${ys(t.def_score) - 10}" class="mlab">${esc(t.short)}</text></g>`).join("");
+  const W = 360, H = 290, L = 34, R = 346, Tp = 22, B = 250, xs = v => L + 12 + (R - L - 24) * v / 100, ys = v => B - 12 - (B - Tp - 24) * v / 100, midX = xs(55), midY = ys(55);
+  const dots = mapDots(D.teams.map(t => ({id: t.id, label: t.short, x: xs(t.att_score), y: ys(t.def_score), fill: colours(t.id)[0] === "#F5F5F5" ? colours(t.id)[1] : colours(t.id)[0]})), [L, R, Tp, B]);
   return `<svg class="fmap" viewBox="0 0 ${W} ${H}" role="img" aria-label="Quality map: attack across, defence up">
     <rect x="${midX}" y="${Tp}" width="${R - midX}" height="${midY - Tp}" fill="#E1F5EE" opacity=".8"/><rect x="${L}" y="${Tp}" width="${midX - L}" height="${midY - Tp}" fill="#E6F1FB" opacity=".8"/>
     <rect x="${midX}" y="${midY}" width="${R - midX}" height="${B - midY}" fill="#FAEEDA" opacity=".6"/><rect x="${L}" y="${midY}" width="${midX - L}" height="${B - midY}" fill="#F1EFE8" opacity=".7"/>
@@ -3041,13 +3240,111 @@ function draftRules(){
   return {buys, sells};
 }
 
+/* ---------- role tracker: deep, mixed or advanced, from each match's passes and touches ---------- */
+let ROLE_NORM = null;
+function roleNorms(){
+  if (ROLE_NORM) return ROLE_NORM;
+  const v = []; D.players.filter(p => p.pos === 3).forEach(p => (p.form || []).forEach(r => { if (r[3] >= 45 && r[11] != null) v.push(r[11] / r[3] * 90); }));
+  v.sort((a,b) => a - b);
+  ROLE_NORM = {med: v.length ? v[Math.floor(v.length / 2)] : 35};
+  return ROLE_NORM;
+}
+function matchRole(r){
+  if (!r || r[3] < 20 || r[11] == null) return null;
+  const pass90 = r[11] / r[3] * 90, box90 = (r[12] || 0) / r[3] * 90, med = roleNorms().med;
+  if (pass90 >= med * 1.2 && box90 < 3) return "deep";
+  if (pass90 <= med * 0.8 || box90 >= 4) return "advanced";
+  return "mixed";
+}
+function roleTracker(p){
+  if (p.pos !== 3 || !p.form || !p.form.some(r => r[11] != null)) return "";
+  const games = p.form.map(r => ({r, role: matchRole(r)})).filter(x => x.role);
+  if (games.length < 3) return "";
+  const label = {deep: "Deep", mixed: "Mixed", advanced: "Advanced"};
+  const by = k => games.filter(g => g.role === k), stat = k => { const g = by(k); return {n: g.length, pts: g.reduce((s, x) => s + x.r[6], 0), goals: g.reduce((s, x) => s + x.r[8], 0), xg: g.reduce((s, x) => s + x.r[4], 0)}; };
+  const adv = stat("advanced"), deep = stat("deep"), mix = stat("mixed"), last5 = games.slice(-5), adv5 = last5.filter(g => g.role === "advanced").length;
+  const line = k => { const s_ = stat(k); return s_.n ? `<tr><td>${label[k]}</td><td class="n">${s_.n}</td><td class="n">${f1(s_.pts / s_.n)}</td><td class="n">${f2(s_.xg / s_.n)}</td><td class="n">${s_.goals}</td></tr>` : ""; };
+  const summary = adv5 >= 4 ? `He’s played advanced in ${adv5} of his last ${last5.length}, so the projection is built mostly on that role.`
+    : last5.filter(g => g.role === "deep").length >= 3 ? `He’s mostly played deep lately, which usually means fewer shots.` : `His role has been switching, so his attacking numbers are less settled.`;
+  return `<h3>Role tracker</h3><p class="lede">Where he played each game, judged from how much of the ball he had: holding players see lots of it and pass a lot, a No. 10 sees less of it, further forward. ${summary}</p>
+    <div class="rstrip">${games.map(g => `<span class="rr ${g.role}" title="GW${g.r[0]} v ${esc(g.r[1])}: ${g.r[11]} passes, ${g.r[12] || 0} box touches, ${g.r[6]} pts"><b>GW${g.r[0]}</b>${label[g.role]}${g.r[8] ? `<em>${"⚽".repeat(Math.min(3, g.r[8]))}</em>` : ""}</span>`).join("")}</div>
+    <table class="log rtab"><thead><tr><th>Role</th><th class="n">Games</th><th class="n">Pts a game</th><th class="n">xG a game</th><th class="n">Goals</th></tr></thead><tbody>${line("advanced")}${line("mixed")}${line("deep")}</tbody></table>
+    <p class="sub">Shown for information; the projection already leans on his recent games.</p>`;
+}
+
+/* ---------- v6.21: glanceable fixtures and form table ---------- */
+function viewSplit(){
+  const win = LONG.slice(0, state.fxWin), def = state.splitSort === "def";
+  const val = f => def ? Math.exp(-f.la) : f.lf, grade = f => def ? csClass(Math.exp(-f.la)) : xgClass(f.lf);
+  const fxs = t => win.map(g => FX[t.id][g] || []);
+  const total = t => fxs(t).reduce((s, l) => s + l.reduce((a, f) => a + val(f), 0), 0);
+  const runTag = t => {
+    const gs = fxs(t).map(l => l.length ? l.reduce((a, f) => a + grade(f), 0) / l.length : null).filter(x => x != null);
+    if (!gs.length) return {txt: "No games", cls: "flat"};
+    const avg = gs.reduce((a,b) => a + b, 0) / gs.length, half = Math.ceil(gs.length / 2);
+    const first = gs.slice(0, half).reduce((a,b) => a + b, 0) / half, second = gs.slice(half).reduce((a,b) => a + b, 0) / Math.max(1, gs.length - half);
+    if (gs.length >= 4 && first - second >= 1) return {txt: `Better from GW${win[half]}`, cls: "info"};
+    if (gs.length >= 4 && second - first >= 1) return {txt: `Harder from GW${win[half]}`, cls: "warn"};
+    if (avg <= 2.2) return {txt: "Great run", cls: "up"};
+    if (avg <= 2.8) return {txt: "Good run", cls: "up2"};
+    if (avg >= 3.8) return {txt: "Tough run", cls: "down"};
+    return {txt: "Mixed", cls: "flat"};
+  };
+  const teams = [...D.teams].sort((a,b) => total(b) - total(a)), max = Math.max(...teams.map(total), 0.01);
+  const chip = (lab, list, cls) => list.length ? `<span class="hchip ${cls}"><b>${lab}</b> ${list.map(t => `<button class="term" data-team="${t.id}">${esc(t.short)}</button>`).join(", ")}</span>` : "";
+  const best = teams.slice(0, 3), worst = teams.slice(-3).reverse(), turns = teams.filter(t => runTag(t).cls === "info").slice(0, 3);
+  const cell = l => !l.length ? `<td class="c d0">Blank</td>` : `<td class="c one">${l.map(f => `<div class="onec d${grade(f)}" title="${esc(T[f.opp].name)} ${f.home ? "at home" : "away"}: ${f1(f.lf)} goals expected, ${pct(Math.exp(-f.la))} clean sheet chance">
+      <span>${esc(T[f.opp].short)} <small>${f.home ? "H" : "A"}</small></span><b>${def ? pct(val(f)) : f1(val(f))}</b></div>`).join("")}</td>`;
+  return `<p class="lede">${def ? "How good each fixture is for a team’s <b>defenders and keeper</b>: the chance of a clean sheet." : "How good each fixture is for a team’s <b>attackers</b>: the goals the team is expected to score."} Green is a good week for that team’s players, red a bad one.</p>
+    ${seg("splitsort", [["att","For attackers"],["def","For defenders"]], def ? "def" : "att", "Whose fixtures")}${seg("fxwin", [[3,"Next 3"],[6,"Next 6"],[10,"Next 10"]], state.fxWin, "Window")}
+    <div class="hchips">${chip(`Best for ${def ? "defenders" : "attackers"}:`, best, "up")}${chip("Getting better:", turns, "info")}${chip("Avoid:", worst, "down")}</div>
+    <div class="scroller"><table class="tick splitt onet"><thead><tr><th scope="col">Team</th><th scope="col">Run</th>${win.map(g => `<th scope="col">GW${g}</th>`).join("")}</tr></thead>
+    <tbody>${teams.map(t => { const tg = runTag(t), tot = total(t);
+      return `<tr><td data-team="${t.id}" style="cursor:pointer">${dot(t.id)}${t.short}</td>
+        <td class="runc"><span class="rtag ${tg.cls}">${esc(tg.txt)}</span><div class="tbar1"><i style="width:${Math.round(100 * tot / max)}%"></i></div><small>${def ? f1(tot) + " clean sheets" : f1(tot) + " goals"}</small></td>
+        ${fxs(t).map(cell).join("")}</tr>`; }).join("")}</tbody></table></div>
+    <div class="legend">Better <i class="d1"></i><i class="d2"></i><i class="d3"></i><i class="d4"></i><i class="d5"></i> Worse. The bar under each tag is the total over the window: expected ${def ? "clean sheets" : "goals"}.</div>`;
+}
+function formStory(r, medPts){
+  const gap = r.pts - r.xpts;
+  if (gap >= 2.5) return {txt: "Lucky", cls: "warn", note: "results ahead of performances"};
+  if (gap <= -2.5) return {txt: "Unlucky", cls: "info", note: "performances ahead of results"};
+  if (r.pts >= medPts && r.xpts >= medPts * 0.8) return {txt: "Strong", cls: "up", note: "good results, backed by performances"};
+  if (r.pts < medPts * 0.7 && r.xpts < medPts * 0.8) return {txt: "Poor", cls: "down", note: "weak results and performances"};
+  return {txt: "Steady", cls: "flat", note: "about what they deserve"};
+}
+function viewFormTable(){
+  const f = state.ft, rows = rankRows(tableRows(f.win, f.venue), f.key), league = leaguePositions();
+  const vname = {all: "all games", home: "home games", away: "away games"}[f.venue];
+  const wname = f.win === "season" ? "this season" : `the last ${f.win} ${f.venue === "all" ? "games" : vname}`;
+  const sortedPts = [...rows].map(r => r.pts).sort((a,b) => a - b), medPts = sortedPts[Math.floor(sortedPts.length / 2)] || 1;
+  const max = Math.max(...rows.map(r => Math.max(r.pts, r.xpts)), 1);
+  rows.forEach(r => r.story = formStory(r, medPts));
+  const chip = (lab, list, cls) => list.length ? `<span class="hchip ${cls}"><b>${lab}</b> ${list.map(r => `<button class="term" data-team="${r.t.id}">${esc(r.t.short)}</button>`).join(", ")}</span>` : "";
+  const bestForm = rows.filter(r => r.story.txt === "Strong").slice(0, 3);
+  const rise = [...rows].filter(r => r.xpts - r.pts >= 2).sort((a,b) => (b.xpts - b.pts) - (a.xpts - a.pts)).slice(0, 3);
+  const fall = [...rows].filter(r => r.pts - r.xpts >= 2).sort((a,b) => (b.pts - b.xpts) - (a.pts - a.xpts)).slice(0, 3);
+  const barCol = {up: "#1D9E75", warn: "#E8B10C", info: "#378ADD", down: "#E24B4A", flat: "#888780"};
+  return `<p class="lede">A league table of ${wname} only. The bar is the points they actually won; the line is what their performances deserved (expected points, from the chances created and allowed). A bar past the line means they’ve been lucky; short of it, unlucky.</p>
+    ${seg("ftvenue", [["all","All games"],["home","Home"],["away","Away"]], f.venue, "Venue")}
+    ${seg("ftwin", [[5,"Last 5"],[8,"Last 8"],["season","Season"]], f.win, "Window")}
+    ${seg("ftkey", [["pts","Rank by points"],["xpts","Rank by performances"]], f.key, "Rank by")}
+    <div class="hchips">${chip("Best form:", bestForm, "up")}${chip("Due a rise:", rise, "info")}${chip("Due a fall:", fall, "warn")}</div>
+    <div class="ft3">${rows.map(r => { const mv = league[r.t.id] - r.rank, st = r.story;
+      return `<button class="ftrow" data-team="${r.t.id}"><span class="rk">${r.rank}</span>
+        <span class="tm"><b>${dot(r.t.id)}${esc(r.t.short)}</b><small>${r.w}-${r.d}-${r.l} <span class="fsq">${r.form.slice(-5).split("").map(c => `<i class="${c}">${c}</i>`).join("")}</span></small></span>
+        <span class="ptsbar" title="${r.pts} points from performances worth ${f1(r.xpts)}"><i style="width:${Math.round(100 * r.pts / max)}%;background:${barCol[st.cls]}"></i><em style="left:${(100 * r.xpts / max).toFixed(1)}%"></em><b>${r.pts}</b><small>deserved ${f1(r.xpts)}</small></span>
+        <span class="rtag ${st.cls}" title="${esc(st.note)}">${st.txt}</span></button>`; }).join("")}</div>
+    <p class="sub">Tags: <b>Strong</b> good results backed by performances. <b>Lucky</b> results ahead of performances, so expect a drop. <b>Unlucky</b> the reverse, so expect a rise. <b>Poor</b> weak on both. Tap a team for the full picture.</p>`;
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-alts],[data-paidsave]");
+  const el = e.target.closest("[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-alts],[data-paidsave]");
   if (!el){ if (e.target === $("#sheet")) closeSheet(); return; }
   const d = el.dataset;
   if (d.gwview){ state.gwView = d.gwview; render(); }
-  else if (d.capmode){ state.capMode = d.capmode; render(); }
+  else if (d.capmode){ const y = window.scrollY; state.capMode = d.capmode; render(); window.scrollTo(0, y); }
   else if (d.term){ openGlossary(d.term); }
   else if (d.setrule){ setRule(d.setrule, +d.pid, d.gw ? +d.gw : null); render(); openPlayer(+d.pid); toast("Rule saved. Solve again to see the new plan."); }
   else if (d.rmrule){ clearRule(+d.rmrule); saveRules(); render(); if ($("#sheet").open && $("#sheetTitle") && P[+d.rmrule] && $("#sheetTitle").textContent.includes(P[+d.rmrule].n)) openPlayer(+d.rmrule); }
@@ -3100,6 +3397,8 @@ document.addEventListener("click", e => {
           s0.sells.forEach(p => counts["Sell " + p.n] = (counts["Sell " + p.n] || 0) + 1); s0.buys.forEach(p => counts["Buy " + p.n] = (counts["Buy " + p.n] || 0) + 1); } catch(e) {}
       }
       state.stress = {n: N, counts}; render(); }, 40); }
+  else if (d.compass){ openCompass(); }
+  else if (d.backup === "export"){ exportSettings(); }
   else if (d.pbview){ state.pbView = d.pbview; const t = $("#sheetTitle"); const id = $("#sheetBody [data-cmp]") ? +$("#sheetBody [data-cmp]").dataset.cmp : null; if (id) { const sc = $(".sheet").scrollTop; openPlayer(id); $(".sheet").scrollTop = sc; } }
   else if (d.plverdict !== undefined){ state.pl.verdict = d.plverdict; state.pl.limit = 50; render(); openFilters(); }
   else if (d.filters){ openFilters(); }
@@ -3155,6 +3454,7 @@ document.addEventListener("change", e => {
   if (e.target.dataset && e.target.dataset.sellsel){ const id = +e.target.dataset.sellsel; if (e.target.value) setRule("sell", id, +e.target.value); else { clearRule(id); saveRules(); } render(); }
   if (e.target.dataset && e.target.dataset.buysel){ const id = +e.target.dataset.buysel; if (e.target.value) setRule("buy", id, +e.target.value); else { clearRule(id); saveRules(); } render(); }
   if (e.target.dataset && e.target.dataset.chipsel){ RULES.chips[e.target.dataset.chipsel] = e.target.value === "off" || e.target.value === "auto" ? e.target.value : +e.target.value; saveRules(); render(); }
+  if (e.target.id === "importfile" && e.target.files && e.target.files[0]){ importSettings(e.target.files[0]); }
   if (e.target.id === "teamsortsel"){ state.teamSort = e.target.value; render(); }
   if (e.target.id === "h2ha" || e.target.id === "h2hb"){ state.h2h[e.target.id.slice(-1)] = +e.target.value; render(); }
   if (e.target.id === "plmax"){ state.pl.max = +e.target.value; render(); }
