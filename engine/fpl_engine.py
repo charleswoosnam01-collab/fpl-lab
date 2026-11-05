@@ -80,6 +80,10 @@ BREAKOUT_TEST = dict(n=123, beat_again=0.38, avg_next=-0.07, threshold=0.4)   # 
 # each week further ahead (2025/26, expected starters, share playing 60+ minutes by week ahead; nailed players
 # declined at the same rate). Applied to weeks two onwards only; next week is unchanged.
 AVAIL_DECAY = {1: 0.03, 2: 0.04, 3: 0.045, 4: 0.035}
+# Switched off (owner's decision, November 2026): future weeks are projected as if the player is fit, and news
+# changes them when it arrives. The decay made later weeks look worse than nearer ones, which skewed chip timing
+# and when-to-transfer decisions; for comparing players over the same weeks it changed little.
+USE_AVAIL_DECAY = False
 AVAIL_FLOOR = 0.78
 FUTURE_TEST = dict(windows=540, seasons="2025/26 and 2026/27", mae_model=0.287, mae_last4=0.386, mae_season=0.300,
                    rise_hit=0.89, rise_n=93, rise_avg=0.46, fall_hit=0.87, fall_n=94, fall_avg=-0.51,
@@ -942,7 +946,7 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
                 ret = sum(v for k, v in pts.items() if k not in ("app", "cards", "gc"))
                 quality = min(1.6, max(0.5, ret / (neutral_ret * max(av[i], 1e-6))))
                 pts["bonus"] = rr["bonus90"] * rr["emins"] * av[i] / 90 * quality
-                if i >= 1:   # injuries, bans, rotation and dropped players add up the further ahead you look
+                if USE_AVAIL_DECAY and i >= 1:   # injuries, bans, rotation and dropped players add up the further ahead you look
                     fa = max(AVAIL_FLOOR, 1 - AVAIL_DECAY.get(pos, 0.04) * min(i, 5))
                     pts = {k_: v_ * fa for k_, v_ in pts.items()}
                 total += sum(pts.values())
@@ -2885,7 +2889,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   rules=dict(ft_max=5, hit=4, chip_half_end=19, squad_max_per_club=3),
                   horizon=HORIZON, long_gws=long_gws, special=special,
                   unscheduled=getattr(ds, "unscheduled", []),
-                  source_notes=SOURCE_NOTES, avail_decay=AVAIL_DECAY, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
+                  source_notes=SOURCE_NOTES, avail_decay=AVAIL_DECAY if USE_AVAIL_DECAY else None, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
