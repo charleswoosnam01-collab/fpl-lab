@@ -359,6 +359,70 @@ The Model tab lists which sources each run actually used (`meta.sources`).
 - ClubElo: the last good ratings are saved to site/history/elo_last.json and
   used for up to 14 days when the site is down (noted on the Model tab).
 
+## Changes in v6.18
+
+- USE_CLUBELO = False: an Elo built from every result since August 2025 made
+  this season's predictions slightly worse (goals log-likelihood -1.4863 v
+  -1.4822 on GW3-9, -1.3733 v -1.3705 on GW7-9), and ClubElo returned 502.
+- USE_UNDERSTAT = False: its data address returns an HTML page to GitHub's
+  servers; it only fed the second-opinion figures. The Understat sort is
+  hidden when there's no Understat data. Both switches can be turned back on.
+
+## Changes in v6.19
+
+- AVAIL_DECAY (GK 3%, DEF 4%, MID 4.5%, FWD 3.5% per week ahead, floor 78%):
+  applied to weeks two onwards only, from the fall in the share of expected
+  starters still playing 60+ minutes each week ahead (2025/26). Next week's
+  projection is unchanged.
+- Form rows now also carry touches, accurate passes and box touches; the app's
+  role tracker (`roleTracker()`, midfielders only) labels each game deep, mixed
+  or advanced from passes per 90 against the midfield median. Display only.
+- UI: sheets size to the visible screen (dvh) and always open at the top;
+  equal-height footer buttons; map labels placed to avoid overlaps with a halo;
+  compact form table; fixture cells show opponent plus two coloured numbers.
+
+## Changes in v6.20 (backtest fault fixed, blend re-tuned)
+
+- Fault: 2025/26 snapshots up to GW10 store FPL's blank "chance of playing"
+  as 0, so `availability()` treated available players as unavailable in
+  backtests (next-week projections near zero after GW6 and GW10). Fixed:
+  status "a" means fully available. Live runs were not affected.
+- site/history/backtest_2025-2026.json regenerated: model now beats FPL in
+  35 of 35 gameweeks (MAE 2.05 v 2.29; was 27 of 35).
+- Re-tuned from the clean backtest: FPL weight in Lab points 5% (was 40%),
+  captain kappa 0 (plain Lab points picked best: 7.3 a week v FPL's 5.1).
+- HAUL_TEST: for players with a 10+ score in their last three, FPL projected
+  5.77, our model 3.81, actual 3.55; best FPL weight 0. FPL's figure is left
+  out for those players (`hot_fpl_off`).
+
+## Changes in v6.21
+
+- `lab_tuning()` now picks the FPL weight by average error (the measure the
+  app reports): 0% on the clean backtest (0% beat 5% in every one of 2,000
+  resamples of the 35 gameweeks; 5% was marginally better only on squared error).
+- Captain bonus (kappa): the smallest setting within 0.5 points a week of the
+  best is chosen, because ~35 picks can't separate smaller gaps; currently 0.
+- Minutes lights also turn yellow when the model's rotation factor for the
+  coming gameweek is under 0.85.
+
+## Changes in v6.22
+
+- Captain section: swipeable cards (FPL Lab pick, The easy choice, Ceiling,
+  Gain rank, Top 500's pick; `CAP_MODES`, `captainSwipe()`), each with an
+  outcome bar and a plain sentence; tapping one drives the full captain card
+  and list below. "Captain compass" (`openCompass()`) opens in a sheet.
+  Top 500's pick uses top-500 captains once FPL reveals them (elite gw equals
+  the coming gameweek), otherwise top-500 ownership, otherwise overall.
+- Outcome tags (`outcomeTags()`): Ceiling (top-15% haul chance for his
+  position, 12%+ haul, blank under 30%), Boom or bust (top-30% haul chance,
+  blank 35%+), Safe floor (blank 22% or less).
+- Safety net (`sanity_checks()`): player count, fixtures, share of regular
+  players with a projection of 1+, impossible values, backtest error range.
+  On failure the engine writes site/history/last_failed.json, doesn't touch
+  data.json and exits 1, so the deploy is skipped and GitHub emails the owner.
+  Results show on the Model tab.
+- Settings export and import (all fpllab.* local storage) on the Model tab.
+
 ## Next tasks
 
 1. Run the engine with full internet access and fix any source that fails.
