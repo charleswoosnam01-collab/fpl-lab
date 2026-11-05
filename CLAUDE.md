@@ -478,6 +478,13 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   beyond the next (keepers 70% of that), capped at 30%. Shown on the Triple
   Captain card and on later-week transfers in both plan views.
 
+## Docs
+
+- README.md is the project's front page (what FPL Lab is, features, model,
+  accuracy, data, design) with screenshots in docs/screenshots/. The old
+  setup README is now SETUP.md. Refresh the accuracy figures and screenshots
+  when they change materially.
+
 ## Next tasks
 
 1. Run the engine with full internet access and fix any source that fails.
