@@ -927,7 +927,7 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
             for opp, home, lf, la in by_team[g].get(team, []):
                 cong = rot["fixture"].get((team, g, opp))
                 f_rot, note = rotation_factor(rot["player"].get(pid), cong, r)
-                rr = r if f_rot >= 0.999 else dict(r, p60=r["p60"] * f_rot,
+                rr = dict(r, p60=min(0.97, r["p60"] * f_rot), emins=min(87.0, r["emins"] * f_rot)) if f_rot > 1.001 else r if f_rot >= 0.999 else dict(r, p60=r["p60"] * f_rot,
                                                    p1=min(1.0, r["p1"] + r["p60"] * (1 - f_rot) * 0.5),
                                                    emins=r["emins"] * (f_rot + (1 - f_rot) * 0.3))
                 if note and i == 0:
@@ -955,7 +955,7 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
                 if simulate_gws and ((i < HORIZON and (i == 0 or ep_hint(r))) or (i >= HORIZON and tc_candidate(r))):
                     sim_total += simulate_fixture(rr, lf, la, det["dc_cond"], pts["bonus"], av[i], sf, rng)
                 if i == 0 and nxt is None and keep_detail:
-                    nxt = dict(det, opp=opp, home=home, drivers=drivers, rot=cong, rot_factor=f_rot, ref=ref,
+                    nxt = dict(det, opp=opp, home=home, drivers=drivers, rot=cong, rot_factor=f_rot, ref=ref, rested=bool(note and note.get("rested")),
                                breakdown={k: round(v, 2) for k, v in pts.items()})
             ep.append(round(total, 2))
             if i < HORIZON:
@@ -1063,15 +1063,30 @@ def rotation_model(ds, gws):
         for pid, g in cm.groupby("player"):
             last = g.iloc[-1]
             if pid in player:
+                player[pid]["cup_by_day"] = {k.date().isoformat(): int(m) for k, m in zip(g.kickoff, g.minutes)}
+            if pid in player:
                 player[pid].update(last_cup=dict(comp=last.comp, mins=int(last.minutes), ko=last.kickoff.isoformat()),
                                    cup_starts=int((g.minutes >= 60).sum()), cup_games=int((g.minutes > 0).sum()))
     return dict(fixture=fixture, player=player)
 
 
+RESTED_BOOST = 0.0   # tested on this season: no boost 2.080 MAE, a quarter 2.088, a half 2.099; so rested players just lose the flag
+
+
 def rotation_factor(ph, cong, r):
-    """Scale a player's chance of starting when his team has a cup or European game either side."""
+    """Scale a player's chance of starting when his team has a cup or European game either side.
+    If that game was before the league match and has already been played, what he actually did decides it:
+    rested (under 30 minutes) means fresh legs and a likelier start; a full game keeps the usual risk."""
     if not cong or not ph or r["p60"] < 0.3:
         return 1.0, None
+    if cong.get("before"):
+        ko = pd.Timestamp(cong["ko"])
+        if ko < pd.Timestamp.now(tz="UTC") - pd.Timedelta(hours=3):
+            mins = (ph.get("cup_by_day") or {}).get(ko.date().isoformat(), 0)
+            if mins < 30:
+                target = min(0.97, r["p60"] + (1 - r["p60"]) * RESTED_BOOST)
+                f = target / max(r["p60"], 0.01)
+                return f, dict(cong, rested=True, mins=mins, f=round(f, 2), n_c=ph["n_c"], s_c=ph["s_c"], n_n=ph["n_n"], s_n=ph["s_n"])
     rate_n = ph["s_n"] / ph["n_n"] if ph["n_n"] else None
     if ph["n_c"] >= 2 and rate_n:
         rate_c = ph["s_c"] / ph["n_c"]
@@ -1918,6 +1933,9 @@ def import_team(team_id, next_gw):
         print("Could not import team:", e)
         return None
     my = team_from_api(team_id, next_gw, entry, history, lambda gw: get(f"entry/{team_id}/event/{gw}/picks/"))
+    if my:
+        my["first_name"] = entry.get("player_first_name")
+        my["overall_rank"] = entry.get("summary_overall_rank")
     try:
         transfers = get(f"entry/{team_id}/transfers/")
         picks = {}
@@ -2589,6 +2607,43 @@ def league_from_api(standings, my_id, cur_gw, limit, picks_for, history_for):
                 entries=entries)
 
 
+def import_all_leagues(my_id, cur_gw, first_id=None, max_leagues=8, around=10):
+    """Every private or public classic league the manager is in (FPL lists them on his entry), with the managers
+    closest to him in each: their squads, captains and chips. History requests are shared across leagues."""
+    try:
+        s = fpl_session()
+        get = lambda path: s.get(f"{API}/{path}", timeout=20).json()
+        entry = get(f"entry/{my_id}/")
+    except Exception as e:  # noqa: BLE001
+        print("Could not list leagues:", e)
+        return []
+    leagues = [l for l in entry.get("leagues", {}).get("classic", []) if l.get("league_type") != "s"]
+    if first_id:
+        leagues.sort(key=lambda l: (str(l.get("id")) != str(first_id), l.get("entry_rank") or 1e9))
+    picks_cache, hist_cache, out = {}, {}, []
+    def picks_for(e):
+        if e not in picks_cache:
+            picks_cache[e] = get(f"entry/{e}/event/{cur_gw}/picks/")
+        return picks_cache[e]
+    def hist_for(e):
+        if e not in hist_cache:
+            hist_cache[e] = get(f"entry/{e}/history/")
+        return hist_cache[e]
+    for l in leagues[:max_leagues]:
+        try:
+            standings = get(f"leagues-classic/{l['id']}/standings/")
+        except Exception:  # noqa: BLE001
+            continue
+        rows = standings.get("standings", {}).get("results", [])
+        me = next((i for i, r in enumerate(rows) if r["entry"] == my_id), None)
+        keep = set(range(len(rows))) if len(rows) <= 25 else set(range(3)) | set(range(max(0, (me or 0) - around), min(len(rows), (me or 0) + around + 1)))
+        sub = dict(standings, standings=dict(results=[rows[i] for i in sorted(keep)]))
+        lg = league_from_api(sub, my_id, cur_gw, 60, picks_for, hist_for)
+        lg.update(size=standings.get("standings", {}).get("has_next") and "50+" or len(rows), my_rank=l.get("entry_rank"))
+        out.append(lg)
+    return out
+
+
 # ================================================================== main
 def next_gameweeks(fixtures, now):
     """The first gameweek whose deadline (90 minutes before its first kick-off) is still ahead."""
@@ -2753,7 +2808,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             next=dict(xg=round(nx["xg"], 3), xa=round(nx["xa"], 3), cs=round(nx["cs"], 3), dc_p=round(nx["dc_p"], 3),
                       dc_proj=round(nx["dc_proj"], 1), ret=round(nx["ret"], 3), style=round(nx["style"], 3),
                       opp=int(nx["opp"]), home=bool(nx["home"]), lf=round(nx["lf"], 2), la=round(nx["la"], 2),
-                      rot=round(nx["rot_factor"], 2), breakdown=nx["breakdown"]) if nx else None,
+                      rot=round(nx["rot_factor"], 2), rested=bool(nx.get("rested")), breakdown=nx["breakdown"]) if nx else None,
             sim=sim0, haul=haul_by_gw,
             ep_long=ep_long if r["emins"] >= 20 else None,
             haul_long=haul_all if tc_candidate(r) else None,
@@ -2844,8 +2899,12 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     if data["my"] and data["my"].get("raw"):
         data["my"]["sell"] = selling_prices(data["my"]["raw"], ds, data["my"]["ids"])
         data["my"]["audit"] = season_audit(data["my"].pop("raw"), ds)
-    if league_id:
-        cur = data["my"]["gw"] if data["my"] else gws[0] - 1
+    cur = data["my"]["gw"] if data["my"] else gws[0] - 1
+    if team_id and online:
+        data["leagues"] = import_all_leagues(int(team_id), cur, first_id=league_id)
+        if data["leagues"]:
+            data["rivals"] = data["leagues"][0]
+    if league_id and not data.get("rivals"):
         data["rivals"] = import_league(league_id, int(team_id) if team_id else None, cur)
     return data
 
