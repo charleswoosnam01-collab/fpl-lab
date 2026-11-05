@@ -463,6 +463,21 @@ The Model tab lists which sources each run actually used (`meta.sources`).
 - Form table tags: "▲ Over" / "▼ Under" / Strong / Steady / Poor with a short
   line underneath (expect a drop, expect a rise, and deserved...).
 
+## Changes in v6.25
+
+- USE_AVAIL_DECAY = False (owner's decision): future weeks are projected as
+  if the player is fit, and news changes them when it arrives. The decay
+  skewed comparisons between weeks (chip timing, when to transfer). The
+  backtest showed later weeks run high partly because of injuries; expect
+  that in the accuracy log.
+- Triple Captain card: notes that weeks are compared as if fit, and when the
+  top two are within 0.5 points, says the sooner one carries less risk.
+- Risk of waiting (`WAIT_RISK`, `waitLine()`): information only, never applied
+  to projections. 2025/26 share of nailed players (4+ starts in last 5) no
+  longer playing 60+ minutes k weeks later, pooled: about 3.2 points per week
+  beyond the next (keepers 70% of that), capped at 30%. Shown on the Triple
+  Captain card and on later-week transfers in both plan views.
+
 ## Next tasks
 
 1. Run the engine with full internet access and fix any source that fails.
