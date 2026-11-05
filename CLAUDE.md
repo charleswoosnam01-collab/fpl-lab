@@ -423,6 +423,46 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   Results show on the Model tab.
 - Settings export and import (all fpllab.* local storage) on the Model tab.
 
+## Changes in v6.23
+
+- Home (was Week): greeting with first name (`D.my.first_name`), opens on
+  Home unless the page is refreshed; swipe row of cards (`homeCards()`) in
+  priority order: deadline check, price falls, watch out, your captain (from
+  your squad, naming the best overall pick if you don't own him), chip tip in
+  its week, best move, league edge, rising prices, best fixtures,
+  differential, chip tip, heating up.
+- Captains: "From my squad / Anyone" switch (`state.capSrc`); a note when the
+  overall pick isn't in the squad.
+- Live card becomes a "GW review" once live.json has done=true, until the
+  next deadline (live data is accepted at any age; the card decides).
+- Rotation: a midweek game already played before the league match uses what
+  the player actually did. Rested (under 30 minutes) removes the rotation
+  penalty and flag. Boosting rested players was tested on this season's
+  backtest and made it worse (no boost 2.080 MAE, a quarter 2.088, a half
+  2.099), so RESTED_BOOST = 0.
+- Leagues: `import_all_leagues()` reads every non-system classic league from
+  the manager's entry (up to 8), keeping everyone in leagues of 25 or fewer,
+  otherwise the top 3 plus 10 either side of the manager; requests are cached
+  across leagues. `D.leagues`, with `D.rivals` = the chosen one (dropdown in
+  Rivals, remembered in local storage). Rivals shows rank, gap to the
+  manager above, the leader's gap and weak spot, and "To get ahead" picks.
+- Home no longer has Differentials, Luck and In form; the Players tab has
+  quick views (Differentials, In form, Due a return) and player sheets show
+  status chips.
+- Bookies view: match cards (win/draw/loss bar, odds and model goals bars, a
+  plain sentence on what the disagreement means). Luck table: diverging bars
+  with Lucky/Unlucky tags. Form table uses Over-/Under-performing.
+
+## Changes in v6.24
+
+- Player rows: no left bar for "Due a return" (the tag says it); position
+  labels (`posLab()`, GK amber, DEF green, MID blue, FWD red) in rows and
+  sheet headers; small pills no longer wrap.
+- Club accents (`clubCol()`): a team-colour strip on captain cards, the
+  captain card, player sheet headers, and a two-team strip on bookies cards.
+- Form table tags: "▲ Over" / "▼ Under" / Strong / Steady / Poor with a short
+  line underneath (expect a drop, expect a rise, and deserved...).
+
 ## Next tasks
 
 1. Run the engine with full internet access and fix any source that fails.
