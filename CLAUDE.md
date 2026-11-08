@@ -478,6 +478,18 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   beyond the next (keepers 70% of that), capped at 30%. Shown on the Triple
   Captain card and on later-week transfers in both plan views.
 
+## Changes in v6.26 (data file failed to load, 7 Nov)
+
+- Cause: mid-gameweek, a just-finished match had no xG yet, so a team's
+  "surprise" figure was NaN; Python wrote NaN into data.json, which browsers
+  reject as invalid JSON, so the whole app showed "The data file didn't load".
+- Engine: the surprise figure skips matches without xG; `json_safe()` turns any
+  NaN or infinity into null, and data.json is written with allow_nan=False and
+  re-read as strict JSON before it's saved.
+- App: `loadData()` tolerates stray NaN values, keeps a copy of the last good
+  data in the Cache API and falls back to it (with a note) if a load fails,
+  and shows the real reason instead of a generic message.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
