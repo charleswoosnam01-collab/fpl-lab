@@ -1810,7 +1810,9 @@ def trend_signals(ds, tm, n_calls=3):
             if r.event - 1 < 1:
                 continue
             lh, la = fixture_lambdas(model_at(r.event - 1), r.team_h, r.team_a)
-            diffs.append(xg_for(r, t) - (lh if r.team_h == t else la))
+            d_ = xg_for(r, t) - (lh if r.team_h == t else la)
+            if d_ == d_:          # skip matches whose xG isn't published yet (NaN)
+                diffs.append(d_)
         if diffs:
             surprise[int(t)] = round(float(np.mean(diffs)), 3)
     calls = []
@@ -2994,6 +2996,19 @@ def deadline_reminder(data, folder, topic, url=None, now=None):
     return body
 
 
+def json_safe(o):
+    """Replace NaN and infinity with null: browsers reject them in JSON, which stops the whole app loading."""
+    if isinstance(o, float):
+        return o if math.isfinite(o) else None
+    if isinstance(o, dict):
+        return {k: json_safe(v) for k, v in o.items()}
+    if isinstance(o, (list, tuple)):
+        return [json_safe(v) for v in o]
+    if isinstance(o, np.generic):
+        return json_safe(o.item())
+    return o
+
+
 def sanity_checks(data):
     """Checks a run must pass before it replaces the live data. Returns (passed, failed) lists of plain-English lines."""
     ok, bad = [], []
@@ -3058,7 +3073,10 @@ def main():
         for f in failed:
             print("  -", f)
         sys.exit(1)
-    out.write_text(json.dumps(data, separators=(",", ":"), default=str))
+    data = json_safe(data)
+    text = json.dumps(data, separators=(",", ":"), default=str, allow_nan=False)
+    json.loads(text)                                  # the file must be valid, strict JSON
+    out.write_text(text)
     acc = data["accuracy"]["summary"] if data["accuracy"] else {}
     print(f"Wrote {out}: {len(data['players'])} players, GW{data['meta']['gws'][0]}-{data['meta']['gws'][-1]}, "
           f"data to GW{data['meta']['last_gw']}. Backtest MAE {acc.get('mae')} vs FPL {acc.get('mae_fpl')}. "
