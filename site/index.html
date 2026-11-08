@@ -3688,8 +3688,35 @@ function start(data){
   render();
 }
 if (window.FPL_DATA) start(window.FPL_DATA);
-else fetch("data.json", {cache:"no-store"}).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(start)
-  .catch(() => { $("#view").innerHTML = `<div class="error"><p class="name">The data file didn’t load.</p><p class="lede">Check that data.json sits next to index.html, or run the update workflow to create it.</p></div>`; });
+else loadData();
+// Load the data; tolerate stray NaN values, keep a copy of the last good file, and fall back to it if anything goes wrong.
+function parseData(text){
+  try { return JSON.parse(text); }
+  catch(e){ return JSON.parse(text.replace(/:\s*-?(NaN|Infinity)\b/g, ":null")); }
+}
+function loadData(){
+  const showError = why => { $("#view").innerHTML = `<div class="error"><p class="name">The data file didn’t load.</p><p class="lede">${esc(why)}. Run the “Update FPL data” workflow on GitHub to rebuild it.</p></div>`; };
+  const fallback = why => {
+    if (!("caches" in window)) return showError(why);
+    caches.open("fpllab-data").then(c => c.match("last-good-data.json")).then(r => r ? r.text() : null).then(t => {
+      if (!t) return showError(why);
+      const d = parseData(t); start(d);
+      const n = document.createElement("p"); n.className = "pending";
+      n.textContent = `Showing the last data that loaded (${dayTime(d.meta.generated)}) because the latest update didn’t load: ${why}.`;
+      const host = $("#pendingNote"); if (host) host.prepend(n);
+    }).catch(() => showError(why));
+  };
+  fetch("data.json", {cache: "no-store"})
+    .then(r => { if (!r.ok) throw new Error(`the server said ${r.status}`); return r.text(); })
+    .then(text => {
+      let d;
+      try { d = parseData(text); } catch(e){ throw new Error("the file is damaged"); }
+      if (!d || !d.players || !d.players.length) throw new Error("the file has no players in it");
+      try { if ("caches" in window) caches.open("fpllab-data").then(c => c.put("last-good-data.json", new Response(text, {headers: {"Content-Type": "application/json"}}))); } catch(e) {}
+      try { start(d); } catch(e){ console.error(e); $("#view").innerHTML = `<div class="error"><p class="name">Something in the app broke while drawing this page.</p><p class="lede">${esc(e.message || String(e))}. Try another tab, or send this message to whoever looks after FPL Lab.</p></div>`; }
+    })
+    .catch(e => fallback(e.message || String(e)));
+}
 })();
 </script>
 </body>
