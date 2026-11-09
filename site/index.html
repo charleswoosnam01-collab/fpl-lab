@@ -749,7 +749,11 @@ function prep(data){
   D.players.forEach(p => { p.ep_raw = [...p.ep]; });
   applyAllMinutes();
   applyWhatIfs();
-  if (D.my && !state.squad.ids.length) applyMyTeam(false);
+  if (D.my && (!state.squad.ids.length || (state.squad.syncedGw || 0) < D.my.gw)){
+    const changed = state.squad.ids.length && D.my.ids.some(id => !state.squad.ids.includes(id));
+    applyMyTeam(false); state.squad.syncedGw = D.my.gw; saveSquad();
+    if (changed) setTimeout(() => toast(`Updated to your GW${D.my.gw} team from FPL`), 600);
+  }
 }
 function applyMyTeam(announce = true){
   const m = D.my; if (!m) return;
@@ -3058,7 +3062,7 @@ function saveForecastSnapshot(){
   if (/passed/.test(deadlineText())) return;
   let st = {}; try { st = JSON.parse(localStorage.getItem(REVIEW_STORE) || "{}"); } catch(e) {}
   const squad = state.squad.ids.map(id => P[id]).filter(Boolean), gw = GWS[0];
-  const ids = new Set(state.squad.ids); D.players.forEach(p => { const v = verdict(p); if (v && (v.word === "Buy" || (v.word === "Don’t buy" && p.ep[0] >= 3))) ids.add(p.id); });
+  const ids = new Set(state.squad.ids); D.players.forEach(p => { const v = verdict(p); if (p.ep[0] >= 0.5 || (v && v.word === "Buy")) ids.add(p.id); });
   const ep = {}, v = {}; ids.forEach(id => { if (P[id]){ ep[id] = +(baseEp(P[id])[0] || 0).toFixed(2); v[id] = verdict(P[id]) ? verdict(P[id]).word : ""; } });
   const xi = squad.length === 15 ? bestXI(squad, 0) : null;
   st.snaps = st.snaps || {}; st.snaps[gw] = {gw, ep, v, xi: xi ? xi.xi.map(p => p.id) : [], cap: xi && xi.cap ? xi.cap.id : null, at: Date.now()};
@@ -3075,10 +3079,19 @@ function reviewCard(){
   const grp = w => Object.keys(s.v).filter(id => s.v[id] === w && actualPts(+id, s.gw) != null).map(id => actualPts(+id, s.gw));
   const avg = a => a.length ? a.reduce((x, y) => x + y, 0) / a.length : null;
   const buys = grp("Buy"), nos = grp("Don’t buy");
-  const capTxt = s.cap && P[s.cap] ? `Captain ${esc(P[s.cap].n)}: ${actualPts(s.cap, s.gw) ?? "–"} points (projected ${f1(s.ep[s.cap] || 0)}).` : "";
-  return `<section class="review"><div class="twhead"><b>How did we do in GW${s.gw}?</b></div>
-    ${s.xi.length ? `<div class="rvbars"><div class="fbrow"><span>Projected</span><i style="width:${Math.min(100, xiProj)}%;background:var(--chalk)"></i><b>${f1(xiProj)}</b></div><div class="fbrow"><span>Actual</span><i style="width:${Math.min(100, xiAct)}%;background:${xiAct >= xiProj ? "var(--up)" : "var(--down)"}"></i><b>${xiAct}</b></div></div>
-      <p class="sub">Your best XI with captain, as the app had it before the deadline. ${capTxt}</p>` : ""}
+  const bars = (proj, act) => `<div class="rvbars"><div class="fbrow"><span>Projected</span><i style="width:${Math.min(100, proj)}%;background:var(--chalk)"></i><b>${f1(proj)}</b></div><div class="fbrow"><span>Actual</span><i style="width:${Math.min(100, act)}%;background:${act >= proj ? "var(--up)" : "var(--down)"}"></i><b>${act}</b></div></div>`;
+  // the team you actually played, from the live scores for that gameweek
+  const L = state.live && state.live.gw === s.gw && state.live.my ? state.live.my : null;
+  let mine = "";
+  if (L){
+    const played = (L.players || []).filter(x => x.mult > 0), missing = played.filter(x => s.ep[x.id] == null).length;
+    const proj = played.reduce((a, x) => a + (s.ep[x.id] || 0) * x.mult, 0);
+    const capN = L.captain && P[L.captain] ? P[L.captain].n : "";
+    mine = `${missing ? "" : bars(proj, L.total)}<p class="sub">Your team as you played it: <b>${L.total}</b> points${missing ? "" : ` against <b>${f1(proj)}</b> projected`}.${capN ? ` Captain ${esc(capN)}: ${L.captain_pts * (L.mult || 2)} (projected ${f1((s.ep[L.captain] || 0) * (L.mult || 2))}).` : ""}${missing ? " Some of your players weren’t in the forecast saved on this phone, so there’s no projection to compare this time." : ""}</p>`;
+  }
+  const sameXI = L && s.xi.length && s.xi.every(id => (L.players || []).some(x => x.id === id && x.mult > 0));
+  const appLine = s.xi.length && !sameXI ? (L ? `<p class="sub">The best XI the app suggested from the squad on this phone would have scored <b>${xiAct}</b> (projected ${f1(xiProj)}), with ${s.cap && P[s.cap] ? esc(P[s.cap].n) : "its pick"} as captain.</p>` : `${bars(xiProj, xiAct)}<p class="sub">The best XI the app suggested before the deadline, from the squad on this phone${s.cap && P[s.cap] ? `, with ${esc(P[s.cap].n)} as captain (${actualPts(s.cap, s.gw) ?? "–"} points, projected ${f1(s.ep[s.cap] || 0)})` : ""}. Your actual team’s score appears here once the live scores for GW${s.gw} have loaded.</p>`) : "";
+  return `<section class="review"><div class="twhead"><b>How did we do in GW${s.gw}?</b></div>${mine}${appLine}
     ${buys.length && nos.length ? `<p class="sub"><b>Verdicts:</b> players marked Buy averaged <b>${f1(avg(buys))}</b> points; Don’t buy averaged <b>${f1(avg(nos))}</b>. ${avg(buys) > avg(nos) ? "The verdicts pointed the right way." : "A week where the verdicts didn’t pay; one week is noisy, so watch the trend."}</p>` : ""}</section>`;
 }
 // live gameweek: site/live.json written by the live workflow
@@ -3445,14 +3458,14 @@ function liveCard(){
   const L = state.live; if (!L || !L.my) return "";
   // a live card only while it's fresh; a review stays until the next deadline
   if (L.gw < GWS[0] - 1) return "";
-  if (!L.done && Date.now() - new Date(L.updated).getTime() > 36 * 36e5) return "";
+  if (!L.done && D.meta.last_gw < L.gw && Date.now() - new Date(L.updated).getTime() > 36 * 36e5) return "";
   const m = L.my, cap = m.captain && P[m.captain] ? P[m.captain].n : "";
   const played = (m.players || []).filter(x => x.mult > 0).sort((a,b) => b.pts - a.pts);
-  if (L.done){
+  if (L.done || D.meta.last_gw >= L.gw){
     const all = (m.players || []).filter(x => x.mult > 0 || x.played);
     const bestCap = [...all].sort((a,b) => b.pts - a.pts)[0], best = played[0], worst = [...played].reverse().find(x => x.played) || played[played.length - 1];
     const capLine = cap ? (bestCap && bestCap.id !== m.captain ? `Captain ${esc(cap)} scored ${m.captain_pts}; ${esc(P[bestCap.id] ? P[bestCap.id].n : "")} (${bestCap.pts}) would have been your best pick.` : `Captain ${esc(cap)} scored ${m.captain_pts}, your best choice.`) : "";
-    return `<section class="livecard done"><div class="twhead"><b>GW${L.gw} review</b><span>Final</span></div>
+    return `<section class="livecard done"><div class="twhead"><b>GW${L.gw} review</b><span>${L.final === false ? "Bonus being confirmed" : "Final"}</span></div>
       <div class="livebig">${m.total}<small>points${m.hits ? `, −${m.hits} hits` : ""}</small></div>
       <div class="sub">${capLine}${best ? ` Best: ${esc(P[best.id] ? P[best.id].n : "")} ${best.pts * best.mult}.` : ""}${worst ? ` Worst: ${esc(P[worst.id] ? P[worst.id].n : "")} ${worst.pts * worst.mult}.` : ""}</div>
       <div class="liverows">${played.map(x => `<span class="lp">${esc(P[x.id] ? P[x.id].n : "")} <b>${x.pts * x.mult}</b></span>`).join("")}</div></section>`;
