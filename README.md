@@ -52,6 +52,8 @@ It runs entirely on free services: GitHub runs the engine on a schedule and GitH
 - **Live gameweek scores** every 15 minutes during matches, with provisional bonus and auto-subs, which turn into a **gameweek review** once the last match finishes: your points, how your captain did against the best pick you had, and your best and worst players.
 - **"How did we do?"**: last week's forecasts scored against what actually happened.
 - **"What changed"**: verdict changes, projection swings, injury news and price changes since your last visit.
+- **A watchlist and search**: star any player to follow him from Home, and find any player or team from the magnifier at the top.
+- **A status strip** under the header that changes through the week: live scores, the final score, or the deadline countdown.
 
 <br clear="right">
 
@@ -115,7 +117,7 @@ Swipeable cards answer one question: *what do you want from your captain this we
 
 <br clear="right">
 
-### 📈 Trends
+### 📈 Trends (inside the Teams tab)
 
 - Each team's **next-four forecast against its last four**, as a dumbbell chart.
 - **Heating up** and **cooling down**, with reasons.
@@ -153,7 +155,7 @@ Swipeable cards answer one question: *what do you want from your captain this we
 
 <br clear="right">
 
-### 📊 Model
+### 📊 Model (the gear icon at the top)
 
 <img src="docs/screenshots/10-model.png" width="220" align="right" alt="Model accuracy">
 

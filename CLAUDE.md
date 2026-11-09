@@ -504,6 +504,30 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   the deadline (now saved for every player projected 0.5+), and shows the
   app's suggested XI separately when it differs.
 
+## Changes in v6.28
+
+- Rows (`playerRow`, `rowTag`): position, verdict and one tag chosen by the
+  view; the rest moved to the player page.
+- Player page tabs (`state.ptab`): Overview, Stats, Fixtures, Role.
+- Navigation: five tabs. `#future` redirects to Teams > Trends; the Model page
+  is behind the gear icon (`#model`). `segMore()` keeps three views up front
+  on Home, Fixtures and Teams and puts the rest under "More".
+- Status strip (`statusStrip`), data freshness warning after 16 hours
+  (`freshness`), search (`openSearch`), watchlist (`fpllab.watch.v1`,
+  Home card and Players quick view), what's new banner (`APP_VERSION`,
+  `WHATS_NEW`: update both with each release), first-visit guide
+  (`openGuide`), app colour (`applyAccent`, CSS --accent), verdict track
+  record on the Model page (`fpllab.track.v1`, device-only).
+- Wide screens (1000px+): sheets open non-modally as a right-hand panel
+  (`dialog.side`, `body.sheet-open`).
+- Map panels use classes (.qz-*, .qlab[data-q]) with dark-mode colours.
+- Goalscorer prices (`fetch_scorer_odds`): The Odds API event-odds endpoint,
+  market player_goal_scorer_anytime, regions=us (soccer props are US books
+  only), fetched once a day within 4 days of the gameweek, cached in
+  site/history/scorer_odds.json, exported as player `gs` = {p, n}. Display
+  only; NOT used in projections. Parsing and matching are tested on simulated
+  replies only: check the first live run's "Goalscorer prices" log line.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
