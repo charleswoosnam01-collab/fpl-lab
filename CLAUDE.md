@@ -490,6 +490,20 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   data in the Cache API and falls back to it (with a note) if a load fails,
   and shows the real reason instead of a generic message.
 
+## Changes in v6.27
+
+- live.py: done = every fixture finished or finished_provisional (all matches
+  over); final = every fixture finished (bonus confirmed). The app also treats
+  a gameweek as over once data.json covers it (meta.last_gw >= live gw), so
+  the card switches from "Live" to "GWn review".
+- Squad sync: when the imported FPL team (D.my) is for a later gameweek than
+  the squad saved on the phone (state.squad.syncedGw), the app loads the FPL
+  team automatically. Planner drafts are separate and unaffected.
+- Review card: scores the team actually played (from live.json for that
+  gameweek: total, captain, multipliers) against the projections saved before
+  the deadline (now saved for every player projected 0.5+), and shows the
+  app's suggested XI separately when it differs.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
