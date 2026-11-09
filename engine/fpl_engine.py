@@ -33,6 +33,7 @@ from __future__ import annotations
 
 import argparse
 import datetime as dt
+import os
 import hashlib
 import json
 import sys
@@ -364,7 +365,8 @@ def attribute_shots(sh, hist):
 #   only ever fed the "second opinion" figures on player pages, never the projections.
 USE_CLUBELO = False
 USE_UNDERSTAT = False
-SOURCE_NOTES = {}           # why a data source wasn't used this run, shown on the Model tab
+SOURCE_NOTES = {}
+SOURCE_STATE = {}           # extra sources that only report when they were actually tried           # why a data source wasn't used this run, shown on the Model tab
 
 
 def note_source(name, why):
@@ -2506,6 +2508,124 @@ def odds_from_odds_api(events, look):
     return out
 
 
+SCORER_MARKET = "player_goal_scorer_anytime"      # The Odds API: soccer player props, US bookmakers, one event per call
+SCORER_DAYS = 4                                   # only fetched this close to the gameweek, to stay inside the free quota
+
+
+def match_scorer_names(prices, cands):
+    """Match bookmaker player names to FPL players in the two teams. prices: {name: [implied chances]}.
+    cands: [(pid, full_name, web_name)]. Returns {pid: dict(p=mean implied chance, n=bookmakers)}."""
+    full = {_ascii(fn): pid for pid, fn, wn in cands if fn}
+    web = {}
+    last = {}
+    for pid, fn, wn in cands:
+        web.setdefault(_ascii(wn), []).append(pid)
+        if fn:
+            last.setdefault(_ascii(fn).split(" ")[-1], []).append(pid)
+    out = {}
+    for name, ps in prices.items():
+        key = _ascii(name).strip()
+        pid = full.get(key)
+        if pid is None and len(web.get(key, [])) == 1:
+            pid = web[key][0]
+        if pid is None:
+            tail = key.split(" ")[-1] if key else ""
+            if len(last.get(tail, [])) == 1:
+                pid = last[tail][0]
+            elif len(web.get(tail, [])) == 1:
+                pid = web[tail][0]
+        if pid is not None and ps:
+            out[int(pid)] = dict(p=round(float(min(0.95, max(0.01, np.mean(ps)))), 3), n=len(ps))
+    return out
+
+
+def scorer_prices_from_event(ev):
+    """{player name: [implied chance per bookmaker]} from one event-odds reply."""
+    prices = {}
+    for bk in ev.get("bookmakers", []):
+        for m in bk.get("markets", []):
+            if m.get("key") != SCORER_MARKET:
+                continue
+            for o in m.get("outcomes", []):
+                if str(o.get("name", "")).lower() == "no" or not o.get("price") or o["price"] <= 1:
+                    continue
+                name = o.get("description") or o.get("name")
+                if name and str(name).lower() != "yes":
+                    prices.setdefault(str(name), []).append(1.0 / float(o["price"]))
+    return prices
+
+
+def fetch_scorer_odds(ds, gw, history):
+    """Bookmakers' anytime-goalscorer prices for the coming gameweek, for display beside the model's own chance.
+    They are NOT used in the projections. Fetched at most once a day, and only close to the gameweek."""
+    key = os.environ.get("ODDS_API_KEY")
+    label = "Goalscorer prices (comparison only)"
+    if not key:
+        return {}
+    cache = Path(history) / "scorer_odds.json" if history else None
+    saved = None
+    if cache and cache.exists():
+        try:
+            saved = json.loads(cache.read_text())
+        except Exception:  # noqa: BLE001
+            saved = None
+    today = dt.date.today().isoformat()
+    same_gw = bool(saved and saved.get("gw") == gw)
+    from_saved = lambda: {int(k): v for k, v in saved["odds"].items()} if same_gw else {}
+    if same_gw and saved.get("day") == today:
+        return from_saved()
+    fx = ds.fixtures[(ds.fixtures["event"] == gw) & ~ds.fixtures["finished"]]
+    if not len(fx):
+        return from_saved()
+    first = fx["kickoff"].min()
+    days = (first - pd.Timestamp.now(tz="UTC")).total_seconds() / 86400 if pd.notna(first) else 99
+    if days > SCORER_DAYS:
+        return from_saved()
+    look = team_lookup(ds.teams)
+    pairs = set(zip(fx.team_h.astype(int), fx.team_a.astype(int)))
+    pl = ds.players
+    names = {int(r.id): (f"{_text(getattr(r, 'first_name', ''))} {_text(getattr(r, 'second_name', ''))}".strip(), _text(r.web_name), int(r.team)) for r in pl.itertuples()}
+    out, seen, with_prices = {}, 0, 0
+    try:
+        import requests
+        base = "https://api.the-odds-api.com/v4/sports/soccer_epl/events"
+        r = requests.get(base, params=dict(apiKey=key), timeout=20)
+        if not r.ok:
+            note_source(label, f"The Odds API refused the events list (HTTP {r.status_code}: {r.text[:80]})")
+            SOURCE_STATE[label] = bool(from_saved())
+            return from_saved()
+        for ev in r.json():
+            h, a = look.get(_team_key(ev.get("home_team"))), look.get(_team_key(ev.get("away_team")))
+            if not h or not a or (int(h), int(a)) not in pairs:
+                continue
+            seen += 1
+            e = requests.get(f"{base}/{ev['id']}/odds", params=dict(apiKey=key, regions="us", markets=SCORER_MARKET, oddsFormat="decimal"), timeout=20)
+            if not e.ok:
+                continue
+            prices = scorer_prices_from_event(e.json())
+            if prices:
+                with_prices += 1
+                cands = [(pid, fn, wn) for pid, (fn, wn, t) in names.items() if t in (int(h), int(a))]
+                out.update(match_scorer_names(prices, cands))
+    except Exception as e:  # noqa: BLE001
+        note_source(label, f"{type(e).__name__}: {e}")
+        SOURCE_STATE[label] = bool(from_saved())
+        return from_saved()
+    if not out:
+        note_source(label, f"no goalscorer prices came back ({seen} matches asked, {with_prices} with prices); The Odds API only has these from US bookmakers, and not for every match")
+        SOURCE_STATE[label] = bool(from_saved())
+        return from_saved()
+    SOURCE_STATE[label] = True
+    if cache:
+        try:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(dict(day=today, gw=int(gw), odds=out)))
+        except Exception:  # noqa: BLE001
+            pass
+    print(f"Goalscorer prices: {len(out)} players from {with_prices} of {seen} matches")
+    return out
+
+
 def fetch_odds(teams, upcoming_pairs):
     """Bookmaker-implied expected goals for upcoming fixtures. The Odds API if a key is set, else football-data.co.uk."""
     import os
@@ -2714,6 +2834,8 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     # 4. Odds and referees for the coming fixtures
     book = fetch_odds(ds.teams, set(zip(up.team_h, up.team_a))) if odds and online else {}
     sources["Bookmaker odds for the next round"] = bool(book)
+    gs = fetch_scorer_odds(ds, gws[0], history) if odds and online else {}
+    sources.update(SOURCE_STATE)
     up_refs = upcoming_referees(ds.teams, getattr(fetch_odds, "fixtures_file", None)) if odds and online else {}
     refs = {}
     for pair, name in up_refs.items():
@@ -2802,7 +2924,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
         players.append(dict(
             id=pid, n=_text(p.get("web_name")), fn=f"{_text(p.get('first_name'))} {_text(p.get('second_name'))}".strip(),
             t=int(p["team"]), pos=r["pos"], price=round(float(p.get("now_cost") or 0), 1), own=round(own, 1),
-            st=_text(p.get("status")) or "a", news=_text(p.get("news")),
+            st=_text(p.get("status")) or "a", news=_text(p.get("news")), gs=gs.get(pid),
             pen=int(p["penalties_order"]) if p.get("penalties_order") is not None and not pd.isna(p.get("penalties_order")) else None,
             ep=it["ep"], ep6=round(sum(it["ep"]), 1), av=[round(a, 2) for a in it["av"]],
             fpl_ep=float(p["ep_next"]) if p.get("ep_next") is not None and not pd.isna(p.get("ep_next")) else None,
