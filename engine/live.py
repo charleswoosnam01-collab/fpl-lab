@@ -89,7 +89,8 @@ def main():
                 if not stats.get(e, {}).get("bonus"):
                     bonus[e] = bonus.get(e, 0) + b
     out = dict(gw=gw, updated=datetime.now(timezone.utc).isoformat(timespec="seconds"),
-               done=all(f.get("finished") for f in fixtures),
+               done=all(f.get("finished") or f.get("finished_provisional") for f in fixtures),   # every match over
+               final=all(f.get("finished") for f in fixtures),                                    # bonus confirmed too
                players={e: dict(pts=st["total_points"] + bonus.get(e, 0), mins=st["minutes"]) for e, st in stats.items() if st["minutes"] or st["total_points"]})
     if a.team_id:
         pk = s.get(f"{API}/entry/{a.team_id}/event/{gw}/picks/", timeout=20).json()
