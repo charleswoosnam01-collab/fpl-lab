@@ -578,6 +578,26 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   sentence on the player's Overview, a "Booking watch" Home card for your own
   players, and a glossary entry.
 
+## Changes in v6.32-6.33
+
+- Team tiles sort (`teamSorts()`): Overall, At home and Away groups, including
+  home and away xG scored and conceded, goals, points a game and xG
+  difference; the chosen figure and rank show on each tile.
+- Fixed a name clash: the verdict track record is `verdictTrackHtml()`;
+  `trackRecordHtml()` is the Trends page's record of trend calls.
+- Planner pitch (`pitchView`, `pitchHeader`, `teamOutlook`, `movesLine`): the
+  projection on a badge on each shirt (or price or ownership, `state.pitchShow`),
+  fixtures as chips coloured by difficulty, captain shows his own score with a
+  C or TC badge, bench greyed and numbered in substitution order, a compact
+  header (free transfers, bank, chip for this gameweek written to
+  RULES.chips, gameweek arrows, a menu for draft actions), the drafted
+  transfers for the gameweek with per-move undo, and the team's projected
+  total with the chance of 40, 60 and 80+ points (normal approximation from
+  each player's simulated spread, scaled for later weeks; players treated as
+  independent).
+- Trends (`trendRows`): one row per team, last four against next four xG per
+  game, a change bar, attack or defence (`state.trendMode`), best change first.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
