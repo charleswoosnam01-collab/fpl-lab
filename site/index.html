@@ -748,6 +748,36 @@ nav.tabs a[aria-current="page"]{border-top-color:var(--accent, var(--ink))}
 .lkrow .lb i.good{background:#1D9E75}.lkrow .lb i.bad{background:#E24B4A}
 .tagchk td small{display:block;font-size:11px;color:var(--muted);font-weight:400}
 .tagchk tr.base td{border-top:2px solid var(--line)}
+.tsort{display:flex;align-items:baseline;gap:6px;margin:6px 0 2px;font-size:12.5px}.tsort span{color:var(--muted);flex:1}.tsort b{font-size:14px}.tsort em{font-style:normal;font-size:11px;color:var(--muted)}
+
+/* v6.33 planner pitch and trend rows */
+.phdr{display:grid;grid-template-columns:auto auto minmax(76px,1fr) auto auto;gap:6px;align-items:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 10px;margin:6px 0}
+.phdr small{display:block;font-size:10.5px;color:var(--muted);font-weight:700}.phdr b{font-size:14px;white-space:nowrap}.phdr b em{font-style:normal;color:var(--down);font-size:12px}
+.phdr select{width:100%;font-size:13px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--bg);color:var(--ink)}
+.gwmini{display:flex;align-items:center;justify-content:center;gap:2px}.gwmini b{font-size:15px;min-width:42px;text-align:center}
+.gwmini .ghost{min-height:34px;min-width:30px;padding:0;border-radius:8px;font-size:18px}
+.pmenu{min-height:34px;min-width:34px;padding:0;border-radius:8px;font-size:18px;font-weight:900}
+.pshow{display:flex;align-items:center;gap:8px;margin:2px 0 6px;flex-wrap:nowrap}.pshow .dn{margin-left:auto;white-space:nowrap}.pshow .seg{margin:0}.pshow .seg button{min-height:32px;padding:3px 10px;font-size:12.5px}
+.pp2{position:relative;display:flex;flex-direction:column;align-items:center;width:20%;max-width:86px;min-width:62px;border:0;background:none;padding:2px 0 4px;cursor:pointer;color:var(--ink)}
+.pp2 .shirtwrap{position:relative;display:inline-block}
+.pp2 .sc{position:absolute;right:-18px;bottom:-4px;background:#fff;color:#101522;font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:16px;line-height:1;border-radius:7px;padding:3px 5px 2px;box-shadow:0 1px 3px rgba(0,0,0,.35);min-width:24px;text-align:center}
+.pp2 .cb{position:absolute;top:-6px;right:-12px;left:auto;font-family:var(--body);font-variation-settings:normal;font-size:11px;font-weight:900;line-height:1.3;background:#F2C14E;color:#101522;border-radius:4px;padding:1px 5px;border:0}
+.pp2 .cb.v{background:#fff;color:#101522;border:1px solid #101522}
+.pp2 .pn{font-size:11px;font-weight:800;background:#fff;color:#101522;border-radius:4px;padding:1px 4px;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-top:4px}
+.pp2 .fxw{display:flex;gap:2px;margin-top:3px;flex-wrap:wrap;justify-content:center}
+.fxc{font-size:9.5px;font-weight:800;border-radius:3px;padding:1px 4px;white-space:nowrap}
+.benchrow2{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 4px;margin-top:8px}
+.benchrow2 .pp2{opacity:.72}.benchrow2 .pp2 .pn{background:var(--muted);color:var(--bg)}
+.pn .bno{font-style:normal;font-size:9.5px;font-weight:900;background:var(--bg);color:var(--ink);border-radius:3px;padding:0 3px;margin-right:3px}
+.moves{margin:8px 0}.mv{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:4px 0;font-size:13.5px}
+.mv span{flex:1}.mv em{font-style:normal;font-weight:800}.mv em small{font-weight:600;color:var(--muted);font-size:11px}
+.tsum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 6px;margin:8px 0 4px}
+.tsum small{display:block;font-size:11px;color:var(--muted);font-weight:700}.tsum b{font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:22px}
+.trows{display:grid;gap:0;margin:6px 0 12px}
+.trow{display:grid;grid-template-columns:62px 98px 1fr 50px;gap:8px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 2px;font-size:13px;color:var(--ink);cursor:pointer}
+.trow.head{font-size:11px;color:var(--muted);font-weight:700;border-top:0;cursor:default}
+.trow .tn{font-weight:800;white-space:nowrap}.trow b{text-align:right}
+.tbar{position:relative;height:12px}.tbar .mid{position:absolute;left:50%;top:-3px;width:1.5px;height:18px;background:var(--muted);opacity:.6}.tbar i{position:absolute;top:0;height:12px;border-radius:6px}
 </style>
 </head>
 <body>
@@ -1293,13 +1323,40 @@ function viewTeams(){
   if (view === "luck"){
     return head + luckBars();
   }
-  const key = state.teamSort;
-  const vd = (t, side) => t[side] ? t[side].xgf - t[side].xga : -9;
-  const teams = [...D.teams].sort((a,b) => key === "att" ? b.att_score - a.att_score : key === "def" ? b.def_score - a.def_score : key === "home" ? vd(b, "home") - vd(a, "home") : key === "away" ? vd(b, "away") - vd(a, "away")
-    : key === "hdef" ? (a.home ? a.home.xga : 9) - (b.home ? b.home.xga : 9) : key === "adef" ? (a.away ? a.away.xga : 9) - (b.away ? b.away.xga : 9) : b.gen - a.gen);
+  const sorts = teamSorts(), key = sorts[state.teamSort] ? state.teamSort : "att", so = sorts[key];
+  const val = t => { const v = so.v(t); return v == null || isNaN(v) ? (so.low ? 1e9 : -1e9) : v; };
+  const teams = [...D.teams].sort((a,b) => so.low ? val(a) - val(b) : val(b) - val(a));
+  const groups = [["Overall", ["att","def","xgf","xga","cs","trend","gen"]], ["At home", ["hxg","hdef","hgf","hga","hpp","home"]], ["Away", ["axg","adef","agf","aga","app","away"]]];
   return head + `<p class="lede">Each tile: attack and defence ratings (100 is the league’s best), form, and the next three fixtures for attackers (A) and defenders (D), green easy to red hard. Tap a team for everything else.</p>
-  <label class="sortsel">Sort by <select id="teamsortsel" aria-label="Sort teams">${[["att","Attack"],["def","Defence"],["home","Home form"],["away","Away form"],["hdef","Home xGC (fewest)"],["adef","Away xGC (fewest)"],["gen","Forces DEFCON"]].map(([k, l]) => `<option value="${k}" ${key === k ? "selected" : ""}>${l}</option>`).join("")}</select></label>
-  <div class="tgrid">${teams.map(teamTile).join("")}</div>`;
+  <label class="sortsel">Sort by <select id="teamsortsel" aria-label="Sort teams">${groups.map(([g, ks]) => `<optgroup label="${g}">${ks.map(k => `<option value="${k}" ${key === k ? "selected" : ""}>${sorts[k].l}</option>`).join("")}</optgroup>`).join("")}</select></label>
+  ${so.note ? `<p class="sub" style="margin:2px 0 8px">${so.note}</p>` : ""}
+  <div class="tgrid">${teams.map((t, k) => teamTile(t, so.show ? `<div class="tsort"><span>${so.s || so.l}</span><b>${so.show(t)}</b><em>${ordinal(k + 1)}</em></div>` : "")).join("")}</div>`;
+}
+// every way the team tiles can be ordered; "low" means fewer is better
+function teamSorts(){
+  const side = (t, s, f) => t[s] && t[s].n ? f(t[s]) : null, per = (a, n) => n ? a / n : null;
+  const n2 = v => v == null ? "–" : f2(v), n1 = v => v == null ? "–" : f1(v);
+  return {
+    att: {l: "Attack rating", v: t => t.att_score},
+    def: {l: "Defence rating", v: t => t.def_score},
+    xgf: {l: "xG scored a game", v: t => t.xgf, show: t => n2(t.xgf), note: "Expected goals created per game, all matches this season."},
+    xga: {l: "xG conceded a game (fewest)", s: "xG conceded a game", v: t => t.xga, low: true, show: t => n2(t.xga), note: "Expected goals allowed per game, all matches this season. Fewest first."},
+    cs: {l: "Clean sheets", v: t => t.cs, show: t => pct(t.cs), note: "Share of matches with a clean sheet this season."},
+    trend: {l: "Attack heating up", s: "Last 4 v season", v: t => (t.rform && t.rform.att) || 1, show: t => { const r = (t.rform && t.rform.att) || 1; return (r >= 1 ? "+" : "−") + Math.round(Math.abs(r - 1) * 100) + "%"; }, note: "Chances created in the last four games against the season average."},
+    gen: {l: "Forces DEFCON", v: t => t.gen, show: t => n2(t.gen), note: "How much defensive work this team forces from opponents: above 1 is good for the DEFCON points of players facing them."},
+    hxg: {l: "Home xG scored", v: t => side(t, "home", h => h.xgf), show: t => n2(side(t, "home", h => h.xgf)), note: "Expected goals created per home game."},
+    axg: {l: "Away xG scored", v: t => side(t, "away", h => h.xgf), show: t => n2(side(t, "away", h => h.xgf)), note: "Expected goals created per away game."},
+    hdef: {l: "Home xG conceded (fewest)", s: "Home xG conceded", v: t => side(t, "home", h => h.xga), low: true, show: t => n2(side(t, "home", h => h.xga)), note: "Expected goals allowed per home game. Fewest first."},
+    adef: {l: "Away xG conceded (fewest)", s: "Away xG conceded", v: t => side(t, "away", h => h.xga), low: true, show: t => n2(side(t, "away", h => h.xga)), note: "Expected goals allowed per away game. Fewest first."},
+    hgf: {l: "Home goals scored", v: t => side(t, "home", h => per(h.gf, h.n)), show: t => n1(side(t, "home", h => per(h.gf, h.n))) + " a game", note: "Actual goals scored per home game."},
+    agf: {l: "Away goals scored", v: t => side(t, "away", h => per(h.gf, h.n)), show: t => n1(side(t, "away", h => per(h.gf, h.n))) + " a game", note: "Actual goals scored per away game."},
+    hga: {l: "Home goals conceded (fewest)", s: "Home goals conceded", v: t => side(t, "home", h => per(h.ga, h.n)), low: true, show: t => n1(side(t, "home", h => per(h.ga, h.n))) + " a game", note: "Actual goals conceded per home game. Fewest first."},
+    aga: {l: "Away goals conceded (fewest)", s: "Away goals conceded", v: t => side(t, "away", h => per(h.ga, h.n)), low: true, show: t => n1(side(t, "away", h => per(h.ga, h.n))) + " a game", note: "Actual goals conceded per away game. Fewest first."},
+    hpp: {l: "Home points a game", v: t => side(t, "home", h => h.ppg), show: t => n1(side(t, "home", h => h.ppg)), note: "League points won per home game."},
+    app: {l: "Away points a game", v: t => side(t, "away", h => h.ppg), show: t => n1(side(t, "away", h => h.ppg)), note: "League points won per away game."},
+    home: {l: "Home xG difference", v: t => side(t, "home", h => h.xgf - h.xga), show: t => sgn(side(t, "home", h => h.xgf - h.xga) || 0), note: "Expected goals created minus allowed, per home game: the best overall measure of home form."},
+    away: {l: "Away xG difference", v: t => side(t, "away", h => h.xgf - h.xga), show: t => sgn(side(t, "away", h => h.xgf - h.xga) || 0), note: "Expected goals created minus allowed, per away game."},
+  };
 }
 
 /* ---------- squad maths ---------- */
@@ -1627,7 +1684,7 @@ function viewModel(){
   <h3>Captain log</h3><div class="scroller"><table class="log"><thead><tr><th>GW</th><th>FPL Lab</th><th class="n">Pts</th><th>FPL’s pick</th><th class="n">Pts</th><th>Top scorer</th><th class="n">Pts</th></tr></thead>
   <tbody>${W.map(w => `<tr><td>${w.gw}</td><td>${esc(w.cap.n)}</td><td class="n">${w.cap.pts}</td><td>${w.cap_fpl ? esc(w.cap_fpl.n) : "–"}</td><td class="n">${w.cap_fpl ? w.cap_fpl.pts : "–"}</td><td>${esc(w.best.n)}</td><td class="n">${w.best.pts}</td></tr>`).join("")}</tbody></table></div>
   <h3>Biggest misses in GW${last.gw}</h3><dl class="kv">${last.under.map(m => `<dt>${esc(m.n)} scored more than expected</dt><dd>${m.proj} → ${m.pts}</dd>`).join("")}${last.over.map(m => `<dt>${esc(m.n)} scored less than expected</dt><dd>${m.proj} → ${m.pts}</dd>`).join("")}</dl>
-  ${trackRecordHtml()}${tagChecksHtml()}${how}${wholeAppViews()}${settingsHtml()}${backupHtml()}${glossaryList()}<h3>Data sources this run</h3>${sourcesList()}<p class="lede">${esc(D.meta.source)}. ${D.meta.matches} league matches, every shot in them, and cup and European minutes feed the model. Rebuilt ${dayTime(D.meta.generated)}.</p>`;
+  ${verdictTrackHtml()}${tagChecksHtml()}${how}${wholeAppViews()}${settingsHtml()}${backupHtml()}${glossaryList()}<h3>Data sources this run</h3>${sourcesList()}<p class="lede">${esc(D.meta.source)}. ${D.meta.matches} league matches, every shot in them, and cup and European minutes feed the model. Rebuilt ${dayTime(D.meta.generated)}.</p>`;
 }
 
 /* ---------- sheets ---------- */
@@ -2106,22 +2163,6 @@ function lineupFor(squad, i){
 function validXI(ids){
   const c = {1:0,2:0,3:0,4:0}; ids.forEach(id => c[P[id].pos]++);
   return ids.length === 11 && c[1] === 1 && c[2] >= 3 && c[2] <= 5 && c[3] >= 2 && c[3] <= 5 && c[4] >= 1 && c[4] <= 3;
-}
-function pitchView(baseSquad){
-  const i = state.pitchGw, g = GWS[i], squad = draftSquadAt(i), L = lineupFor(squad, i), base = new Set(state.squad.ids);
-  const card = (p, bench) => { const isIn = !base.has(p.id), v = verdict(p);
-    const corner = isIn ? '<span class="pbadge in">In</span>' : v && v.word === "Sell" ? '<span class="pbadge sell">Sell</span>' : "";
-    const f0 = (FX[p.t][g] || [])[0];
-    const sg = f0 ? (p.pos >= 3 ? sig(xgClass(f0.lf), "Att") : sig(csClass(Math.exp(-f0.la)), "Def")) : "";
-    return `<button class="pp ${bench ? "bench" : ""}" data-pitch="${p.id}" aria-label="${esc(p.n)}, ${f1(p.ep[i])} points">
-    ${p === L.cap ? '<span class="cb">C</span>' : p === L.vice ? '<span class="cb v">V</span>' : ""}${p.edited ? '<span class="eb" aria-label="Minutes edited">✎</span>' : ""}
-    <span class="shirtwrap">${shirt(p.t)}${corner}</span><span class="pn">${msDot(p)}${esc(p.n)}</span>
-    <span class="pf">${(FX[p.t][g] || []).map(f => `${esc(T[f.opp].short)} ${f.home ? "H" : "A"}`).join(", ") || "Blank"}</span><span class="psig">${sg.replace(/<small>[^<]*<\/small>/, "")}</span>
-    <span class="pe">${f1(p.ep[i] * (p === L.cap ? 2 : 1))}</span></button>`; };
-  const rows = [1,2,3,4].map(pos => `<div class="prow">${L.xi.filter(p => p.pos === pos).map(p => card(p)).join("")}</div>`).join("");
-  return `${draftBar()}<div class="gwstep"><button class="ghost" data-gwstep="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${g}</b><button class="ghost" data-gwstep="1" ${i === GWS.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button></div>
-    <div class="pitch">${rows}</div><div class="prow benchrow">${L.bench.map(p => card(p, true)).join("")}</div>
-    <p class="sub" style="text-align:center">${f1(L.total)} projected with ${esc(L.cap.n)} as captain${L.custom ? " (your line-up)" : " (best line-up)"}. Tap a player to transfer him out, captain him, swap him or edit his minutes.${L.custom ? ` <button class="term" data-luclear="1">Reset line-up</button>` : ""}</p>`;
 }
 function openPitchPlayer(id){
   const i = state.pitchGw, squad = draftSquadAt(i), L = lineupFor(squad, i), p = P[id];
@@ -2863,7 +2904,7 @@ function viewFuture(){
       <li>Falls were called right <b>${pct(ft.fall_hit || 0.87)}</b> of the time.</li>
       <li>Teams already on a hot run (20% above their season level) created ${f2(Math.abs(ft.hot_change || 0.43))} less a game over the next four on average, and only ${pct(ft.hot_stayed || 0.48)} stayed above their season level. By the time a run is obvious, it’s usually ending.</li>
       <li>Box touches and shots in the box didn’t add any early warning beyond this, so they’re not used.</li></ul></div>
-    <h3>Every team: last four against next four</h3>${dumbbell(all)}
+    <h3>Every team: last four against next four</h3>${trendRows()}
     <h3>Heating up</h3>${up.length ? `<ul class="why">${up.map(x => `<li>${toneDot("up")}<div><h4><button class="term" data-team="${x.t.id}">${esc(x.t.name)}</button>: ${f2(x.f.last)} → ${f2(x.f.next)} xG a game ${trendPill(x.t.id)}</h4><p>${esc(forecastReason(x.t.id, x.f))}</p></div></li>`).join("")}</ul>` : `<p class="lede">No team is forecast to rise by 0.3 or more.</p>`}
     <h3>Get ahead: attackers from those teams</h3><p class="lede">Nailed players (green minutes) with a real share of their team’s chances, ranked by how much their expected goals and assists should rise.</p>
     <ul class="list">${buys.map(x => prow(x, "buy")).join("") || `<li class="lede">No clear candidates this week.</li>`}</ul>
@@ -3127,7 +3168,7 @@ function teamCall(t){
   if (a <= 2 || d <= 2) return {txt: "Short-term picks only", tone: "warn"};
   return {txt: "Avoid", tone: "down"};
 }
-function teamTile(t){
+function teamTile(t, sortLine = ""){
   const c = teamCall(t), next = GWS.slice(0, 3);
   const sq = (g, kind) => { const l = FX[t.id][g] || []; if (!l.length) return `<i class="tsq d0" title="GW${g}: blank"></i>`;
     const f = l[0], k = kind === "a" ? xgClass(f.lf) : csClass(Math.exp(-f.la)); return `<i class="tsq d${k}" title="GW${g}: ${esc(T[f.opp].short)} ${f.home ? "H" : "A"}, ${kind === "a" ? f1(f.lf) + " goals expected" : pct(Math.exp(-f.la)) + " clean sheet"}"></i>`; };
@@ -3136,7 +3177,7 @@ function teamTile(t){
     <div class="tbar"><span>Attack</span><div><i style="width:${t.att_score}%;background:#D85A30"></i></div><em>${t.att_score}</em></div>
     <div class="tbar"><span>Defence</span><div><i style="width:${t.def_score}%;background:#1D9E75"></i></div><em>${t.def_score}</em></div>
     <div class="tsqs"><span>A</span>${next.map(g => sq(g, "a")).join("")}<span>D</span>${next.map(g => sq(g, "d")).join("")}</div>
-    <div class="tcall ${c.tone}">${esc(c.txt)}</div></button>`;
+    ${sortLine}<div class="tcall ${c.tone}">${esc(c.txt)}</div></button>`;
 }
 function qualityMap(){
   const W = 360, H = 290, L = 34, R = 346, Tp = 22, B = 250, xs = v => L + 12 + (R - L - 24) * v / 100, ys = v => B - 12 - (B - Tp - 24) * v / 100, midX = xs(55), midY = ys(55);
@@ -3726,8 +3767,11 @@ function statusChips(p){
 }
 
 /* ---------- v6.28: calmer rows, tabs, five-tab nav, status strip, watchlist, search, guide, what's new, accent ---------- */
-const APP_VERSION = "6.31";
+const APP_VERSION = "6.33";
 const WHATS_NEW = [
+  "A new planner pitch: each player’s score on his shirt, fixtures coloured by difficulty, one compact header with free transfers, bank, chip and gameweek, and your team’s chances of 40, 60 and 80 points",
+  "Trends: one clear row per team showing the change in expected goals, for attack or defence",
+  "More ways to sort the team tiles, including home and away xG scored, goals and points, with the figure and rank shown on each tile",
   "Yellow-card bans: players one booking from a ban get a 🟨 warning, and their projections allow for the matches they might miss",
   "Decisions vs luck in your Season review: what your choices were expected to score against what they scored",
   "“Do the tags work?” on the Model page checks each tag against what happened",
@@ -3892,7 +3936,7 @@ function updateTrack(){
   if (changed) try { localStorage.setItem(TRACK_STORE, JSON.stringify(tr)); } catch(e) {}
   return tr;
 }
-function trackRecordHtml(){
+function verdictTrackHtml(){
   const tr = updateTrack(), gws = Object.keys(tr).map(Number).sort((a,b) => a - b);
   if (!gws.length) return `<h3>Verdict track record</h3><p class="lede">After each gameweek, this shows how players marked Buy scored against players marked Don’t buy. The first entry appears once a gameweek you opened the app before has finished. It’s kept on this device.</p>`;
   const max = Math.max(...gws.map(g => Math.max(tr[g].buy, tr[g].no)), 1), wins = gws.filter(g => tr[g].buy > tr[g].no).length;
@@ -3904,12 +3948,114 @@ function trackRecordHtml(){
 // wide screens: the sheet becomes a side panel so the list stays usable
 const WIDE = window.matchMedia ? window.matchMedia("(min-width: 1000px)") : {matches: false};
 
+/* ---------- v6.33: planner pitch with scores on shirts, compact header, team score summary; trend rows ---------- */
+state.pitchShow = "pts";
+// spread of each player's points this gameweek, from his simulations (or a rough rule when he has none)
+const SIM_BINS = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11.5, 13.5, 16, 19];
+let VAR_RATIO = null;
+function simVar(p){
+  if (p.sim && p.sim.dist && p.sim.dist.length === SIM_BINS.length){
+    const m = p.sim.dist.reduce((s, q, k) => s + q * SIM_BINS[k], 0);
+    return p.sim.dist.reduce((s, q, k) => s + q * (SIM_BINS[k] - m) ** 2, 0);
+  }
+  if (VAR_RATIO == null){
+    const r = D.players.filter(q => q.sim && q.sim.dist && q.ep[0] >= 2).map(q => simVar(q) / q.ep[0]).sort((a,b) => a - b);
+    VAR_RATIO = r.length ? r[Math.floor(r.length / 2)] : 1.8;
+  }
+  return VAR_RATIO * Math.max(0, p.ep[0] || 0);
+}
+const normCdf = z => { const t = 1 / (1 + 0.2316419 * Math.abs(z)), d = 0.3989423 * Math.exp(-z * z / 2);
+  const pr = d * t * (0.3193815 + t * (-0.3565638 + t * (1.781478 + t * (-1.821256 + t * 1.330274)))); return z > 0 ? 1 - pr : pr; };
+function chipAt(g){ const c = RULES.chips || {}; return ["tc","bb","fh","wc"].find(k => String(c[k]) === String(g) && hasChip(k)) || null; }
+function teamOutlook(L, i){
+  const chip = chipAt(GWS[i]), capM = chip === "tc" ? 3 : 2;
+  const counted = chip === "bb" ? [...L.xi, ...L.bench] : L.xi;
+  let mean = counted.reduce((s, p) => s + (p.ep[i] || 0), 0) + (L.cap ? (L.cap.ep[i] || 0) * (capM - 1) : 0);
+  // spreads: this week's simulations, scaled to each week's projection further ahead
+  let v = 0; counted.forEach(p => { const k = p === L.cap ? capM : 1, base = simVar(p), scale = (p.ep[0] || 0) > 0.3 ? (p.ep[i] || 0) / p.ep[0] : 1; v += base * Math.max(0.2, scale) * k * k; });
+  const sd = Math.sqrt(Math.max(1, v)), atLeast = x => 1 - normCdf((x - 0.5 - mean) / sd);
+  return {mean, sd, p40: atLeast(40), p60: atLeast(60), p80: atLeast(80), chip};
+}
+function pitchHeader(i){
+  const st = draftState(), w = st.weeks[i], g = GWS[i], chip = chipAt(g);
+  const opts = [["", "None"], ...["tc","bb","fh","wc"].filter(k => hasChip(k)).map(k => [k, CHIP_LONG[k]])];
+  return `<div class="phdr">
+    <div><small>Free transfers</small><b>${Math.max(0, w.ftBefore - w.n)} left${w.hits ? ` <em>−${w.hits * 4}</em>` : ""}</b></div>
+    <div><small>Bank</small><b class="${w.bank < 0 ? "downc" : ""}">${money(w.bank)}</b></div>
+    <div><small>Chip</small><select id="pchipsel" aria-label="Chip for GW${g}">${opts.map(([k, l]) => `<option value="${k}" ${chip === k || (!chip && !k) ? "selected" : ""}>${l}</option>`).join("")}</select></div>
+    <div class="gwmini"><button class="ghost" data-gwstep="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${g}</b><button class="ghost" data-gwstep="1" ${i === GWS.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button></div>
+    <button class="ghost pmenu" data-pmenu="1" aria-label="Draft actions">⋯</button></div>
+    <div class="pshow"><span class="sub">On shirts:</span>${seg("pitchshow", [["pts","Points"],["price","Price"],["own","Owned"]], state.pitchShow, "Number on the shirts")}<span class="sub dn">${esc(RULES.name)}</span></div>`;
+}
+function openPitchMenu(){
+  const g = GWS[0], st = draftState().weeks[0];
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">${esc(RULES.name)}</h2><p class="lede">Draft actions. None of these change your real FPL team.</p>
+    <div class="optgrid"><button class="optrow" data-draftundo="1">Undo last move</button><button class="optrow" data-draftreset="1">Reset draft</button>
+    <button class="optrow" data-draftsolve="1">Let the solver finish this</button><button class="optrow" data-draftapply="1" ${st.n ? "" : "disabled"}>Make GW${g} moves my squad</button></div>
+    <p class="sub">“Make GW${g} moves my squad” is for after you’ve made the same transfers in FPL.</p>${sheetFoot()}`;
+  showSheet();
+}
+function movesLine(i){
+  const g = GWS[i], list = draftMoves().map((m, k) => ({m, k})).filter(x => x.m.gw === g);
+  if (!list.length) return `<p class="moves sub">No transfers in GW${g}.</p>`;
+  return `<div class="moves">${list.map(({m, k}) => { const o = P[m.out], c = P[m.in]; if (!o || !c) return "";
+    let d = 0; for (let j = i; j < GWS.length; j++) d += (c.ep[j] || 0) - (o.ep[j] || 0);
+    return `<div class="mv"><span>${esc(o.n)} → <b>${esc(c.n)}</b></span><em class="${d >= 0 ? "upc" : "downc"}">${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}<small> to GW${GWS[GWS.length - 1]}</small></em><button class="ghost small" data-draftrm="${k}" aria-label="Undo this transfer">Undo</button></div>`; }).join("")}</div>`;
+}
+function pitchView(baseSquad){
+  const i = state.pitchGw, g = GWS[i], squad = draftSquadAt(i), L = lineupFor(squad, i), base = new Set(state.squad.ids);
+  const show = state.pitchShow || "pts", out = teamOutlook(L, i), capM = out.chip === "tc" ? 3 : 2;
+  const fxChip = p => { const fs = FX[p.t][g] || []; if (!fs.length) return `<span class="fxc d5">Blank</span>`;
+    return fs.map(f => { const gr = p.pos >= 3 ? xgClass(f.lf) : csClass(Math.exp(-f.la)); return `<span class="fxc d${gr}">${esc(T[f.opp].short)} ${f.home ? "H" : "A"}</span>`; }).join(""); };
+  const benchNo = {}; let n = 0; L.bench.forEach(p => { benchNo[p.id] = p.pos === 1 ? "GK" : String(++n); });
+  const card = (p, bench) => { const isIn = !base.has(p.id), v = verdict(p);
+    const corner = isIn ? '<span class="pbadge in">In</span>' : v && v.word === "Sell" ? '<span class="pbadge sell">Sell</span>' : "";
+    const val = show === "price" ? money(p.price).replace("m", "") : show === "own" ? `${Math.round(p.own)}%` : f1(p.ep[i] || 0);
+    const capTag = p === L.cap ? `<span class="cb">${out.chip === "tc" ? "TC" : "C"}</span>` : p === L.vice ? '<span class="cb v">V</span>' : "";
+    return `<button class="pp2 ${bench ? "bench" : ""}" data-pitch="${p.id}" aria-label="${esc(p.n)}, ${f1(p.ep[i] || 0)} points${p === L.cap ? ", captain" : ""}">
+      <span class="shirtwrap">${shirt(p.t)}${corner}${capTag}<span class="sc">${val}</span></span>
+      <span class="pn">${bench ? `<i class="bno">${benchNo[p.id]}</i>` : ""}${minutesSecurity(p).level !== "green" ? msDot(p) : ""}${esc(p.n)}${p.edited ? " ✎" : ""}</span><span class="fxw">${fxChip(p)}</span></button>`; };
+  const rows = [1,2,3,4].map(pos => `<div class="prow">${L.xi.filter(p => p.pos === pos).map(p => card(p)).join("")}</div>`).join("");
+  return `${pitchHeader(i)}
+    <div class="pitch">${rows}</div>
+    <div class="prow benchrow2">${L.bench.map(p => card(p, true)).join("")}</div>
+    ${movesLine(i)}
+    <div class="tsum"><div><small>Projected</small><b>${f1(out.mean)}</b></div><div><small>40+ points</small><b>${pct(out.p40)}</b></div><div><small>60+ points</small><b>${pct(out.p60)}</b></div><div><small>80+ points</small><b>${pct(out.p80)}</b></div></div>
+    <p class="sub" style="text-align:center">With ${esc(L.cap.n)} as ${out.chip === "tc" ? "triple " : ""}captain${out.chip === "bb" ? " and your bench counting" : ""}${L.custom ? " (your line-up)" : " (best line-up)"}; his shirt shows his own score, the total counts it ×${capM}. The chances come from each player’s simulations and treat players as independent, so they slightly understate the spread when you own several players from one team. Tap a player to transfer, captain or swap him.${L.custom ? ` <button class="term" data-luclear="1">Reset line-up</button>` : ""}</p>`;
+}
+// trends: one row per team, change in expected goals per game
+state.trendMode = "att";
+function teamForecastDef(t, n = 4){
+  const r = (T[t].results || []).slice(-n), last = r.length ? r.reduce((s, x) => s + x[4], 0) / r.length : T[t].xga;
+  const fx = GWS.slice(0, n).flatMap(g => (FX[t][g] || []));
+  const next = fx.length ? fx.reduce((s, f) => s + f.la, 0) / fx.length : null;
+  return {last, next, change: next == null ? 0 : next - last};
+}
+function trendRows(){
+  const def = state.trendMode === "def";
+  const rows = D.teams.map(t => ({t, f: def ? teamForecastDef(t.id) : teamForecast(t.id)})).filter(x => x.f.next != null);
+  const good = x => def ? -x.f.change : x.f.change;
+  rows.sort((a,b) => good(b) - good(a));
+  const max = Math.max(...rows.map(x => Math.abs(x.f.change)), 0.2);
+  return `${seg("trendmode", [["att","Attack: goals scored"],["def","Defence: goals conceded"]], state.trendMode, "Trend measure")}
+    <p class="sub">Expected goals ${def ? "conceded" : "scored"} per game: the last four matches against the next four fixtures. ${def ? "Falling is good for defenders" : "Rising is good for attackers"}, so the best changes come first.</p>
+    <div class="trows"><div class="trow head"><span>Team</span><span>Last 4 → next 4</span><span>Change</span><span></span></div>
+    ${rows.map(x => { const ch = x.f.change, g_ = good(x) >= 0.05, b_ = good(x) <= -0.05, col = g_ ? "#1D9E75" : b_ ? "#E24B4A" : "#888780";
+      return `<button class="trow" data-team="${x.t.id}"><span class="tn">${dot(x.t.id)}${esc(x.t.short)}</span><span>${f2(x.f.last)} → ${f2(x.f.next)}</span>
+        <span class="tbar"><span class="mid"></span><i style="${ch >= 0 ? "left:50%" : "right:50%"};width:${50 * Math.abs(ch) / max}%;background:${col}"></i></span>
+        <b style="color:${col}">${ch >= 0 ? "+" : "−"}${f2(Math.abs(ch))}</b></button>`; }).join("")}</div>`;
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
+  const el = e.target.closest("[data-pitchshow],[data-pmenu],[data-draftrm],[data-trendmode],[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
   if (!el){ if (e.target === $("#sheet")) closeSheet(); return; }
   const d = el.dataset;
-  if (d.moretoggle){ const k = d.moretoggle; state.more[k] = !(el.getAttribute("aria-expanded") === "true"); render(); }
+  if (d.pitchshow){ state.pitchShow = d.pitchshow; render(); }
+  else if (d.pmenu){ openPitchMenu(); }
+  else if (d.draftrm !== undefined){ const ms = draftMoves(); ms.splice(+d.draftrm, 1); saveRules(); render(); }
+  else if (d.trendmode){ state.trendMode = d.trendmode; render(); }
+  else if (d.moretoggle){ const k = d.moretoggle; state.more[k] = !(el.getAttribute("aria-expanded") === "true"); render(); }
   else if (d.ptab){ state.ptab = d.ptab; SHEET_KEY = null; openPlayer(+d.pid); }
   else if (d.watch){ const id = +d.watch; toggleWatch(id); toast(isWatched(id) ? `${P[id].n} added to your watchlist` : `${P[id].n} removed from your watchlist`); const sc = $(".sheet").scrollTop; render(); openPlayer(id); $(".sheet").scrollTop = sc; }
   else if (d.search){ state.gq = ""; openSearch(); }
@@ -3981,10 +4127,10 @@ document.addEventListener("click", e => {
   else if (d.sortpick){ if (state.pl.sort === d.sortpick) state.pl.dir = state.pl.dir === "asc" ? "desc" : "asc"; else { state.pl.sort = d.sortpick; state.pl.dir = "desc"; } state.pl.limit = 50; render(); openFilters(); }
   else if (d.draftoutsheet){ state.tq = ""; state.tqOut = +d.draftoutsheet; openTransferOut(+d.draftoutsheet); }
   else if (d.draftin){ addDraftMove(+d.draftout, +d.draftin); closeSheet(); render(); toast(`${P[+d.draftout].n} → ${P[+d.draftin].n} added to ${RULES.name}`); }
-  else if (d.draftundo){ draftMoves().pop(); saveRules(); render(); }
-  else if (d.draftreset){ RULES.moves = []; state.lu = {}; saveRules(); render(); toast("Draft cleared"); }
-  else if (d.draftsolve){ const b = $("[data-solve]"); if (b){ b.scrollIntoView({behavior: "smooth", block: "center"}); b.click(); toast("Keeping your moves and solving the rest…"); } }
-  else if (d.draftapply){ const now = draftMoves().filter(m => m.gw === GWS[0]); if (!now.length){ toast(`No moves in GW${GWS[0]} yet`); }
+  else if (d.draftundo){ closeSheet(); draftMoves().pop(); saveRules(); render(); }
+  else if (d.draftreset){ closeSheet(); RULES.moves = []; state.lu = {}; saveRules(); render(); toast("Draft cleared"); }
+  else if (d.draftsolve){ closeSheet(); const b = $("[data-solve]"); if (b){ b.scrollIntoView({behavior: "smooth", block: "center"}); b.click(); toast("Keeping your moves and solving the rest…"); } }
+  else if (d.draftapply){ closeSheet(); const now = draftMoves().filter(m => m.gw === GWS[0]); if (!now.length){ toast(`No moves in GW${GWS[0]} yet`); }
     else if (confirm(`Make ${now.length} GW${GWS[0]} move${now.length === 1 ? "" : "s"} part of your squad? Only do this once you’ve made them in FPL.`)){
       const st = draftState().weeks[0]; state.squad.ids = draftIdsAt(0); state.squad.bank = st.bank; state.squad.ft = Math.max(1, st.ftBefore - st.n);
       RULES.moves = draftMoves().filter(m => m.gw !== GWS[0]); saveRules(); saveSquad(); state.plan = null; state.chipPlan = null; render(); toast("Squad updated"); } }
@@ -4032,6 +4178,9 @@ document.addEventListener("change", e => {
   if (e.target.dataset && e.target.dataset.buysel){ const id = +e.target.dataset.buysel; if (e.target.value) setRule("buy", id, +e.target.value); else { clearRule(id); saveRules(); } render(); }
   if (e.target.dataset && e.target.dataset.chipsel){ RULES.chips[e.target.dataset.chipsel] = e.target.value === "off" || e.target.value === "auto" ? e.target.value : +e.target.value; saveRules(); render(); }
   if (e.target.id === "leaguesel"){ setLeague(+e.target.value); render(); }
+  if (e.target.id === "pchipsel"){ const g = GWS[state.pitchGw]; RULES.chips = RULES.chips || {};
+    ["tc","bb","fh","wc"].forEach(k => { if (String(RULES.chips[k]) === String(g)) RULES.chips[k] = "off"; });
+    if (e.target.value) RULES.chips[e.target.value] = g; saveRules(); render(); }
   if (e.target.id === "accentsel"){ try { localStorage.setItem(ACCENT_STORE, e.target.value); } catch(err) {} applyAccent(); }
   if (e.target.id === "importfile" && e.target.files && e.target.files[0]){ importSettings(e.target.files[0]); }
   if (e.target.id === "teamsortsel"){ state.teamSort = e.target.value; render(); }
