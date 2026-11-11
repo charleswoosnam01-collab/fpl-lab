@@ -5,6 +5,7 @@ on:
     - cron: "0 8,18 * * *"     # after FPL Core Insights refreshes (07:30 and 17:30 UTC)
     - cron: "0 11,15,21 * * 5" # extra Friday runs for late team news before the deadline
     - cron: "30 16 * * 5"      # just after the free weekend odds file is published
+    - cron: "20 * * * *"       # hourly, but only goes ahead in the 12 hours before a deadline (see the gate job)
   workflow_dispatch: {}         # adds a "Run workflow" button
 
 permissions:
@@ -17,7 +18,30 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  gate:
+    # The hourly trigger only goes ahead in the 12 hours before an FPL deadline, to catch late team news.
+    # Every other trigger (the daily schedule, the Run workflow button) always goes ahead.
+    runs-on: ubuntu-latest
+    outputs:
+      run: ${{ steps.check.outputs.run }}
+    steps:
+      - id: check
+        env:
+          EVENT: ${{ github.event_name }}
+          CRON: ${{ github.event.schedule }}
+        run: |
+          if [ "$EVENT" != "schedule" ] || [ "$CRON" != "20 * * * *" ]; then echo "run=true" >> "$GITHUB_OUTPUT"; exit 0; fi
+          H=$(curl -sf --retry 3 https://fantasy.premierleague.com/api/bootstrap-static/ | python3 -c "
+          import sys, json, datetime as d
+          ev = [e for e in json.load(sys.stdin)['events'] if e.get('is_next')]
+          t = d.datetime.fromisoformat(ev[0]['deadline_time'].replace('Z', '+00:00')) if ev else None
+          print(round((t - d.datetime.now(d.timezone.utc)).total_seconds() / 3600, 2) if t else -1)" || echo -1)
+          echo "Hours to the next deadline: $H"
+          if python3 -c "import sys; h = float('$H'); sys.exit(0 if 0 < h <= 12 else 1)"; then echo "run=true" >> "$GITHUB_OUTPUT"; else echo "run=false" >> "$GITHUB_OUTPUT"; fi
+
   build-and-deploy:
+    needs: gate
+    if: needs.gate.outputs.run == 'true'
     runs-on: ubuntu-latest
     environment:
       name: github-pages
