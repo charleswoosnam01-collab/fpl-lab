@@ -900,6 +900,47 @@ def default_rates(pos):
                 p60=0.0, p1=0.0, profile=None, np_xg=0.0, pen_xg=0.0, season=None)
 
 
+CARD_BANS = True
+# Premier League booking bans (2026/27): five league yellows within a club's first 19 league matches = one-match
+# ban; ten up to and including match 32 = two-match ban. Served in the next league match(es); cup cards don't count.
+CARD_RULES = [(5, 19, 1), (10, 32, 2)]
+# Players close to a ban get booked about half as often as their booking rate suggests (more careful, and part of a
+# high early rate is luck). Fitted on 2025/26: of 35 players on four yellows by GW15, 57% were banned by GW19
+# against 77% predicted at the full rate; the best scale was 0.45-0.55 across three such groups.
+CARD_RISK_SCALE = 0.5
+
+
+def ban_chances(yc, yc90, emins_by_fixture, match_nos, risk_slots=None):
+    """Chance he's available (not serving a booking ban) for each upcoming league fixture, and the chance a ban
+    starts within these fixtures. yc: league yellows so far; yc90: booking rate per 90; emins_by_fixture: expected
+    minutes per fixture; match_nos: the club's league match number for each fixture."""
+    if not CARD_BANS or not any(yc < n for n, _, _ in CARD_RULES):
+        return [1.0] * len(match_nos), 0.0, None
+    nxt = next(((n, by, ban) for n, by, ban in CARD_RULES if yc < n), None)
+    if nxt and match_nos and match_nos[0] > nxt[1]:
+        nxt = next(((n, by, ban) for n, by, ban in CARD_RULES if yc < n and match_nos[0] <= by), None)
+    state = {(int(yc), 0): 1.0}
+    avail, started = [], 0.0
+    for idx, (em, m) in enumerate(zip(emins_by_fixture, match_nos)):
+        avail.append(sum(p for (y, b), p in state.items() if b == 0))
+        counting = risk_slots is None or idx < risk_slots
+        q = 1 - math.exp(-CARD_RISK_SCALE * max(0.0, yc90) * max(0.0, em) / 90)
+        new = {}
+        for (y, b), p in state.items():
+            if b > 0:
+                new[(y, b - 1)] = new.get((y, b - 1), 0.0) + p
+                continue
+            ban = next((bn for n, by, bn in CARD_RULES if y + 1 == n and m <= by), 0)
+            if counting and nxt and y + 1 == nxt[0] and ban:   # the next threshold only, within the shown weeks
+                started += p * q
+            new[(min(y + 1, 20), ban)] = new.get((min(y + 1, 20), ban), 0.0) + p * q
+            new[(y, 0)] = new.get((y, 0), 0.0) + p * (1 - q)
+        state = new
+    info = dict(y=int(yc), need=nxt[0], by=nxt[1], ban=nxt[2], left=max(0, nxt[1] - (match_nos[0] - 1)) if match_nos else 0,
+                risk=round(started, 3)) if nxt else None
+    return avail, started, info
+
+
 def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=False):
     rot = rot or {"fixture": {}, "player": {}}
     rng = np.random.default_rng(2026)
@@ -908,6 +949,21 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
     gw_dates = {g: upcoming.loc[upcoming.event == g, "kickoff"].min().to_pydatetime().replace(tzinfo=None)
                 for g in gws if (upcoming.event == g).any() and upcoming.loc[upcoming.event == g, "kickoff"].notna().any()}
     by_team = {g: {} for g in gws}
+    # each club's league match number for every upcoming fixture, for the booking-ban rules
+    played = {}
+    for r in fx[fx["finished"]].itertuples():
+        played[r.team_h] = played.get(r.team_h, 0) + 1
+        played[r.team_a] = played.get(r.team_a, 0) + 1
+    order = {}
+    for r in fx[~fx["finished"]].sort_values(["kickoff", "event"], na_position="last").itertuples():
+        for t_ in (r.team_h, r.team_a):
+            order[t_] = order.get(t_, 0) + 1
+            order[(t_, r.id)] = played.get(t_, 0) + order[t_]
+    yellows = ds.hist.groupby("element")["yellow_cards"].sum().to_dict() if "yellow_cards" in ds.hist else {}
+    fx_id = {}
+    for r in upcoming.itertuples():
+        fx_id.setdefault((r.event, r.team_h), []).append(r.id)
+        fx_id.setdefault((r.event, r.team_a), []).append(r.id)
     for r in upcoming.sort_values("kickoff").itertuples():
         lh, la = blended_lambdas(tm, r.team_h, r.team_a)
         by_team[r.event].setdefault(r.team_h, []).append((r.team_a, True, lh, la))
@@ -927,10 +983,16 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
         ep, nxt, sims, rot_notes, epf = [], None, [], [], []
         comp6 = {}
         rf = dict(r, p60=1.0, p1=0.0, emins=88.0)      # the same player if he starts and plays 88 minutes
+        # booking-ban risk, fixture by fixture
+        slots = [(i, g, k) for i, g in enumerate(gws) for k in range(len(by_team[g].get(team, [])))]
+        mnos = [order.get((team, (fx_id.get((g, team)) or [None])[min(k, len(fx_id.get((g, team)) or [None]) - 1)]), 0) or 99 for i, g, k in slots]
+        b_av, _, cards = ban_chances(yellows.get(pid, 0), r["yc90"], [r["emins"] * av[i] for i, g, k in slots], mnos,
+                                     risk_slots=sum(1 for i, g, k in slots if i < HORIZON))
+        ban_av = {(i, k): v for (i, g, k), v in zip(slots, b_av)}
         for i, g in enumerate(gws):
             total, total_full = 0.0, 0.0
             sim_total = np.zeros(SIM_N) if simulate_gws else None
-            for opp, home, lf, la in by_team[g].get(team, []):
+            for k_fx, (opp, home, lf, la) in enumerate(by_team[g].get(team, [])):
                 cong = rot["fixture"].get((team, g, opp))
                 f_rot, note = rotation_factor(rot["player"].get(pid), cong, r)
                 rr = dict(r, p60=min(0.97, r["p60"] * f_rot), emins=min(87.0, r["emins"] * f_rot)) if f_rot > 1.001 else r if f_rot >= 0.999 else dict(r, p60=r["p60"] * f_rot,
@@ -951,6 +1013,9 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
                 if USE_AVAIL_DECAY and i >= 1:   # injuries, bans, rotation and dropped players add up the further ahead you look
                     fa = max(AVAIL_FLOOR, 1 - AVAIL_DECAY.get(pos, 0.04) * min(i, 5))
                     pts = {k_: v_ * fa for k_, v_ in pts.items()}
+                bf = ban_av.get((i, k_fx), 1.0)
+                if bf < 0.999:   # chance he's serving a booking ban for this match
+                    pts = {k_: v_ * bf for k_, v_ in pts.items()}
                 total += sum(pts.values())
                 if i < HORIZON:
                     for k_, v_ in pts.items():
@@ -968,7 +1033,7 @@ def project(ds, tm, rates, prof, gws, keep_detail=True, rot=None, simulate_gws=F
                 epf.append(round(total_full, 2))
             if simulate_gws:
                 sims.append(sim_total)
-        out.append(dict(p=p, r=r, ep=ep, av=av, next=nxt, sims=sims, rot_notes=rot_notes, epf=epf,
+        out.append(dict(p=p, r=r, ep=ep, av=av, next=nxt, sims=sims, rot_notes=rot_notes, epf=epf, cards=cards,
                         comp6={k_: round(v_, 2) for k_, v_ in comp6.items()}))
     return out
 
@@ -1310,12 +1375,41 @@ def explain(item, teams, ttab, prof, pct, tm=None):
 
 
 # ============================================================ accuracy
+TEAM_MINUTES_CAP = True     # a team only has 11 x 90 = 990 minutes to share; see cap_team_minutes()
+TEAM_MINUTES = 990.0
+
+
+def cap_team_minutes(ds, rates, cap=TEAM_MINUTES):
+    """Each player's expected minutes are estimated on their own, so a team's total can come to more than the 990
+    minutes that exist (three strikers each expected to play 70 minutes for one place). Where a team's available
+    players add up to more than 990, scale their expected minutes, and their chances of playing, down to fit."""
+    if not TEAM_MINUTES_CAP:
+        return {}
+    pl = ds.players
+    status = dict(zip(pl["id"].astype(int), pl["status"].fillna("a"))) if "status" in pl else {}
+    team = dict(zip(pl["id"].astype(int), pl["team"].astype(int)))
+    total = {}
+    for pid, r in rates.items():
+        if status.get(int(pid), "a") in ("i", "s", "u", "n") or int(pid) not in team:
+            continue
+        total[team[int(pid)]] = total.get(team[int(pid)], 0.0) + r["emins"]
+    scaled = {t: cap / v for t, v in total.items() if v > cap}
+    for pid, r in rates.items():
+        f = scaled.get(team.get(int(pid)))
+        if f:
+            r["emins"] *= f
+            r["p60"] *= f
+            r["p1"] = min(1.0, r["p1"] * f)
+    return {int(t): round(f, 3) for t, f in scaled.items()}
+
+
 def fit_and_project(ds, gws, detail=False, simulate=False, book=None, refs=None):
     tm = team_model(ds)
     tm["book"] = book or {}
     tm["refs"] = refs or {}
     prof, league = team_profiles(ds, tm)
     rates = player_model(ds, tm)
+    tm["minutes_capped"] = cap_team_minutes(ds, rates)
     rot = rotation_model(ds, gws)
     return tm, prof, league, rates, rot, project(ds, tm, rates, prof, gws, keep_detail=detail, rot=rot,
                                                  simulate_gws=simulate)
@@ -1985,6 +2079,58 @@ def selling_prices(raw, ds, ids):
         sell = cur if cur <= paid else paid + math.floor(round((cur - paid) * 10) / 2) / 10
         out[int(pid)] = round(sell, 1)
     return out
+
+
+def decisions_vs_luck(raw, ds, stack_rows):
+    """Split your season into decisions and luck. For each gameweek: what your starting XI was expected to score,
+    using the model's projection made before that deadline (rebuilt from the data available then), against what
+    it scored; the same for your captain against the best-projected option in your XI, and for each transfer."""
+    if not raw or not stack_rows:
+        return None
+    ours = {(int(r[0]), int(r[6])): float(r[1]) for r in stack_rows}
+    proj_gws = {int(r[0]) for r in stack_rows}
+    pts = ds.hist.groupby(["element", "event"])["event_points"].sum().to_dict()
+    name = dict(zip(ds.players["id"], ds.players["web_name"]))
+    last = int(ds.fixtures.loc[ds.fixtures["finished"], "event"].max()) if ds.fixtures["finished"].any() else 0
+    chips = {c["event"]: c["name"] for c in raw.get("history", {}).get("chips", [])}
+    weeks = []
+    for gw, pk in sorted(raw.get("picks", {}).items(), key=lambda kv: int(kv[0])):
+        gw = int(gw)
+        if gw > last or gw not in proj_gws:
+            continue
+        xi = [p for p in pk.get("picks", []) if p.get("multiplier", 0) > 0]
+        if not xi:
+            continue
+        exp = sum(ours.get((gw, p["element"]), 0.0) * p["multiplier"] for p in xi)
+        act = sum(pts.get((p["element"], gw), 0) * p["multiplier"] for p in xi)
+        cap = next((p for p in xi if p.get("is_captain")), None)
+        row = dict(gw=gw, exp=round(exp, 1), act=int(act), chip=chips.get(gw))
+        if cap:
+            extra = (cap.get("multiplier", 2) or 2) - 1
+            best = max(xi, key=lambda p: ours.get((gw, p["element"]), 0.0))
+            ce, be = ours.get((gw, cap["element"]), 0.0), ours.get((gw, best["element"]), 0.0)
+            row.update(cap=name.get(cap["element"], ""), cap_exp=round(ce * extra, 1), cap_act=int(pts.get((cap["element"], gw), 0) * extra),
+                       cap_best=name.get(best["element"], ""), cap_cost=round((be - ce) * extra, 1))
+        weeks.append(row)
+    trs = []
+    tr = sorted(raw.get("transfers", []), key=lambda t: (t["event"], t.get("time", "")))
+    for k, t in enumerate(tr):
+        gw, pin, pout = t["event"], t["element_in"], t["element_out"]
+        if chips.get(gw) in ("wildcard", "freehit") or gw not in proj_gws:
+            continue
+        end = next((u["event"] - 1 for u in tr[k + 1:] if u["element_out"] == pin), last)
+        span = [g for g in range(gw, end + 1) if g <= last and g in proj_gws]
+        if not span:
+            continue
+        e = sum(ours.get((g, pin), 0.0) - ours.get((g, pout), 0.0) for g in span)
+        a = sum(pts.get((pin, g), 0) - pts.get((pout, g), 0) for g in span)
+        trs.append(dict(gw=gw, inn=name.get(pin, ""), out=name.get(pout, ""), weeks=len(span), exp=round(e, 1), act=int(a)))
+    if not weeks:
+        return None
+    sm = lambda rows, k: round(sum(r.get(k, 0) or 0 for r in rows), 1)
+    return dict(weeks=weeks, transfers=trs, first_gw=weeks[0]["gw"], summary=dict(
+        exp=sm(weeks, "exp"), act=sm(weeks, "act"), cap_exp=sm(weeks, "cap_exp"), cap_act=sm(weeks, "cap_act"),
+        cap_cost=sm(weeks, "cap_cost"), tr_exp=sm(trs, "exp"), tr_act=sm(trs, "act"), n=len(weeks), tr_n=len(trs)))
 
 
 def season_audit(raw, ds):
@@ -2925,6 +3071,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             id=pid, n=_text(p.get("web_name")), fn=f"{_text(p.get('first_name'))} {_text(p.get('second_name'))}".strip(),
             t=int(p["team"]), pos=r["pos"], price=round(float(p.get("now_cost") or 0), 1), own=round(own, 1),
             st=_text(p.get("status")) or "a", news=_text(p.get("news")), gs=gs.get(pid),
+            cards=it.get("cards") if it.get("cards") and it["cards"]["y"] >= it["cards"]["need"] - 2 else None,
             pen=int(p["penalties_order"]) if p.get("penalties_order") is not None and not pd.isna(p.get("penalties_order")) else None,
             ep=it["ep"], ep6=round(sum(it["ep"]), 1), av=[round(a, 2) for a in it["av"]],
             fpl_ep=float(p["ep_next"]) if p.get("ep_next") is not None and not pd.isna(p.get("ep_next")) else None,
@@ -3013,7 +3160,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   rules=dict(ft_max=5, hit=4, chip_half_end=19, squad_max_per_club=3),
                   horizon=HORIZON, long_gws=long_gws, special=special,
                   unscheduled=getattr(ds, "unscheduled", []),
-                  source_notes=SOURCE_NOTES, avail_decay=AVAIL_DECAY if USE_AVAIL_DECAY else None, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
+                  source_notes=SOURCE_NOTES, minutes_capped=tm.get("minutes_capped", {}), avail_decay=AVAIL_DECAY if USE_AVAIL_DECAY else None, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
@@ -3026,7 +3173,12 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     )
     if data["my"] and data["my"].get("raw"):
         data["my"]["sell"] = selling_prices(data["my"]["raw"], ds, data["my"]["ids"])
-        data["my"]["audit"] = season_audit(data["my"].pop("raw"), ds)
+        raw_ = data["my"].pop("raw")
+        data["my"]["audit"] = season_audit(raw_, ds)
+        try:
+            data["my"]["luck"] = decisions_vs_luck(raw_, ds, (acc or {}).get("stack_rows", []))
+        except Exception as e:  # noqa: BLE001
+            print("Decisions vs luck skipped:", e)
     cur = data["my"]["gw"] if data["my"] else gws[0] - 1
     if team_id and online:
         data["leagues"] = import_all_leagues(int(team_id), cur, first_id=league_id)
@@ -3148,6 +3300,9 @@ def sanity_checks(data):
           f"only {share:.0%} of regular players have a projection of 1+ point (expected most)")
     bad_num = sum(1 for p in ps for x in (p.get("ep") or []) if x is None or x != x or x < 0 or x > 30)
     check(bad_num == 0, "no impossible projections", f"{bad_num} impossible projections (blank, negative or over 30)")
+    mc = data["meta"].get("minutes_capped") or {}
+    ok.append("every team’s expected minutes fit within 990" if not mc else
+              f"{len(mc)} team{'s' if len(mc) != 1 else ''}’ expected minutes scaled down to fit 990")
     acc = (data.get("accuracy") or {}).get("summary") or {}
     if acc.get("mae") is not None:
         check(1.0 <= acc["mae"] <= 3.5, f"backtest error {acc['mae']} is in the normal range",
