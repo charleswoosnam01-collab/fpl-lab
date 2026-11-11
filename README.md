@@ -181,7 +181,7 @@ Each team gets an attack and a defence rating from expected goals (the quality o
 <details>
 <summary><b>Player roles and points</b></summary>
 
-Each player's share of his team's chances (non-penalty xG and xA) is measured from recent games and steadied towards a sensible starting point when the sample is small. Penalties go only to the current first-choice taker. Expected minutes come from his starts and minutes, cup and European games either side, and injury news. Clean sheets, goals conceded, saves, bonus, cards and **DEFCON** points are each modelled against the specific opponent.
+Each player's share of his team's chances (non-penalty xG and xA) is measured from recent games and steadied towards a sensible starting point when the sample is small. Penalties go only to the current first-choice taker. Expected minutes come from his starts and minutes, cup and European games either side, and injury news. Clean sheets, goals conceded, saves, bonus, cards and **DEFCON** points are each modelled against the specific opponent. Players near a yellow-card ban (five league bookings by their club's 19th match, ten by the 32nd) have their projections lowered for the matches they might miss, using a booking rate tested on last season.
 </details>
 
 <details>
@@ -214,7 +214,7 @@ Weeks further ahead are projected as if each player stays fit. Injuries, suspens
 
 | | FPL Lab | FPL's own projections |
 |---|---|---|
-| **Average error per player, last season** (35 gameweeks) | **2.05 points** | 2.29 points |
+| **Average error per player, last season** (35 gameweeks) | **2.04 points** | 2.29 points |
 | Gameweeks where FPL Lab was more accurate | **35 of 35** | |
 | **Average error, this season** (to GW9) | **2.08 points** | 2.36 points |
 | **Captain pick, average points a week** | **7.1** | 5.1 (FPL's top pick) |
