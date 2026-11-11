@@ -528,6 +528,56 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   only; NOT used in projections. Parsing and matching are tested on simulated
   replies only: check the first live run's "Goalscorer prices" log line.
 
+## Changes in v6.29
+
+- Outcome tags: Boom or bust tightened to haul chance in the top 20% of his
+  position and blank chance 40%+ (was top 30% and 35%); about 9 of the top
+  200 players instead of 24. Thresholds are judgement, not fitted.
+- `outcomeLine(p)`: a plain sentence with the player's numbers and a
+  tappable glossary term on the Overview and Role tabs; glossary entries
+  `boom`, `ceiling`, `safe`.
+
+## Changes in v6.30
+
+- Draft limits (per draft, in RULES): `defClub` (keeper plus defenders from
+  one club; a club already above it may stay but not grow) and `gkMax`
+  (keeper price cap; an owned keeper may stay). Enforced in `buildLP` and in
+  the pitch replacement list; shown in the plan summary.
+- `cap_team_minutes()` (TEAM_MINUTES_CAP): scales a team's expected minutes
+  and playing chances down when its available players add up to more than
+  990. Backtest: last season 2.054 -> 2.043 MAE, this season 2.066 -> 2.067
+  (no team currently exceeds 990). Reported in the safety checks.
+- Hourly runs (cron "20 * * * *") gated by a `gate` job that only lets them
+  through in the 12 hours before FPL's next deadline.
+- `decisions_vs_luck()`: per gameweek, the starting XI's expected points (from
+  this season's backtest projections, i.e. the model rebuilt with data
+  available before each deadline) against actual; captain decision cost and
+  luck; transfer expected against actual gain. In data.my.luck; shown in
+  Season review.
+- Tag checks (`tagChecksHtml`, Model page): device snapshots now store each
+  player's outcome tag, haul and blank chances and Due a return flag; once a
+  gameweek finishes, each tag's actual haul and blank rates are compared
+  with what the simulations said and with everyone projected 2.5+.
+
+## Changes in v6.31 (yellow-card bans)
+
+- CARD_RULES: five league yellows within a club's first 19 league matches = one
+  match ban; ten up to and including match 32 = two matches; served in the next
+  league match(es); cup and European cards don't count.
+- `ban_chances()`: a small state model over each player's upcoming league
+  fixtures (yellows so far, ban matches left), using his booking rate scaled by
+  CARD_RISK_SCALE = 0.5 and his expected minutes. It gives the chance he's
+  available for each fixture (multiplied into that fixture's points) and the
+  chance a ban for the next threshold starts within the shown six gameweeks.
+  CARD_RISK_SCALE fitted on 2025/26: players on 4 yellows by GW15 were banned
+  57% of the time against 77% predicted at the full rate (best scale 0.45-0.55
+  across three groups). Next-week projections are unaffected (a ban can only
+  start after a booking).
+- Exported as player `cards` = {y, need, by, ban, left, risk} for players within
+  two yellows of a threshold. App: 🟨 chip on rows (one booking away), a plain
+  sentence on the player's Overview, a "Booking watch" Home card for your own
+  players, and a glossary entry.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
