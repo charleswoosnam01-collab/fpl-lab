@@ -740,6 +740,14 @@ nav.tabs a[aria-current="page"]{border-top-color:var(--accent, var(--ink))}
   body.sheet-open .wrap{max-width:none;margin:0 min(480px,42vw) 0 0;padding-left:28px;padding-right:28px}
   body.sheet-open nav.tabs{right:min(480px,42vw)}
 }
+.oline{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:9px 12px;margin:8px 0;font-size:14px;line-height:1.45}.oline .otag{margin-right:4px}
+
+/* v6.30 */
+.lkbars{display:grid;gap:6px;margin:10px 0}
+.lkrow{display:grid;grid-template-columns:52px 1fr 52px;gap:8px;align-items:center;font-size:12.5px}.lkrow span{color:var(--muted);font-weight:700}.lkrow b{text-align:right}
+.lkrow .lb i.good{background:#1D9E75}.lkrow .lb i.bad{background:#E24B4A}
+.tagchk td small{display:block;font-size:11px;color:var(--muted);font-weight:400}
+.tagchk tr.base td{border-top:2px solid var(--line)}
 </style>
 </head>
 <body>
@@ -1013,11 +1021,24 @@ function outcomeTags(){
     const ps = D.players.filter(p => p.pos === pos && p.sim && available(p) && p.ep[0] >= 2.5);
     const hs = ps.map(haul).sort((a,b) => a - b), pc = v => hs.length ? hs.filter(x => x < v).length / hs.length : 0;
     ps.forEach(p => { const hp = pc(haul(p)), b = blank(p);
-      OUTCOME[p.id] = hp >= 0.85 && haul(p) >= 0.12 && b < 0.3 ? {t: "Ceiling", c: "ceil", why: "one of the best haul chances in his position, without much blank risk"}
-        : hp >= 0.7 && b >= 0.35 ? {t: "Boom or bust", c: "boom", why: "a real chance of a haul, but blanks often"}
-        : b <= 0.22 ? {t: "Safe floor", c: "safe", why: "points most weeks, rarely a big haul"} : null; });
+      // thresholds set by judgement, not fitted: Boom or bust tightened in v6.29 (top 20% haul and 40%+ blank, was 30% and 35%)
+      const o = hp >= 0.85 && haul(p) >= 0.12 && b < 0.3 ? {t: "Ceiling", c: "ceil", g: "ceiling", why: "one of the best haul chances in his position, without much blank risk"}
+        : hp >= 0.8 && b >= 0.4 ? {t: "Boom or bust", c: "boom", g: "boom", why: "one of the bigger haul chances in his position, but he blanks often"}
+        : b <= 0.22 ? {t: "Safe floor", c: "safe", g: "safe", why: "points most weeks, rarely a big haul"} : null;
+      if (o) OUTCOME[p.id] = Object.assign(o, {hp, b, h: haul(p)}); });
   });
   return OUTCOME;
+}
+// a plain sentence for player pages, with a tappable explanation
+function outcomeLine(p){
+  const o = outcomeTags()[p.id]; if (!o) return "";
+  const posn = POS_LONG[p.pos] + "s", top = Math.max(1, Math.round(100 * (1 - o.hp)));
+  const said = {
+    boom: `<b>${pct(o.h)}</b> chance of 10+ points, in the top ${top}% of ${posn} this week, but a <b>${pct(o.b)}</b> chance of 2 or fewer. A gamble: good for a differential or chasing rank, risky as a captain.`,
+    ceiling: `<b>${pct(o.h)}</b> chance of 10+ points, in the top ${top}% of ${posn} this week, and only a <b>${pct(o.b)}</b> chance of 2 or fewer. The best kind of pick: upside without much risk.`,
+    safe: `Only a <b>${pct(o.b)}</b> chance of 2 or fewer, so he usually returns something, but a <b>${pct(o.h)}</b> chance of 10+. Steady rather than explosive.`,
+  }[o.g];
+  return `<p class="oline"><span class="otag ${o.c}">${o.t}</span> ${said} ${term(o.g, "What this means")}</p>`;
 }
 const outcomeTag = p => { const o = outcomeTags()[p.id]; return o ? `<span class="otag ${o.c}" title="${esc(o.why)}: ${pct(haul(p))} chance of 10+, ${pct(blank(p))} chance of 2 or fewer">${o.t}</span>` : ""; };
 function viewWeek(){
@@ -1606,7 +1627,7 @@ function viewModel(){
   <h3>Captain log</h3><div class="scroller"><table class="log"><thead><tr><th>GW</th><th>FPL Lab</th><th class="n">Pts</th><th>FPL’s pick</th><th class="n">Pts</th><th>Top scorer</th><th class="n">Pts</th></tr></thead>
   <tbody>${W.map(w => `<tr><td>${w.gw}</td><td>${esc(w.cap.n)}</td><td class="n">${w.cap.pts}</td><td>${w.cap_fpl ? esc(w.cap_fpl.n) : "–"}</td><td class="n">${w.cap_fpl ? w.cap_fpl.pts : "–"}</td><td>${esc(w.best.n)}</td><td class="n">${w.best.pts}</td></tr>`).join("")}</tbody></table></div>
   <h3>Biggest misses in GW${last.gw}</h3><dl class="kv">${last.under.map(m => `<dt>${esc(m.n)} scored more than expected</dt><dd>${m.proj} → ${m.pts}</dd>`).join("")}${last.over.map(m => `<dt>${esc(m.n)} scored less than expected</dt><dd>${m.proj} → ${m.pts}</dd>`).join("")}</dl>
-  ${trackRecordHtml()}${how}${wholeAppViews()}${settingsHtml()}${backupHtml()}${glossaryList()}<h3>Data sources this run</h3>${sourcesList()}<p class="lede">${esc(D.meta.source)}. ${D.meta.matches} league matches, every shot in them, and cup and European minutes feed the model. Rebuilt ${dayTime(D.meta.generated)}.</p>`;
+  ${trackRecordHtml()}${tagChecksHtml()}${how}${wholeAppViews()}${settingsHtml()}${backupHtml()}${glossaryList()}<h3>Data sources this run</h3>${sourcesList()}<p class="lede">${esc(D.meta.source)}. ${D.meta.matches} league matches, every shot in them, and cup and European minutes feed the model. Rebuilt ${dayTime(D.meta.generated)}.</p>`;
 }
 
 /* ---------- sheets ---------- */
@@ -1636,7 +1657,7 @@ function openPlayer(id){
   const tabs = `<div class="seg ptabs" role="group" aria-label="Player sections">${[["overview","Overview"],["stats","Stats"],["fixtures","Fixtures"],["role","Role"]].map(([k, l]) => `<button data-ptab="${k}" data-pid="${p.id}" aria-pressed="${tab === k}">${l}</button>`).join("")}</div>`;
   const star = `<button class="starbtn" data-watch="${p.id}" aria-pressed="${isWatched(p.id)}">${isWatched(p.id) ? "★ Watching" : "☆ Watch"}</button>`;
   const body = {
-    overview: () => `${verdictLine(p)}${statusChips(p)}${betterOptions(p)}${playerWeek(p)}${p.hot_fpl_off ? `<p class="sub">FPL’s own projection (${f1(p.fpl_ep)}) is left out this week because he scored 10+ in one of his last three games; straight after a haul it has overrated players by about 60% in testing.</p>` : ""}${p.summary ? `<p class="lede">${esc(p.summary)}</p>` : ""}
+    overview: () => `${verdictLine(p)}${cardLine(p)}${outcomeLine(p)}${statusChips(p)}${betterOptions(p)}${playerWeek(p)}${p.hot_fpl_off ? `<p class="sub">FPL’s own projection (${f1(p.fpl_ep)}) is left out this week because he scored 10+ in one of his last three games; straight after a haul it has overrated players by about 60% in testing.</p>` : ""}${p.summary ? `<p class="lede">${esc(p.summary)}</p>` : ""}
   ${plainCard(p)}
   ${p.news ? `<div class="callout">${esc(p.news)}</div>` : ""}
   ${n ? `<div class="versus"><div class="big">${f1(p.ep[0])}</div><div class="sm">projected for GW${GWS[0]}<br>${esc(fxText(p.t, GWS[0]))}${p.fpl_ep != null ? `<br>FPL’s own projection: ${f1(p.fpl_ep)}` : ""}</div></div>
@@ -1652,7 +1673,7 @@ function openPlayer(id){
     fixtures: () => `<h3>Next ${GWS.length} gameweeks</h3><div class="gwgrid">${GWS.map((g,i) => { const l = FX[p.t][g]; const d = l.length ? Math.round(l.reduce((a,f) => a + diff(modeFor(p), f), 0) / l.length) : 0;
     return `<div class="d${d}">GW${g}<b>${f1(p.ep[i])}</b>${l.length ? l.map(f => T[f.opp].short + " " + (f.home ? "H" : "A")).join(" ") : "None"}</div>`; }).join("")}</div>
   <h3>Form, match by match</h3>${formChart(p.form)}${n ? ruleEditor(p) : ""}`,
-    role: () => `<p class="lede">${typeTag(p)} ${outcomeTag(p)}</p>${p.pos >= 2 ? pieLine(p) : ""}${roleTracker(p)}
+    role: () => `<p class="lede">${typeTag(p)}</p>${outcomeLine(p)}${p.pos >= 2 ? pieLine(p) : ""}${roleTracker(p)}
   <div class="statline"><span>${term("ms", "Minutes security")}: <b class="ms-t ${minutesSecurity(p).level}">${{green: "High", yellow: "Medium", red: "Low"}[minutesSecurity(p).level]}</b>. ${esc(minutesSecurity(p).text)}.</span>
 
     ${(() => { const v = variance(p); return v ? `<span>Last ${v.games} games: ${f1(v.xg)} xG and ${f1(v.xa)} xA, for ${v.goals} goal${v.goals === 1 ? "" : "s"} and ${v.ast} assist${v.ast === 1 ? "" : "s"}. ${v.unlucky ? `<b>${term("variance", "Due a return")}</b>: about ${f1(v.gap)} points of returns missing.` : v.lucky ? "He’s scored well above his chances lately, which rarely lasts." : "Returns are in line with his chances."}</span>` : ""; })()}
@@ -1780,7 +1801,7 @@ function closeSheet(){ const d = $("#sheet"); if (d.open) d.close(); document.bo
 function buildLP(opts){
   const {players, squadIds, bank, ft, H, epAt, capAt = epAt, decay = 0.9, benchW = 0.1, ftValue = 1.5, maxTransfersPerGW = 3, hitCost = 4, pool = 22,
     banned = [], forced = [], buyBy = [], sellBy = [], maxTransfers = null, maxHits = null,
-    chips = {}, sellPrice = {}, exclude = []} = opts;
+    chips = {}, sellPrice = {}, exclude = [], defClub = null, gkMax = null} = opts;
   // banned: never in the squad (owned players are sold in week one); forced: in the squad every week;
   // buyBy / sellBy: [{id, t}] in the squad, or gone, from week t onwards;
   // chips: {wc|fh|bb|tc: "auto" | week index | undefined}; sellPrice: {id: £m} for players already owned;
@@ -1822,6 +1843,8 @@ function buildLP(opts){
       if (buyBy.some(r => r.id === p.id && t >= r.t)) C(`${v("s", i, t)} = 1`);
       if (sellBy.some(r => r.id === p.id && t >= r.t)) C(`${v("s", i, t)} = 0`);
       if (p.st === "u") C(`${v("b", i, t)} = 0`);
+      // draft limit: no keeper above the draft's price cap, unless he's already in the squad
+      if (gkMax != null && p.pos === 1 && p.price > gkMax + 1e-9 && !inSquad.has(p.id)){ C(`${v("s", i, t)} = 0`); if (use("fh")) C(`${v("f", i, t)} = 0`); }
       C(`${v("b", i, t)} + ${v("q", i, t)} <= 1`);
     }
   });
@@ -1837,6 +1860,9 @@ function buildLP(opts){
     C(`${sum(t, "x", p => p.pos === 4)} >= 1`); C(`${sum(t, "x", p => p.pos === 4)} <= 3`);
     C(`${sum(t, "c")} = 1`);
     for (const tm of teams) C(`${sum(t, "s", p => p.t === tm)} <= 3`);
+    // draft limit: keeper plus defenders from one club; a club already above it can't go higher
+    if (defClub != null) for (const tm of teams){ const now = squadIds.filter(id => { const q = players.find(x => x.id === id); return q && q.t === tm && q.pos <= 2; }).length;
+      C(`${sum(t, "s", p => p.t === tm && p.pos <= 2)} <= ${Math.max(defClub, now)}`); if (use("fh")) C(`${sum(t, "f", p => p.t === tm && p.pos <= 2)} <= ${defClub}`); }
     if (use("fh")){
       C(`${sum(t, "f")} - 15 fh_${t} = 0`);
       for (const pos of [1,2,3,4]) C(`${sum(t, "f", p => p.pos === pos)} - ${lim[pos]} fh_${t} = 0`);
@@ -1946,6 +1972,10 @@ const GLOSSARY = {
   fdr2:["Goals and clean sheets", "Each fixture shows the goals the team is expected to score and its chance of a clean sheet, from the model’s ratings of both sides (and bookmaker odds when available).", "Plain numbers say more than a 1 to 5 scale: 2.1 expected goals and a 45% clean sheet chance tell you exactly what the fixture offers attackers and defenders."],
   variance:["Due a return", "Flags players whose expected goals and assists over their last four games are well ahead of the goals and assists they actually got (at least 1.0 xG plus xA, and roughly a goal’s worth of points missing).", "Chances tend to turn into returns over time, so these players are often good value before the points arrive. Check his minutes are secure first."],
   ms:["Minutes security", "Green: started at least four of his last five (or every game recently) with 70% or more of the minutes. Yellow: some benchings or early substitutions. Red: rarely starting, injured or suspended.", "Expected points mean nothing without minutes. A yellow or red light is the quickest rotation warning."],
+  cards:["Yellow-card bans", "Five league yellow cards within a club’s first 19 league matches means a one-match ban; ten up to and including their 32nd match means a two-match ban. The ban is served in the next league match or matches. Cup and European bookings don’t count towards these.", "FPL Lab works out each player’s chance of reaching the next threshold from how often he’s booked and how many minutes he’s expected to play, and lowers his projection for the matches he might miss. Players close to a ban get booked about half as often as their usual rate suggests (tested on last season: 57% of players on four yellows were banned by the cut-off, against 77% at their full rate), so the chance is scaled down accordingly. Players one booking away get a 🟨 warning."],
+  boom:["Boom or bust", "A player who could haul but often scores almost nothing this gameweek. From 3,000 simulations of his next match: his chance of 10+ points is in the top 20% of his position, and his chance of 2 points or fewer is 40% or more.", "It describes the shape of his outcomes, not whether he’s good. Useful when you want a differential or need to chase rank; risky when you want a dependable captain. The cut-offs were set by judgement, not fitted on past seasons."],
+  ceiling:["Ceiling", "One of the best chances of a big haul in his position this gameweek (top 15%, and at least 12% for 10+ points), with less than a 30% chance of 2 points or fewer.", "The best of both: real upside without much blank risk. These players are rare, usually a handful a week."],
+  safe:["Safe floor", "A player who scores most weeks: no more than a 22% chance of 2 points or fewer this gameweek, but not one of the bigger haul chances.", "Good for filling a spot you need points from, protecting a lead, or as a safe vice-captain."],
   pick:["Pick score", "0 to 100 within his position. Mostly how many more points he projects over the next six gameweeks than a typical nailed player at his price (75%), then whether his fixtures are best now or later (15%), how secure his minutes are (6%) and his share of his team’s chances (4%). Buy is 85 and up with secure minutes, Watch 65 to 84, Don’t buy below 65. For your own players, Sell means an affordable replacement adds at least 3 points more than a free transfer is worth.", "The score compares him with regular starters at his position (3+ starts in the last 5). The weights were fitted on last season and checked on weeks held back from the fit: regular starters scoring 85+ beat others at their price by 4.6 points over the next six weeks on average (59% of the time), 65 to 84 by 2.3, while those under 40 fell 1.2 short. Underlying form and price momentum were tested too and added nothing, so they aren’t in it."],
   solver:["Exact solver", "A mathematical optimiser that checks every possible combination of transfers, captains and line-ups over the next six gameweeks and finds the plan with the most projected points after hits.", "It’s the method paid planners use. Our quick planner is a fast search that can miss combinations; the solver can’t."],
   robust:["Stress test", "The solver re-run with the projections randomly shaken, to see which moves hold up.", "A move picked in most runs is robust; one picked only once relies on the projections being exactly right."],
@@ -2208,6 +2238,7 @@ async function solveExact(squad, bank, ft, opts = {}){
     try {
       const {lp, P: pl} = buildLP(Object.assign({players: D.players, squadIds: squad.map(p => p.id), bank, ft, H, epAt, capAt, pool,
         decay: RULES.decay, ftValue: RULES.ftv, chips, sellPrice: sellPrices(squad), exclude: opts.exclude || [],
+        defClub: RULES.defClub || null, gkMax: RULES.gkMax || null,
         hitCost: hitsMode === "off" ? 99 : 4, maxHits: hitsMode === "one" ? 1 : null}, rules));
       const highs = await newHighs();   // a fresh solver each time
       const withChips = Object.keys(chips).length > 0;
@@ -2255,6 +2286,8 @@ function rulesSummary(r){
   if (r.sell.length) bits.push("selling " + r.sell.map(x => `${nm(x.id)} by GW${x.gw}`).join(", "));
   if (r.buy.length) bits.push("buying " + r.buy.map(x => `${nm(x.id)} by GW${x.gw}`).join(", "));
   if (r.ban.length) bits.push("banning " + r.ban.map(nm).join(", "));
+  if (r.defClub) bits.push(`at most ${r.defClub} ${r.defClub === 1 ? "keeper or defender" : "keepers or defenders"} per club`);
+  if (r.gkMax) bits.push(`no keeper over ${money(r.gkMax)}`);
   if (r.moves && r.moves.length) bits.push("your drafted moves: " + r.moves.map(m => `${nm(m.out)} → ${nm(m.in)} (GW${m.gw})`).join(", "));
   if (r.hits !== "on") bits.push(r.hits === "off" ? "no hits" : "at most one hit");
   const ch = CHIP_KEYS.filter(k => r.chips[k] && r.chips[k] !== "off" && hasChip(k)).map(k => `${CHIP_LONG[k]} ${r.chips[k] === "auto" ? "when best" : "in GW" + r.chips[k]}`);
@@ -2288,6 +2321,10 @@ function plannerPanel(squad){
       <h4 class="mini-h">Plan ahead</h4>${seg("horizon", [[3,"3 gameweeks"],[4,"4"],[6,"6"]], RULES.H, "Horizon")}
       <h4 class="mini-h">How much later weeks count</h4>${seg("decay", [[1,"Equal"],[0.9,"A bit less"],[0.8,"Much less"]], RULES.decay, "Weight of later weeks")}
       <h4 class="mini-h">Value of a banked free transfer</h4>${seg("ftv", [[0,"None"],[1.5,"1.5 pts"],[3,"3 pts"]], RULES.ftv, "Free transfer value")}
+      <h4 class="mini-h">Keeper and defenders from one club</h4>${seg("defclub", [[0,"Up to 3"],[2,"Up to 2"],[1,"Just 1"]], RULES.defClub || 0, "Defensive players from one club")}
+      <p class="sub">Spreads your clean-sheet risk: if one team concedes, fewer of your players lose points together. Applies to this draft only. A club you already have more from can stay as it is, but won’t be added to.</p>
+      <h4 class="mini-h">Most you’ll pay for a keeper</h4>${seg("gkmax", [[0,"No limit"],[4.5,"£4.5m"],[5,"£5.0m"],[5.5,"£5.5m"]], RULES.gkMax || 0, "Maximum goalkeeper price")}
+      <p class="sub">Keepers score in a narrow range, so a cheap one frees money for attackers. Applies to this draft only; a keeper you already own can stay.</p>
       <p class="sub" style="margin-top:8px">Projections further ahead are less certain, so most planners count later weeks a bit less. A banked transfer has value because it lets you react later.</p>
       <div class="optgrid" style="margin-top:10px"><button class="optrow" data-plannew="blank">New empty draft</button><button class="optrow" data-plandel="1">Delete ${esc(RULES.name)}</button></div>
     </div>`;
@@ -2322,6 +2359,20 @@ function stressHtml(st){
 }
 
 /* ---------- v6: season review ---------- */
+function luckHtml(){
+  const Lk = D.my && D.my.luck; if (!Lk || !Lk.weeks || !Lk.weeks.length) return "";
+  const s = Lk.summary, luck = s.act - s.exp, capLuck = s.cap_act - s.cap_exp, trLuck = s.tr_act - s.tr_exp;
+  const word = v => v >= 0 ? `<b class="upc">${f1(v)} points of good luck</b>` : `<b class="downc">${f1(-v)} points of bad luck</b>`;
+  const max = Math.max(...Lk.weeks.map(w => Math.abs(w.act - w.exp)), 5);
+  const bars = Lk.weeks.map(w => { const d = w.act - w.exp; return `<div class="lkrow"><span>GW${w.gw}${w.chip ? "*" : ""}</span><div class="lb"><span class="mid"></span><i class="${d >= 0 ? "good" : "bad"}" style="${d >= 0 ? "left:50%" : "right:50%"};width:${50 * Math.abs(d) / max}%"></i></div><b>${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}</b></div>`; }).join("");
+  return `<h3>Decisions vs luck</h3>
+    <p class="lede">Good decisions don’t always pay off, and bad ones sometimes do. This compares what your choices were expected to score, using the model’s projection made before each deadline, with what they actually scored. The gap is luck.</p>
+    <div class="stats"><div class="stat"><b>${f1(s.act)}</b><span>Your starting XIs scored</span><em>expected ${f1(s.exp)}</em></div><div class="stat"><b>${luck >= 0 ? "+" : "−"}${f1(Math.abs(luck))}</b><span>Luck</span><em>${luck >= 0 ? "results went for you" : "results went against you"}</em></div></div>
+    <p class="sub"><b>Captains.</b> Your captain picks cost <b>${f1(s.cap_cost)}</b> expected points against the best-projected option in your XI each week (the decision). After that, the results gave you ${word(capLuck)} on the captaincy.</p>
+    ${s.tr_n ? `<p class="sub"><b>Transfers.</b> Your ${s.tr_n} transfer${s.tr_n === 1 ? " was" : "s were"} expected to gain <b>${sgn(s.tr_exp)}</b> points while the new players were in your team, and actually gained <b>${sgn(s.tr_act)}</b>: ${word(trLuck)}.</p>` : ""}
+    <div class="lkbars">${bars}</div>
+    <p class="sub">Each bar is one gameweek: your starting XI’s actual points minus expected. Green is good luck, red bad. ${Lk.weeks.some(w => w.chip) ? "* a chip week. " : ""}Covers GW${Lk.first_gw} onwards, the first gameweek the model has a projection for. Expected points use the current model rebuilt with only the data available before each deadline, and leave out hits and automatic substitutions.</p>`;
+}
 function viewSeason(){
   const A = D.my && D.my.audit;
   if (!A) return `<div class="empty-state"><p class="name" style="margin:0 0 6px">Your season review appears once your team ID is set.</p><p class="lede">It needs the GitHub setup to read your transfers, captains and rank from FPL. Add the FPL_TEAM_ID variable and run the workflow.</p></div>`;
@@ -2333,7 +2384,7 @@ function viewSeason(){
     ${W.map((w,k) => `<circle cx="${lx(k)}" cy="${ly(w.rank)}" r="3" style="fill:var(--me)"/><text x="${lx(k)}" y="146" text-anchor="middle">${w.gw}</text>`).join("")}
     <text x="4" y="24">${(minR/1000).toFixed(0)}k</text><text x="4" y="132">${(maxR/1000).toFixed(0)}k</text></svg>` : "";
   const tr = [...A.transfers].sort((a,b) => b.gw - a.gw);
-  return `<div class="stats"><div class="stat"><b>${(s.best_rank || 0).toLocaleString("en-GB")}</b><span>Best overall rank</span></div><div class="stat"><b>${sgn(s.net)}</b><span>Points from transfers</span><em>${s.good} of ${s.transfers} paid off</em></div><div class="stat"><b>${s.cap_best}/${s.cap_n}</b><span>Best captain picked</span><em>${s.cap_lost} pts missed</em></div></div>
+  return luckHtml() + `<h3>Your decisions, week by week</h3>` + `<div class="stats"><div class="stat"><b>${(s.best_rank || 0).toLocaleString("en-GB")}</b><span>Best overall rank</span></div><div class="stat"><b>${sgn(s.net)}</b><span>Points from transfers</span><em>${s.good} of ${s.transfers} paid off</em></div><div class="stat"><b>${s.cap_best}/${s.cap_n}</b><span>Best captain picked</span><em>${s.cap_lost} pts missed</em></div></div>
     <p class="verdict">${s.net >= 0 ? `Your transfers have gained <b>${f1(s.net)} points</b> against keeping the players you sold, after ${s.hits} points of hits.` : `Your transfers have cost <b>${f1(-s.net)} points</b> against keeping the players you sold, including ${s.hits} points of hits.`} You picked the highest-scoring captain in your XI ${s.cap_best} times out of ${s.cap_n}, and left ${s.bench} points on your bench.</p>
     <h3>Overall rank</h3>${chart}
     <h3>Every transfer</h3><p class="lede">Points the new player scored against the one you sold, from that gameweek until you sold him on, minus any hit.</p>
@@ -2885,6 +2936,27 @@ function surpriseHtml(){
   return `<h3>Surprise runs</h3><p class="lede">Teams whose last two games were far above (or below) what the model expected before each one. This is where a run like Bournemouth’s shows up first, but treat it with care: of ${bt.n} teams that beat the forecast by ${bt.threshold} xG a game over two games, only <b>${pct(bt.beat_again)}</b> kept beating it over the next four. Stats can’t see these runs coming, and chasing them after two games hasn’t paid on average. Watch for a reason that sticks, like a new striker, a tactical change or a run of injuries returning.</p>
     ${list.length ? `<ul class="why">${list.map(t => `<li>${toneDot(t.surprise > 0 ? "up" : "down")}<div><h4><button class="term" data-team="${t.id}">${esc(t.name)}</button>: ${t.surprise > 0 ? "+" : "−"}${f2(Math.abs(t.surprise))} xG a game against forecast ${trendPill(t.id)}</h4><p>${t.surprise > 0 ? "Creating far more than expected lately. Probably a mix of real improvement and luck; the forecast already includes the part that tends to last." : "Creating far less than expected lately. Usually a dip that recovers; check for injuries before selling."}</p></div></li>`).join("")}</ul>` : `<p class="lede">No team is far off its forecast right now.</p>`}`;
 }
+function tagChecksHtml(){
+  let st = {}; try { st = JSON.parse(localStorage.getItem(REVIEW_STORE) || "{}"); } catch(e) {}
+  const snaps = Object.values(st.snaps || {}).filter(s => s.o && D.meta.last_gw >= s.gw && !(D.meta.pending || []).some(f => f.gw === s.gw));
+  const groups = {boom: [], ceiling: [], safe: [], due: [], all: []};
+  snaps.forEach(s => Object.entries(s.o).forEach(([id, [tag, h, b, due]]) => {
+    const pts = actualPts(+id, s.gw); if (pts == null) return;
+    const row = {pts, h, b}; groups.all.push(row); if (tag) groups[tag].push(row); if (due) groups.due.push(row);
+  }));
+  const intro = `<h3>Do the tags work?</h3><p class="lede">After each gameweek, each tag is checked against what happened: did Boom or bust players really haul and blank more, did Safe floor players really blank less, did Due a return players score more? A haul is 10+ points, a blank 2 or fewer. It covers gameweeks you opened the app before the deadline, and it’s kept on this device.</p>`;
+  if (!groups.all.length) return intro + `<p class="sub">The first results appear once a gameweek you opened the app before has finished.</p>`;
+  const st_ = g => { const n = g.length, m = k => g.reduce((s, r) => s + r[k], 0) / n;
+    return n ? {n, pts: m("pts"), hA: g.filter(r => r.pts >= 10).length / n, bA: g.filter(r => r.pts <= 2).length / n, hP: m("h"), bP: m("b")} : null; };
+  const base = st_(groups.all);
+  const row = (label, k, says) => { const x = st_(groups[k]);
+    if (!x) return `<tr><td>${label}</td><td colspan="4" class="sub">No tagged players yet</td></tr>`;
+    return `<tr><td><b>${label}</b><small>${says}</small></td><td class="n">${x.n}</td><td class="n">${f1(x.pts)}</td><td class="n">${pct(x.hA)}<small>said ${pct(x.hP)}</small></td><td class="n">${pct(x.bA)}<small>said ${pct(x.bP)}</small></td></tr>`; };
+  return intro + `<div class="scroller"><table class="log tagchk"><thead><tr><th>Tag</th><th class="n">Player-weeks</th><th class="n">Avg pts</th><th class="n">Hauled</th><th class="n">Blanked</th></tr></thead><tbody>
+    ${row("Boom or bust", "boom", "should haul and blank more than most")}${row("Ceiling", "ceiling", "should haul often, blank rarely")}${row("Safe floor", "safe", "should blank less than most")}${row("Due a return", "due", "should score more than most")}
+    <tr class="base"><td><b>Everyone projected 2.5+</b><small>the comparison</small></td><td class="n">${base.n}</td><td class="n">${f1(base.pts)}</td><td class="n">${pct(base.hA)}<small>said ${pct(base.hP)}</small></td><td class="n">${pct(base.bA)}<small>said ${pct(base.bP)}</small></td></tr></tbody></table></div>
+    <p class="sub">“Said” is what the simulations expected for that group before the deadline. ${snaps.length < 4 ? `Only ${snaps.length} gameweek${snaps.length === 1 ? "" : "s"} so far: a few weeks is too few to judge, so treat this as a first look.` : ""} Player types (Goal threat, Creator and so on) describe where points come from rather than predicting anything, so they aren’t scored here.</p>`;
+}
 function trackRecordHtml(){
   const c = D.meta.trend_calls || []; if (!c.length) return "";
   const rows = c.map(r => { const rose = r.actual > r.last4 + 0.05, big = r.actual - r.last4;
@@ -3145,7 +3217,10 @@ function saveForecastSnapshot(){
   const ids = new Set(state.squad.ids); D.players.forEach(p => { const v = verdict(p); if (p.ep[0] >= 0.5 || (v && v.word === "Buy")) ids.add(p.id); });
   const ep = {}, v = {}; ids.forEach(id => { if (P[id]){ ep[id] = +(baseEp(P[id])[0] || 0).toFixed(2); v[id] = verdict(P[id]) ? verdict(P[id]).word : ""; } });
   const xi = squad.length === 15 ? bestXI(squad, 0) : null;
-  st.snaps = st.snaps || {}; st.snaps[gw] = {gw, ep, v, xi: xi ? xi.xi.map(p => p.id) : [], cap: xi && xi.cap ? xi.cap.id : null, at: Date.now()};
+  const o = {}, ot = outcomeTags();
+  D.players.forEach(p => { if (p.sim && p.ep[0] >= 2.5 && available(p)){ const t = ot[p.id], vr = variance(p);
+    o[p.id] = [t ? t.g : "", +haul(p).toFixed(3), +blank(p).toFixed(3), vr && vr.unlucky ? 1 : 0]; } });
+  st.snaps = st.snaps || {}; st.snaps[gw] = {gw, ep, v, o, xi: xi ? xi.xi.map(p => p.id) : [], cap: xi && xi.cap ? xi.cap.id : null, at: Date.now()};
   try { localStorage.setItem(REVIEW_STORE, JSON.stringify(st)); } catch(e) {}
 }
 function actualPts(id, gw){ const p = P[id]; if (!p || !p.form) return null; const r = p.form.filter(x => x[0] === gw); return r.length ? r.reduce((s, x) => s + x[6], 0) : (D.meta.last_gw >= gw ? 0 : null); }
@@ -3345,11 +3420,13 @@ function openTransferOut(outId){
   const clubs = {}; draftIdsAt(i).forEach(id => { if (P[id] && id !== outId) clubs[P[id].t] = (clubs[P[id].t] || 0) + 1; });
   const q = (state.tq || "").trim().toLowerCase();
   const gainOf = c => { let d = 0; for (let k = i; k < GWS.length; k++) d += (c.ep[k] || 0) - (o.ep[k] || 0); return d; };
-  const list = D.players.filter(c => c.pos === o.pos && !ids.has(c.id) && !banned.has(c.id) && available(c) && c.price <= budget + 1e-9 && (clubs[c.t] || 0) < 3
+  const defs = {}; draftIdsAt(i).forEach(id => { const q = P[id]; if (q && id !== outId && q.pos <= 2) defs[q.t] = (defs[q.t] || 0) + 1; });
+  const limitOk = c => (!RULES.gkMax || c.pos !== 1 || c.price <= RULES.gkMax + 1e-9) && (!RULES.defClub || c.pos > 2 || (defs[c.t] || 0) < RULES.defClub);
+  const list = D.players.filter(c => c.pos === o.pos && !ids.has(c.id) && !banned.has(c.id) && available(c) && c.price <= budget + 1e-9 && (clubs[c.t] || 0) < 3 && limitOk(c)
     && (!q || c.n.toLowerCase().includes(q) || T[c.t].short.toLowerCase() === q || T[c.t].name.toLowerCase().includes(q)))
     .sort((a,b) => ((pick(b) || {}).score || 0) - ((pick(a) || {}).score || 0) || gainOf(b) - gainOf(a)).slice(0, 30);
   $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Replace ${esc(o.n)}</h2>
-    <p class="sub">${POS_LONG[o.pos]}s up to ${money(budget)} for GW${g} (${money(sell)} from selling him plus ${money(st.bank)} in the bank). Sorted by pick score; the number is points gained from GW${g} to GW${GWS[GWS.length - 1]}. Banned players and clubs you already have three from are left out.</p>
+    <p class="sub">${RULES.defClub && o.pos <= 2 ? `This draft allows ${RULES.defClub} defensive player${RULES.defClub === 1 ? "" : "s"} per club. ` : ""}${RULES.gkMax && o.pos === 1 ? `This draft’s keeper limit is ${money(RULES.gkMax)}. ` : ""}${POS_LONG[o.pos]}s up to ${money(budget)} for GW${g} (${money(sell)} from selling him plus ${money(st.bank)} in the bank). Sorted by pick score; the number is points gained from GW${g} to GW${GWS[GWS.length - 1]}. Banned players and clubs you already have three from are left out.</p>
     <input type="search" id="tq" placeholder="Search a name or club" value="${esc(state.tq || "")}" aria-label="Search replacements" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:10px 12px;margin:6px 0;background:var(--bg)">
     <ul class="list" id="tqlist">${list.map(c => { const d = gainOf(c); return `<li><button class="row" data-draftin="${c.id}" data-draftout="${outId}"><div><div class="name">${msDot(c)}${dot(c.t)}${esc(c.n)} ${verdictPill(c)}</div><div class="sub">${T[c.t].short}, ${money(c.price)}, ${esc(fxText(c.t, g))}</div></div><div class="metric" style="color:var(--${d >= 0 ? "up" : "down"})">${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}<small>pts</small></div></button></li>`; }).join("") || `<li class="lede">Nobody fits the budget and club limit.</li>`}</ul>${sheetFoot()}`;
   showSheet();
@@ -3505,6 +3582,8 @@ function homeCards(){
   if (has){
     const xi = bestXI(squad, 0).xi, hurt = xi.filter(p => p.st !== "a");
     if (hurt.length) card(1, "!", "Deadline check", hurt.length === 1 ? `${hurt[0].n} is flagged` : `${hurt.length} flagged in your XI`, esc(hurt[0].news || "Check the news before the deadline"), `data-open="${hurt[0].id}"`, "down");
+    const edge = squad.filter(onBanEdge).sort((a,b) => b.cards.risk - a.cards.risk)[0];
+    if (edge) card(8, "🟨", "Booking watch", `${edge.n} on ${edge.cards.y} yellows`, `One more means a ${edge.cards.ban}-match ban; about ${pct(edge.cards.risk)} chance in the next ${GWS.length} GWs`, `data-open="${edge.id}"`, "down");
     const risk = squadRisk(squad)[0];
     if (risk) card(5, "!", "Watch out", risk.head, esc(risk.sub), `data-open="${risk.p.id}"`, "down");
     const falling = squad.filter(p => p.pc && p.pc.src === "fpl" && p.pc.steps && p.pc.steps[0] <= -100);
@@ -3647,8 +3726,14 @@ function statusChips(p){
 }
 
 /* ---------- v6.28: calmer rows, tabs, five-tab nav, status strip, watchlist, search, guide, what's new, accent ---------- */
-const APP_VERSION = "6.28";
+const APP_VERSION = "6.31";
 const WHATS_NEW = [
+  "Yellow-card bans: players one booking from a ban get a 🟨 warning, and their projections allow for the matches they might miss",
+  "Decisions vs luck in your Season review: what your choices were expected to score against what they scored",
+  "“Do the tags work?” on the Model page checks each tag against what happened",
+  "Two new draft rules in the planner: a limit on keepers and defenders from one club, and a maximum keeper price",
+  "Updates every hour in the 12 hours before each deadline, to catch late team news",
+  "Boom or bust, Ceiling and Safe floor are explained on every player page, with a tappable definition, and Boom or bust is now stricter",
   "Calmer player lists: position, verdict and one tag that fits the view",
   "Player pages split into Overview, Stats, Fixtures and Role tabs",
   "Five tabs: Trends now lives inside Teams, and the Model sits behind the gear icon at the top",
@@ -3681,8 +3766,17 @@ function watchNote(p){
   if (step <= -100) return `<span class="chip down">Price falling</span>`;
   return varianceChip(p) || outcomeTag(p) || typeTag(p);
 }
+// booking-ban risk: one yellow from a ban
+const onBanEdge = p => p.cards && p.cards.y === p.cards.need - 1 && p.cards.left > 0;
+function cardChip(p){ return onBanEdge(p) ? `<span class="chip warn" title="One more league yellow by his club’s ${ordinal(p.cards.by)} match means a ${p.cards.ban}-match ban">🟨 ${p.cards.y} yellows</span>` : ""; }
+function cardLine(p){
+  if (!p.cards || p.cards.left <= 0 || p.cards.y < p.cards.need - 2) return "";
+  const c = p.cards, club = T[p.t].name, more = c.need - c.y;
+  return `<p class="oline"><span class="chip warn">🟨 ${c.y} yellow card${c.y === 1 ? "" : "s"}</span> ${more === 1 ? "One more" : `${more} more`} league booking${more === 1 ? "" : "s"} in ${esc(club)}’s next ${c.left} league match${c.left === 1 ? "" : "es"} (up to their ${ordinal(c.by)}) means a <b>${c.ban}-match ban</b>. From how often he’s booked, there’s about a <b>${pct(c.risk)}</b> chance a ban starts in the next ${GWS.length} gameweeks; his projections for later weeks already allow for it. ${term("cards", "The rules")}</p>`;
+}
 // the one tag a row shows depends on the list you're looking at
 function rowTag(p){
+  if (onBanEdge(p)) return cardChip(p);
   const tab = (location.hash || "#week").slice(1), q = tab === "players" ? state.pl.quick : null;
   if (q === "diff") return `<span class="chip">${f1(p.own)}% owned</span>`;
   if (q === "form") return `<span class="chip up">${(p.form || []).slice(-4).reduce((s, r) => s + r[6], 0)} pts in last 4</span>`;
@@ -3812,7 +3906,7 @@ const WIDE = window.matchMedia ? window.matchMedia("(min-width: 1000px)") : {mat
 
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-alts],[data-paidsave]");
+  const el = e.target.closest("[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
   if (!el){ if (e.target === $("#sheet")) closeSheet(); return; }
   const d = el.dataset;
   if (d.moretoggle){ const k = d.moretoggle; state.more[k] = !(el.getAttribute("aria-expanded") === "true"); render(); }
@@ -3838,6 +3932,8 @@ document.addEventListener("click", e => {
   else if (d.plandel){ deletePlan(); render(); }
   else if (d.decay){ RULES.decay = +d.decay; saveRules(); render(); }
   else if (d.ftv){ RULES.ftv = +d.ftv; saveRules(); render(); }
+  else if (d.defclub !== undefined){ RULES.defClub = +d.defclub || null; saveRules(); render(); }
+  else if (d.gkmax !== undefined){ RULES.gkMax = +d.gkmax || null; saveRules(); render(); }
   else if (d.paidsave){ const v = parseFloat(($("#paidinp") || {}).value); if (v > 0){ PAID[+d.paidsave] = v; } else delete PAID[+d.paidsave];
     try { localStorage.setItem(PAID_STORE, JSON.stringify(PAID)); } catch(e) {} state.exact = null; render(); openPlayer(+d.paidsave); toast("Selling price saved"); }
   else if (d.alts){ el.textContent = "Finding alternatives…"; el.disabled = true; setTimeout(async () => { const sq = state.squad.ids.map(id => P[id]), best = state.exact, ex = [], out = [];
