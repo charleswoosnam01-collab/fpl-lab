@@ -714,6 +714,36 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   markers), DEFCON (`defconView`), By position (`byPosView`, best XI on a
   pitch). The Disagreements quick view opens Model vs FPL.
 
+## Changes in v6.41
+
+- Squad tabs: Team, Season, Rivals (the Plan tab is gone; old "plan" state maps
+  to Team). Team: alerts, draft tabs and FPL transfers and bank (`draftTabs`),
+  Pitch/List, the pitch, the solve bar (`solveBar`: Solve plus "Rules · n" and a
+  one-line summary from `rulesLine`), the plan week by week (`planTimeline`:
+  one row per gameweek, actions Put on my pitch (`applyPlanToDraft` writes the
+  plan's moves into RULES.moves), Other plans, Stress test, Compare drafts,
+  Solve again), then folded Chips and wildcard, Health check, Squad source.
+- Rules sheet (`openRules`): per player Can sell / Keep plus a Sell by select,
+  buy-or-ban search (`rulesFound`), free transfers and bank as steppers marked
+  "from FPL" with Reset to FPL (D.my.ft / D.my.bank), hits, saved-transfer
+  value, later-week weight, chips you have (pills) and per chip Don't use /
+  Best week / GW, limits. It refreshes in place after every change (render()
+  calls `refreshRules` while it's open), so it never closes on you.
+- Folds remember being open (`state.folds`, details[data-fold], restored in
+  render()). Fixed the stray comma in the rules summary and the focus outline
+  on #view.
+- Leagues (`import_all_leagues`): no limit of eight; head-to-head leagues
+  included (kind "h2h", standings from leagues-h2h); in leagues bigger than a
+  page the page with the manager is fetched (page_standings) plus the top
+  three; leagues with no standings yet come back with new=True. Tested on
+  simulated FPL replies only: check the "Leagues:" line in the first run's log.
+- iPhone home-screen app: the bottom bar hides while the keyboard is up
+  (body.kb, via visualViewport) and the page is nudged when it closes; number
+  boxes for bank and free transfers are now steppers. Needs checking on a phone.
+- Button system: segmented controls are one track with the chosen option raised;
+  primary 40px dark, secondary outlined, pills 30px; the club colour is used
+  only for the current tab and sliders, so red and green keep their meaning.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
