@@ -900,6 +900,7 @@ def default_rates(pos):
                 p60=0.0, p1=0.0, profile=None, np_xg=0.0, pen_xg=0.0, season=None)
 
 
+MODEL_VERSION = "2026.11-c"   # bump when the projection model changes (not for app-only changes)
 CARD_BANS = True
 # Premier League booking bans (2026/27): five league yellows within a club's first 19 league matches = one-match
 # ban; ten up to and including match 32 = two-match ban. Served in the next league match(es); cup cards don't count.
@@ -1515,6 +1516,20 @@ def backtest(ds, first=4):
 
 # ============================================================ FPL Lab score
 KAPPAS = [0, 0.5, 1, 1.5, 2, 3, 4]
+
+
+def disagreement_record(rows, gap=1.5):
+    """When our projection and FPL's differ by `gap` or more, who was closer to what the player actually scored?
+    Split by whether we were above or below FPL. rows: backtest stack rows [gw, ours, fpl, pts, xgi, pos, id]."""
+    rs = [r for r in rows if r[2] is not None and abs(r[1] - r[2]) >= gap]
+    def part(sel):
+        sel = [r for r in sel if abs(r[3] - r[1]) != abs(r[3] - r[2])]
+        if not sel:
+            return None
+        closer = sum(abs(r[3] - r[1]) < abs(r[3] - r[2]) for r in sel) / len(sel)
+        mean = lambda k: round(sum(r[k] for r in sel) / len(sel), 2)
+        return dict(n=len(sel), closer=round(closer, 3), actual=mean(3), ours=mean(1), fpl=mean(2))
+    return dict(gap=gap, all=part(rs), higher=part([r for r in rs if r[1] > r[2]]), lower=part([r for r in rs if r[1] < r[2]]))
 
 
 def lab_tuning(rows):
@@ -2970,6 +2985,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                 cache_file.parent.mkdir(parents=True, exist_ok=True)
                 cache_file.write_text(json.dumps(prev_acc, separators=(",", ":"), default=str))
     lab = lab_tuning([tuple(r) for r in (acc or {}).get("stack_rows", []) + (prev_acc or {}).get("stack_rows", [])])
+    disagree = dict(this=disagreement_record((acc or {}).get("stack_rows", [])), last=disagreement_record((prev_acc or {}).get("stack_rows", [])))
     sources["FPL Lab score tuning"] = bool(lab)
     rows = (acc or {}).get("odds_rows", []) + (prev_acc or {}).get("odds_rows", [])
     fit = fit_book_weight([tuple(r) for r in rows])
@@ -3152,6 +3168,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
 
     data = dict(
         meta=dict(generated=dt.datetime.now(dt.timezone.utc).isoformat(timespec="minutes"), source=ds.source,
+                  model_version=MODEL_VERSION, commit=(os.environ.get("GITHUB_SHA") or "")[:7] or None,
                   last_gw=tm["last_gw"], gws=gws, first_kickoff=first_ko, matches=int(len(tm["m"])),
                   pending=[dict(h=int(r.team_h), a=int(r.team_a), gw=int(r.event),
                                 ko=r.kickoff.isoformat() if pd.notna(r.kickoff) else None) for r in pending.itertuples()],
@@ -3160,7 +3177,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   rules=dict(ft_max=5, hit=4, chip_half_end=19, squad_max_per_club=3),
                   horizon=HORIZON, long_gws=long_gws, special=special,
                   unscheduled=getattr(ds, "unscheduled", []),
-                  source_notes=SOURCE_NOTES, minutes_capped=tm.get("minutes_capped", {}), avail_decay=AVAIL_DECAY if USE_AVAIL_DECAY else None, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
+                  source_notes=SOURCE_NOTES, disagree=disagree, minutes_capped=tm.get("minutes_capped", {}), avail_decay=AVAIL_DECAY if USE_AVAIL_DECAY else None, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
