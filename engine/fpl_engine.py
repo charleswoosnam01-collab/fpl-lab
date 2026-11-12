@@ -2894,17 +2894,25 @@ def league_from_api(standings, my_id, cur_gw, limit, picks_for, history_for):
                 entries=entries)
 
 
-def import_all_leagues(my_id, cur_gw, first_id=None, max_leagues=8, around=10):
-    """Every private or public classic league the manager is in (FPL lists them on his entry), with the managers
-    closest to him in each: their squads, captains and chips. History requests are shared across leagues."""
+LEAGUE_PAGE = 50      # FPL returns league standings 50 managers to a page
+
+
+def import_all_leagues(my_id, cur_gw, first_id=None, max_leagues=None, around=10):
+    """Every private or public league the manager is in, classic and head-to-head (FPL lists both on his entry;
+    system leagues such as Overall or his country are left out), with the managers closest to him in each: their
+    squads, captains and chips. In leagues bigger than one page of standings, the page he's on is fetched, so
+    "closest to you" really is. Leagues he has only just joined have no standings until the next gameweek and
+    come back marked as new. History requests are shared across leagues."""
     try:
         s = fpl_session()
-        get = lambda path: s.get(f"{API}/{path}", timeout=20).json()
+        get = lambda path, **params: s.get(f"{API}/{path}", params=params or None, timeout=20).json()
         entry = get(f"entry/{my_id}/")
     except Exception as e:  # noqa: BLE001
         print("Could not list leagues:", e)
         return []
-    leagues = [l for l in entry.get("leagues", {}).get("classic", []) if l.get("league_type") != "s"]
+    lg_all = entry.get("leagues", {}) or {}
+    leagues = [dict(l, kind="classic") for l in lg_all.get("classic", []) if l.get("league_type") != "s"]
+    leagues += [dict(l, kind="h2h") for l in lg_all.get("h2h", []) if l.get("league_type") != "s"]
     if first_id:
         leagues.sort(key=lambda l: (str(l.get("id")) != str(first_id), l.get("entry_rank") or 1e9))
     picks_cache, hist_cache, out = {}, {}, []
@@ -2916,18 +2924,40 @@ def import_all_leagues(my_id, cur_gw, first_id=None, max_leagues=8, around=10):
         if e not in hist_cache:
             hist_cache[e] = get(f"entry/{e}/history/")
         return hist_cache[e]
-    for l in leagues[:max_leagues]:
+    for l in leagues[:max_leagues] if max_leagues else leagues:
+        path = f"leagues-{'h2h' if l['kind'] == 'h2h' else 'classic'}/{l['id']}/standings/"
         try:
-            standings = get(f"leagues-classic/{l['id']}/standings/")
+            first = get(path)
         except Exception:  # noqa: BLE001
             continue
-        rows = standings.get("standings", {}).get("results", [])
+        st = first.get("standings", {}) or {}
+        rows = list(st.get("results", []) or [])
+        rank = l.get("entry_rank") or 0
+        # big league: fetch the page he's on, and keep the top three from page one
+        if rank and rank > len(rows) and st.get("has_next"):
+            page = (int(rank) - 1) // LEAGUE_PAGE + 1
+            try:
+                more = (get(path, page_standings=page).get("standings", {}) or {}).get("results", []) or []
+                rows = rows[:3] + [r for r in more if r not in rows[:3]]
+            except Exception:  # noqa: BLE001
+                pass
+        if not rows:
+            new = (first.get("new_entries", {}) or {}).get("results", []) or []
+            out.append(dict(id=l["id"], name=_text(l.get("name")), kind=l["kind"], new=True, size=len(new), my_rank=None,
+                            entries=[], gw=cur_gw))
+            continue
         me = next((i for i, r in enumerate(rows) if r["entry"] == my_id), None)
-        keep = set(range(len(rows))) if len(rows) <= 25 else set(range(3)) | set(range(max(0, (me or 0) - around), min(len(rows), (me or 0) + around + 1)))
-        sub = dict(standings, standings=dict(results=[rows[i] for i in sorted(keep)]))
+        if len(rows) <= 25:
+            keep = set(range(len(rows)))
+        else:
+            keep = set(range(min(3, len(rows))))
+            if me is not None:
+                keep |= set(range(max(0, me - around), min(len(rows), me + around + 1)))
+        sub = dict(first, standings=dict(results=[rows[i] for i in sorted(keep)]))
         lg = league_from_api(sub, my_id, cur_gw, 60, picks_for, hist_for)
-        lg.update(size=standings.get("standings", {}).get("has_next") and "50+" or len(rows), my_rank=l.get("entry_rank"))
+        lg.update(size=("50+" if st.get("has_next") else len(rows)), my_rank=rank or None, kind=l["kind"])
         out.append(lg)
+    print(f"Leagues: {len(out)} ({sum(1 for x in out if x.get('kind') == 'h2h')} head-to-head, {sum(1 for x in out if x.get('new'))} not started yet)")
     return out
 
 
