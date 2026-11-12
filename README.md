@@ -45,10 +45,12 @@ It runs entirely on free services: GitHub runs the engine on a schedule and GitH
 
 ### 🏠 Home
 
+Your gameweek in one place, ordered by what matters now: before the deadline it leads with your three decisions (captain, transfer, the most urgent alert), then your XI, your captain, your best transfer, alerts for your players and watchlist, chips when a window is close, and your leagues. During matches the live score comes first; after the gameweek, the review.
+
 <img src="docs/screenshots/01-home.png" width="220" align="right" alt="Home page">
 
 - **A greeting and your week at a glance**, with the deadline countdown.
-- **Swipeable cards**, ordered by urgency: deadline checks (injured or doubtful players in your XI), price falls, players to watch, your captain, your best transfer, your mini-league edge, the best fixtures for attackers and defenders, a differential, your best chip week, and teams heating up.
+- **Stacked cards in the order that matters this week**: your three decisions, your XI, captain, transfer (with a plain "worth doing" label and a hit check), alerts, chips and leagues.
 - **Live gameweek scores** every 15 minutes during matches, with provisional bonus and auto-subs, which turn into a **gameweek review** once the last match finishes: your points, how your captain did against the best pick you had, and your best and worst players.
 - **"How did we do?"**: last week's forecasts scored against what actually happened.
 - **"What changed"**: verdict changes, projection swings, injury news and price changes since your last visit.
@@ -57,7 +59,7 @@ It runs entirely on free services: GitHub runs the engine on a schedule and GitH
 
 <br clear="right">
 
-### 👑 Captains
+### 👑 Captain (its own tab)
 
 <img src="docs/screenshots/02-captains.png" width="220" align="right" alt="Captain choices">
 

@@ -47,8 +47,9 @@ last-season backtest is cached in `site/history`.
    seasons' results with referees, cards and closing odds (`mmz4281/YYYY/E0.csv`).
    The odds parser was tested on real rows of `fixtures.csv`.
 4. The Odds API (optional key): odds on every run.
-5. ClubElo (api.clubelo.com): team ratings for starting points.
-6. Understat: second-opinion xG, shown only; it doesn't change projections.
+5. ClubElo and 6. Understat: both switched OFF (USE_CLUBELO / USE_UNDERSTAT =
+   False); see v6.18. The Odds API also supplies anytime-goalscorer prices
+   (display only, see v6.28).
 
 ## Not yet tested live
 
@@ -82,13 +83,18 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   specific splits made goal predictions worse at every strength, so
   `VENUE_IN_MODEL = False`. They appear in every explanation but don't move
   numbers.
-- **Lab score.** Lab points are 60% model and 40% FPL's projection; the
-  captain score adds 3 × expected goals and assists. Both were picked by
-  backtesting 35 gameweeks of 2025/26 (Lab points error 1.86, model alone 1.90,
-  FPL 2.06; the captain pick averaged 6.3 points against FPL's top pick at
-  4.8).
-- Bookmaker odds are blended at 60% for the coming round; the weight is
-  meant to be re-fitted from closing odds once those files load.
+- **Lab score (current).** `lab_tuning()` picks the FPL weight by average
+  error on both seasons' backtests and currently chooses 0%: Lab points are
+  the model alone, and FPL's figure is never used straight after a 10+ haul.
+  The captain bonus (kappa) is the smallest setting within 0.5 points a week
+  of the best, currently 0 (plain Lab points). Earlier notes below that say
+  60/40 or kappa 3 are history (fixed in v6.20-6.21 after a backtest fault).
+- Bookmaker odds for the coming round are blended at the weight fitted from
+  closing odds (`fit_book_weight`), currently about 90% market.
+- Future weeks are projected as if each player is fit (USE_AVAIL_DECAY =
+  False); booking-ban risk is applied (CARD_BANS, v6.31); team minutes are
+  capped at 990 (v6.30). MODEL_VERSION in the engine is shown on the Model
+  page with the data run time and the commit.
 
 ## Writing style (Charles cares about this)
 
@@ -597,6 +603,116 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   independent).
 - Trends (`trendRows`): one row per team, last four against next four xG per
   game, a change bar, attack or defence (`state.trendMode`), best change first.
+
+## Changes in v6.34
+
+- `actionLabel(gain, hits)`: Worth doing (free, gain >= FT value + 2.5),
+  Marginal (>= FT value), Not worth it; with hits: Worth the hit (net >= 2),
+  Marginal hit (net >= 0), Not worth the hit. FT value is RULES.ftv (1.5).
+  Shown on Home's best move and each drafted transfer.
+- `hitCard(i)`: for a gameweek where the draft takes a hit, judges the moves
+  beyond the free transfers (the last ones added): gain over the window,
+  cost, net, payback week (only if it ends ahead) and a rough chance it comes
+  out ahead (normal approximation from simulated spreads). The replacement
+  list shows each player's payback week when the move would cost a hit.
+- Fixtures: a "One week" window with a gameweek stepper (`state.fxOne`).
+- Model page: rolling four-week accuracy chart, version section.
+- Players: the position, search, quick views and sort sit in a sticky block.
+
+## Changes in v6.35 (Phase 2)
+
+- Confidence (`confidence(p)`): High if he started all of his last five league
+  games, Medium for 3-4, Low for 0-2; a doubtful flag lowers it a step.
+  Tested on both backtests (projected 2+): typical miss as a share of the
+  projection was 0.66 / 0.76 / 0.81 last season and 0.67 / 0.75 / 0.84 this
+  season, consistent by position. Season minutes made no difference, so they
+  aren't used. Shown in the player header (`triple`: Expected, Risk,
+  Confidence), the evidence line and the three decisions; never on rows.
+- `threeDecisions()` on Home under What's new: captain (with confidence),
+  best transfer (action label) or hold, and the most urgent alert.
+- Look-ahead (`state.ahead`, `fpllab.ahead.v1`, 1-6): Players "over your
+  look-ahead" sort, transfer ideas (`horizonN`), drafted move gains, the hit
+  check and the planner horizon (RULES.H, minimum 3). Verdicts and pick
+  scores stay on six weeks (the window they were fitted on).
+- Disagreements: `disagreement_record()` in the engine (meta.disagree, gap
+  1.5, both seasons' backtests): when we're lower than FPL we were closer 76%
+  (last season) / 75% (this), when higher 44% / 46%, though the average
+  actual sits nearer ours. Players quick view "Disagreements", a line on the
+  player Overview, and "Do our disagreements pay?" on the Model page.
+- Line icons (`icon()`) replace emoji; loading placeholder in index.html;
+  focus moves into sheets and back to the opener; page changes announced
+  through #announce.
+
+## Changes in v6.36
+
+- Bug fixed: the v6.33 Trends rows reused the `.tbar` class, which the team
+  tiles already used, so tile rating bars were positioned absolutely and spilled
+  out of the tiles. Trends bars are now `.trbar`.
+- Team tiles (`teamTile`): attack and defence as two big numbers with a short
+  bar under each (`.tnum`, bars clamped to 0-100 and clipped), and the next
+  three opponents named in chips coloured by difficulty for attackers (A) and
+  defenders (D) (`.tfx`); doubles show both opponents. Tiles clip overflow.
+
+## Changes in v6.37
+
+- One weeks slider (`weeksSlider(ctx)`, input `.wkrange`): Players and Squad
+  1-6 (projections), Fixtures 1-10 (`FXLIST()`); shared value `state.ahead`
+  (`fpllab.ahead.v1`). The label follows while dragging ("input"); the page
+  re-renders on release ("change"). Players shows a note when the shared value
+  is above 6. At 1 on Fixtures it becomes "One week" with gameweek arrows.
+- Fixtures: the Split view is now "Fixtures" with For attackers / For defenders
+  / Both (`state.splitSort` att|def|both). Both shows goals on top and
+  clean-sheet chance underneath, each coloured for its side; the Run column
+  has A and D tags and bars; sorting is by the two average difficulty grades
+  together, or by A or D (`state.bothSort`). The old "Attack only" and
+  "Clean sheets only" ticker modes redirect here.
+- `openMatch()`: tap a fixture for expected goals, result chances, likely
+  scores, clean sheets and the referee (from D.fixtures). `openFxHelp()`
+  holds the full explanation; the page keeps one line.
+- The grid sits in a scroll box (.fxgrid) so the gameweek row stays in view;
+  teams you own players from show a count badge (i.mine).
+
+## Changes in v6.38
+
+- Sort and filter sheet (`openFilters`): one-row Position and Verdict, a
+  two-handle price slider (`state.pl.min` / `max`, 0 = no limit), an
+  ownership cap slider (`state.pl.own`, 0 or 100 = any), switches for Nailed
+  only (4+ starts in the last 5) and Hide injured and doubtful (`pl.nailed`,
+  `pl.fit`), a sort dropdown with a direction switch, a live "Show N players"
+  count (`filterCount`) while dragging, and Reset all. Changes re-render the
+  list behind and reopen the sheet at the same scroll (`refreshFilters`).
+- The sheet title no longer shows a focus outline when focus moves to it.
+
+## Changes in v6.40
+
+- Bottom bar has six tabs: Home, Players, Fixtures, Captain, Teams, Squad.
+- Captain tab (`viewCaptain`): the five lens cards (`captainSwipe`, unchanged),
+  From my squad / Anyone, then the chosen lens's top eight as rows
+  (`capRow`): the first opens expanded with the outcome strip, the top-500
+  line and the full reasons; others expand on tap (`state.capOpen[lens]`).
+  Below: the compass drawn on the page (`compassSvg`), Triple Captain timing
+  (`tcLine`, from `chipPlan`) and the captain record (`capRecord`, from
+  data.my.luck).
+- Outcome strip (`outcomeStrip`): blank / 3 to 9 / 10+ in one bar with a
+  "ten weeks like this" sentence. It replaces the 15-bar histogram on player
+  pages and in Compare (`histogram()` is no longer used).
+- Home (`homeCommand`, replaces `thisWeekStrip`): phase-aware (`phase()`:
+  deadline, live, review) stacked cards: three decisions, Your XI, captain
+  (Expected, Risk, Top 500, rank-safety line, link to Captain), transfer with
+  its action label, alerts as chips, chips when within two gameweeks, leagues.
+  The old Captains / Prices / DEFCON / Model vs FPL / By position switch left
+  Home; `viewWeek` now only adds What changed and special gameweek notices.
+- Squad: Team, Plan, Season, Rivals (`state.squadView` mine|plan|season|rivals).
+  Team: alerts, Pitch/List switch (`state.sqShow`), links to the Captain tab
+  and the squad fixtures sheet (`openSquadFixtures`), folded Health check and
+  Squad source. Plan: folded settings (inputs + `plannerPanel`), the solver,
+  drafts compare, folded Quick single transfers and Chips and wildcard. The
+  planner's "Plan ahead" control now follows the look-ahead slider.
+- Players view switch (`state.plView`): Players, Model vs FPL (`vsFplView`:
+  paired bars with both projections and the gap, the track record banner,
+  We're lower / We're higher), Prices (`pricesView`, progress bars, "yours"
+  markers), DEFCON (`defconView`), By position (`byPosView`, best XI on a
+  pitch). The Disagreements quick view opens Model vs FPL.
 
 ## Docs
 
