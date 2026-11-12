@@ -401,7 +401,7 @@ h3 .term{font-weight:inherit}
 .fmap .alab,.dumb .alab{font-size:10px;fill:var(--muted)}
 .evidence{background:var(--up-soft);border-radius:12px;padding:12px 14px;font-size:14px;margin:8px 0}
 .evidence ul{margin:6px 0 0;padding-left:18px}.evidence li{margin:4px 0}
-nav.tabs .in{grid-template-columns:repeat(7,1fr)}
+
 nav.tabs a{font-size:10.5px}
 
 /* v6.8 signal bars, home/away */
@@ -933,6 +933,72 @@ i.mine2{font-style:normal;font-size:10px;font-weight:900;background:var(--accent
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .achip.down,:root:not([data-theme="light"]) .xig > span.fl{background:#501313;color:#F7C1C1} :root:not([data-theme="light"]) .achip.warn,:root:not([data-theme="light"]) .vsban.warn{background:#412402;color:#FAC775} }
 :root[data-theme="dark"] .achip.down,:root[data-theme="dark"] .xig > span.fl{background:#501313;color:#F7C1C1}:root[data-theme="dark"] .achip.warn,:root[data-theme="dark"] .vsban.warn{background:#412402;color:#FAC775}
 nav.tabs a span{font-size:11px}
+
+/* ===== v6.41 button system: smaller, consistent, one primary action per screen ===== */
+#view:focus,#view:focus-visible{outline:none}
+/* segmented controls: one connected track, the chosen option raised */
+.seg{display:inline-flex;flex-wrap:wrap;gap:2px;background:var(--sunk);border-radius:11px;padding:3px;margin:4px 0 10px;overflow:visible;max-width:100%}
+.seg button{flex:0 0 auto;border:0;background:transparent;border-radius:8px;min-height:32px;height:auto;padding:5px 12px;font-size:13.5px;font-weight:700;color:var(--muted);cursor:pointer;box-shadow:none}
+.seg button[aria-pressed="true"]{background:var(--surface);color:var(--ink);border:0;box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.seg button:focus-visible{outline:2px solid var(--ink);outline-offset:1px}
+.sheet .seg{display:inline-flex;grid-auto-flow:unset}
+.sheet .seg button{min-height:32px;padding:5px 10px;font-size:13px}
+.segmore{margin-top:-6px}
+.morebtn{color:var(--muted)}
+/* primary: solid, 40px; secondary: outlined; text: plain link */
+.primary{border:0;background:var(--ink);color:var(--bg);font-weight:800;border-radius:11px;min-height:40px;padding:0 18px;font-size:14.5px;cursor:pointer;flex:none}
+.secbtn{border:1px solid var(--line);background:var(--surface);color:var(--ink);font-weight:800;border-radius:11px;min-height:40px;padding:0 14px;font-size:14px;cursor:pointer}
+.ghost{min-height:36px;border-radius:10px;font-size:14px}
+.optrow{min-height:40px;border-radius:11px;font-size:13.5px;padding:8px 12px}
+.sheet-foot > button{height:44px;min-height:44px;border-radius:12px;font-size:15px}
+.sheet-foot .primary{min-height:44px}
+/* pills for filters and quick views */
+.qchip,.pillbtn{min-height:30px;height:30px;padding:0 12px;border-radius:999px;font-size:12.5px;font-weight:700;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer;white-space:nowrap}
+.qchip.on,.pillbtn.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.pillrow{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.hbtn{width:36px;height:36px}
+/* club colour only for small highlights: tabs, sliders, switches; action buttons stay neutral */
+.seg button[aria-pressed="true"],.qchip.on{background:var(--surface);color:var(--ink)}
+.qchip.on{background:var(--ink);color:var(--bg)}
+nav.tabs a[aria-current="page"]{color:var(--accent, var(--ink));border-top-color:var(--accent, var(--ink))}
+/* draft and solver */
+.drafttabs{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin:4px 0 2px}
+.drafttabs .segc{margin:0}
+.drafttabs .from{margin-left:auto;font-size:12.5px;color:var(--muted)}.drafttabs .from b{color:var(--ink)}
+.segc{display:inline-flex;gap:2px;background:var(--sunk);border-radius:10px;padding:3px}
+.segc button{border:0;background:transparent;border-radius:7px;min-height:28px;padding:3px 11px;font-size:13px;font-weight:800;color:var(--muted);cursor:pointer}
+.segc button[aria-pressed="true"]{background:var(--surface);color:var(--ink);box-shadow:0 1px 3px rgba(0,0,0,.18)}
+.segc.mini button{min-height:26px;padding:2px 8px;font-size:12px}
+.solvebar{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:10px 0}
+.solvebar .sb2{display:grid;grid-template-columns:1fr auto;gap:8px}
+.solvebar .sub{margin:6px 0 0}
+.plancard{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:10px 12px;margin:10px 0}
+.planhead b{display:block;font-size:17px}.planhead span{font-size:12.5px;color:var(--muted)}
+.wklist{display:grid;gap:6px;margin:10px 0}
+.wkrow{display:grid;grid-template-columns:46px 1fr auto;gap:8px;align-items:center;background:var(--sunk);border-radius:10px;padding:7px 10px;font-size:13.5px}
+.wkrow small{display:block;color:var(--muted);font-size:11.5px}.wkrow em{font-style:normal;font-weight:800;text-align:right}.wkrow em small{display:block}
+.wkrow.roll{opacity:.8}
+.rh{margin:16px 0 4px;font-size:13px;color:var(--muted);font-weight:800}.rh small{font-weight:500;margin-left:6px}
+.rrow2{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:6px 0;border-top:1px solid var(--line);font-size:14px;flex-wrap:wrap}
+.rrow2 small{color:var(--muted);font-size:11.5px}
+.rctl{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-left:auto}.rctl .seg{margin:0}
+.mini-sel{font-size:12px;font-weight:700;border:1px solid var(--line);border-radius:8px;padding:4px 6px;background:var(--surface);color:var(--ink);min-height:30px}
+.mini-sel.on{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.mini-btn{font-size:12px;font-weight:800;border:1px solid var(--line);border-radius:8px;padding:0 10px;min-height:30px;background:var(--surface);color:var(--ink);cursor:pointer}
+.mini-btn.on{background:#A32D2D;color:#fff;border-color:#A32D2D}
+.stepper{display:inline-flex;align-items:center;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:var(--surface)}
+.stepper button{border:0;background:transparent;color:var(--ink);width:34px;min-height:32px;font-size:18px;font-weight:700;cursor:pointer}
+.stepper b{min-width:54px;text-align:center;font-size:14px}
+.rsearch{width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 12px;background:var(--bg);color:var(--ink);font-size:16px;margin:4px 0}
+.rulechips{display:flex;flex-wrap:wrap;gap:6px;margin:6px 0}
+.rulechip{display:inline-flex;align-items:center;gap:4px;background:var(--sunk);border-radius:999px;padding:3px 4px 3px 10px;font-size:12.5px}
+/* iPhone: hide the bottom bar while the keyboard is up */
+body.kb nav.tabs{display:none}
+.rrow2{flex-wrap:nowrap}.rrow2 > span:first-child{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;flex:1}
+.rctl{flex-wrap:nowrap;flex:none}
+.segc.mini button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.mini-sel{max-width:92px}
+@media (max-width:440px){ .rrow2 > span:first-child small{display:none} .segc.mini button{padding:2px 7px;font-size:11.5px} .mini-sel{max-width:84px;font-size:11.5px;padding:3px 4px} .rctl{gap:4px} }
 </style>
 </head>
 <body>
@@ -1131,6 +1197,8 @@ function render(){
   freshness();
   document.querySelectorAll("nav.tabs a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + name ? "page" : "false"));
   $("#view").innerHTML = (name === "week" ? homeCommand() : "") + VIEWS[name]();
+  restoreFolds();
+  if ($("#sheet").open && SHEET_KEY && SHEET_KEY.startsWith("Rules for")) setTimeout(refreshRules, 0);
   if (name === "week" && state.squad.ids.length === 15) { try { saveForecastSnapshot(); } catch(e) {} }
   const cs = $("#capswipe");
   if (cs){ const on = cs.querySelector(".capcard.on"); if (on) cs.scrollLeft = on.offsetLeft - (cs.clientWidth - on.clientWidth) / 2;
@@ -1605,15 +1673,15 @@ function chipHtml(c){
 
 /* ---------- squad view ---------- */
 function viewSquad(){
-  if (!["mine","plan","season","rivals"].includes(state.squadView)) state.squadView = "mine";
-  const head = seg("squadview", [["mine","Team"],["plan","Plan"],["season","Season"],["rivals","Rivals"]], state.squadView, "Squad view");
+  if (!["mine","season","rivals"].includes(state.squadView)) state.squadView = "mine";
+  const head = seg("squadview", [["mine","Team"],["season","Season"],["rivals","Rivals"]], state.squadView, "Squad view");
   if (state.squadView === "season") return `<h2>Your season</h2>${head}${viewSeason()}`;
   if (state.squadView === "rivals") return `<h2>Mini-league rivals</h2>${head}${viewRivals()}`;
-  if (state.squadView === "plan") return `<h2>Plan</h2>${head}` + viewMine("plan");
   return `<h2>Your squad</h2>${head}` + viewMine("team");
 }
 function viewRivals(){
   const R = D.rivals;
+  if (R && R.new) return `${leaguePicker()}<div class="empty-state"><p class="name" style="margin:0 0 6px">${esc(R.name)} starts next gameweek.</p><p class="lede">FPL only publishes standings for a league once its first gameweek is played. Rivals, threats and your edge appear after that.</p></div>`;
   if (!R || !R.entries || !R.entries.length) return `<div class="empty-state"><p class="name" style="margin:0 0 6px">Add your mini-league to see your rivals.</p>
     <p class="lede">In your GitHub setup, add a variable called FPL_LEAGUE_ID with your league’s number (it’s in the address when you open the league on the FPL site). Each run then pulls the top ten, the five managers either side of you, their squads, captains and chips.</p></div>`;
   const mine = new Set(state.squad.ids), rivals = R.entries.filter(e => !e.me), n = rivals.length || 1;
@@ -1694,11 +1762,15 @@ function viewMine(mode = "team"){
   <details class="fold"><summary><b>Chips and wildcard</b><span>${chipsum || "Timing for each chip you have left"}</span></summary>${chipCalendar(squad)}${specialBanner(30)}${chipSection}</details>`;
   }
   return `${alertsHome()}
+  ${draftTabs()}
   ${seg("sqshow", [["pitch","Pitch"],["list","List"]], state.sqShow || "pitch", "Show your squad as")}
   ${state.sqShow === "list" ? `<div class="slotlist">${slots}</div>` : pitchView(squad)}
+  ${solveBar()}
+  ${state.exact ? planTimeline(state.exact) : state.solveError ? `<p class="lede">The solver couldn’t run here (${esc(state.solveError)}), so this is the quick planner instead.</p>${planHtml}` : ""}
+  <details class="fold" data-fold="chips"><summary><b>Chips and wildcard</b><span>${(() => { try { const c = state.chipPlan; if (!c) return "Timing for each chip you have left"; const bits = []; if (hasChip("tc") && c.tcBest && c.tcBest.p) bits.push(`TC: GW${c.tcBest.g}`); if (hasChip("bb") && c.bbBest) bits.push(`BB: GW${c.bbBest.g}`); if (hasChip("fh") && c.fhBest) bits.push(`FH: GW${c.fhBest.g}`); return bits.join(" · ") || "Timing for each chip you have left"; } catch(e){ return ""; } })()}</span></summary>${chipCalendar(squad)}${specialBanner(30)}${chipSection}</details>
   <div class="optgrid sqlinks">${b.cap ? `<button class="optrow" data-goto="captain" data-capsrc="squad">${icon("crown")} Why ${esc(b.cap.n)} as captain? Compare all five options</button>` : ""}<button class="optrow" data-sqfx="1">${icon("trend")} Your fixtures: the next ones for your 15</button></div>
-  <details class="fold"><summary><b>Health check</b><span>${health.length ? `${health.length} note${health.length === 1 ? "" : "s"}` : "Nothing to flag"}</span></summary>${health.length ? `<ul class="health">${health.map(([t, s]) => `<li>${toneDot(t)}<span>${s}</span></li>`).join("")}</ul>` : `<p class="lede">No injuries, rotation worries or price falls.</p>`}</details>
-  <details class="fold"><summary><b>Squad source</b><span>${D.my ? "Imported from FPL" : "Added by hand"}</span></summary>${my}<p class="sub">Bank, free transfers and chips are set in Plan.</p></details>`;
+  <details class="fold" data-fold="health"><summary><b>Health check</b><span>${health.length ? `${health.length} note${health.length === 1 ? "" : "s"}` : "Nothing to flag"}</span></summary>${health.length ? `<ul class="health">${health.map(([t, s]) => `<li>${toneDot(t)}<span>${s}</span></li>`).join("")}</ul>` : `<p class="lede">No injuries, rotation worries or price falls.</p>`}</details>
+  <details class="fold" data-fold="source"><summary><b>Squad source</b><span>${D.my ? "Imported from FPL" : "Added by hand"}</span></summary>${my}<p class="sub">Bank, free transfers and chips come from FPL; change them for a what-if under Rules.</p></details>`;
 }
 function addToSquad(id){
   const p = P[id], ids = state.squad.ids;
@@ -3885,7 +3957,7 @@ function setLeague(i){
 }
 function leaguePicker(){
   if (!D.leagues || D.leagues.length < 2) return "";
-  return `<label class="sortsel">League <select id="leaguesel" aria-label="Choose a mini league">${D.leagues.map((l, i) => `<option value="${i}" ${D.rivals && D.rivals.id === l.id ? "selected" : ""}>${esc(l.name)}${l.my_rank ? ` (you’re ${ordinal(l.my_rank)})` : ""}</option>`).join("")}</select></label>`;
+  return `<label class="sortsel">League <select id="leaguesel" aria-label="Choose a mini league">${D.leagues.map((l, i) => `<option value="${i}" ${D.rivals && D.rivals.id === l.id ? "selected" : ""}>${esc(l.name)}${l.kind === "h2h" ? " · head-to-head" : ""}${l.new ? " · starts next gameweek" : l.my_rank ? ` (you’re ${ordinal(l.my_rank)})` : ""}</option>`).join("")}</select></label>`;
 }
 function leagueInsights(){
   const R = D.rivals; if (!R || !R.entries) return "";
@@ -3925,16 +3997,15 @@ function statusChips(p){
 }
 
 /* ---------- v6.28: calmer rows, tabs, five-tab nav, status strip, watchlist, search, guide, what's new, accent ---------- */
-const APP_VERSION = "6.40";
+const APP_VERSION = "6.41";
 const WHATS_NEW = [
+  "Drafting and the solver now live on Team, under your pitch, with all rules in one Rules sheet and the plan shown week by week",
+  "All your mini-leagues, including head-to-head ones and leagues you’re far down",
+  "Sharper, smaller buttons across the app, and folded sections that stay open",
   "A Captain tab: the five captain cards, each card’s best options with the first one explained in full, the compass, Triple Captain timing and your captain record",
   "Home is now your gameweek: decisions, your XI, captain, transfer, alerts, chips and leagues, in the order that matters for the week",
   "Squad split into Team, Plan, Season and Rivals, with the planner settings and extras folded away",
   "Players gets Model vs FPL, Prices, DEFCON and Best by position views; the old points chart is now a simple outcome strip",
-  "A new Sort and filter: a price range slider, an ownership slider, Nailed only and Hide injured switches, and a live count of matching players",
-  "One Fixtures grid instead of three: For attackers, For defenders, or Both at once",
-  "A slider for how many weeks to look ahead, shared by Players, Squad and Fixtures",
-  "Tap any fixture for the likely scores, both teams’ expected goals and the referee",
 ];
 // a row of main views, with the rest behind "More"
 state.more = {};
@@ -4457,7 +4528,7 @@ function captainHome(){
 function transferHome(){
   const squad = state.squad.ids.map(id => P[id]).filter(Boolean); if (squad.length !== 15) return "";
   const ft = Number(state.squad.ft || 1), move = transferIdeas(squad)[0];
-  if (!move) return homeCard("swap", "Transfer", `<span class="hl"><b>Save your transfer</b> <span class="apill up">Hold</span></span><span class="sub">No move beats ${ft >= 1 ? "keeping the free transfer" : "waiting for a free one"} over the next ${aheadN()} GWs.</span>`, `data-goto="squad" data-squadview="plan"`);
+  if (!move) return homeCard("swap", "Transfer", `<span class="hl"><b>Save your transfer</b> <span class="apill up">Hold</span></span><span class="sub">No move beats ${ft >= 1 ? "keeping the free transfer" : "waiting for a free one"} over the next ${aheadN()} GWs.</span>`, `data-goto="squad" data-squadview="mine"`);
   const lab = actionLabel(move.gain, ft < 1 ? 1 : 0);
   return homeCard("swap", "Transfer", `<span class="hl"><b>${esc(move.o.n)} → ${esc(move.c.n)}</b> ${actionPill(lab)}</span><span class="sub">${esc(lab.say)} over the next ${aheadN()} GW${aheadN() === 1 ? "" : "s"}${ft < 1 ? ", and it costs a hit" : ""}. Plan more in Squad.</span>`, `data-open="${move.c.id}"`);
 }
@@ -4482,7 +4553,7 @@ function chipsHome(){
   const opts = [have.freehit && c.fhBest && c.fhBest.gain > 4 ? ["Free Hit", c.fhBest.g, c.fhBest.gain] : null, have.bboost && c.bbBest ? ["Bench Boost", c.bbBest.g, c.bbBest.gain] : null, have["3xc"] && c.tcBest ? ["Triple Captain", c.tcBest.g, c.tcBest.gain] : null].filter(Boolean).sort((a,b) => a[1] - b[1]);
   const soon = opts.filter(o => o[1] - g <= 2);
   if (!soon.length) return "";
-  return homeCard("flask", "Chips", `<span class="hl"><b>${soon.map(o => `${o[0]}: GW${o[1]}`).join(" · ")}</b></span><span class="sub">The best week${soon.length > 1 ? "s are" : " is"} close. ${soon[0][2] ? `About +${f1(soon[0][2])} points.` : ""}</span>`, soon[0][0] === "Triple Captain" ? `data-goto="captain"` : `data-goto="squad" data-squadview="plan"`);
+  return homeCard("flask", "Chips", `<span class="hl"><b>${soon.map(o => `${o[0]}: GW${o[1]}`).join(" · ")}</b></span><span class="sub">The best week${soon.length > 1 ? "s are" : " is"} close. ${soon[0][2] ? `About +${f1(soon[0][2])} points.` : ""}</span>`, soon[0][0] === "Triple Captain" ? `data-goto="captain"` : `data-goto="squad" data-squadview="mine"`);
 }
 function leaguesHome(){
   const rv = rivalThreat(), R = D.rivals; if (!R || !R.entries || !R.entries.length) return "";
@@ -4558,12 +4629,122 @@ function byPosView(){
       return `<h3>${POS_LONG[pos][0].toUpperCase() + POS_LONG[pos].slice(1)}s</h3><ul class="list">${top.map(p => playerRow(p, f1(p.ep[0]), `GW${g}`)).join("")}</ul>`; }).join("")}`;
 }
 
+/* ---------- v6.41: draft and solver on Team, Rules sheet, folds that stay open, iPhone bar fix, leagues ---------- */
+// folds remember whether you left them open, so redraws don't close them
+state.folds = state.folds || {};
+document.addEventListener("toggle", e => { const d = e.target; if (d && d.matches && d.matches("details[data-fold]")) state.folds[d.dataset.fold] = d.open; }, true);
+function restoreFolds(){ document.querySelectorAll("details[data-fold]").forEach(d => { if (state.folds[d.dataset.fold]) d.open = true; }); }
+// the rules in one short line
+function rulesLine(r){ return (rulesSummary(r) || "").replace(/^[,;\s]*(with your rules:)?\s*/i, "").replace(/;\s*/g, " · ") || "No rules set: the solver can sell anyone"; }
+function ruleCount(r){ return (r.lock.length + r.sell.length + r.buy.length + r.ban.length) + (r.hits !== "on" ? 1 : 0) + (r.defClub ? 1 : 0) + (r.gkMax ? 1 : 0) + CHIP_KEYS.filter(k => r.chips[k] && r.chips[k] !== "off" && hasChip(k)).length; }
+const fplFT = () => D.my && D.my.ft != null ? D.my.ft : null, fplBank = () => D.my && D.my.bank != null ? D.my.bank : null;
+function draftTabs(){
+  const ft = Number(state.squad.ft || 0), bank = Number(state.squad.bank || 0), f0 = fplFT(), b0 = fplBank();
+  const whatIf = (f0 != null && f0 !== ft) || (b0 != null && Math.abs(b0 - bank) > 0.01);
+  return `<div class="drafttabs"><span class="segc">${PLANS.map((p, i) => `<button data-planswitch="${i}" aria-pressed="${i === ACTIVE}">${esc(p.name.replace("Draft ", ""))}</button>`).join("")}${PLANS.length < 8 ? `<button data-plannew="copy" aria-label="New draft, copying this one's rules">+</button>` : ""}</span>
+    <span class="from">${whatIf ? `What-if: <b>${ft} FT · ${money(bank)}</b>` : `${f0 != null ? "From FPL" : "Your squad"}: <b>${ft} FT · ${money(bank)}</b>`}</span></div>`;
+}
+// the plan, week by week
+function planTimeline(res){
+  if (!res) return "";
+  const gain = planTotal(res) - planBase(res.H); res.gain = gain;
+  const weeks = res.steps.map(st => {
+    const pairs = pairsOf(st), g = GWS[st.t];
+    const what = st.chip === "wc" ? "Wildcard" : st.chip === "fh" ? "Free Hit for one week" : pairs.length ? pairs.map(([o, c]) => `${esc(o.n)} → <b>${esc(c.n)}</b>`).join(", ") : "Save your transfer";
+    const extra = [st.cap ? `Captain ${esc(st.cap.n)}${st.chip === "tc" ? " (Triple Captain)" : ""}` : "", st.chip === "bb" ? "Bench Boost" : "", st.hits ? `−${st.hits * 4} hit` : ""].filter(Boolean).join(" · ");
+    return `<div class="wkrow ${pairs.length || st.chip ? "" : "roll"}"><b>GW${g}</b><span>${what}<small>${extra}</small></span><em>${f1(st.pts)}<small>pts</small></em></div>`; }).join("");
+  return `<section class="plancard"><div class="planhead"><b>${gain >= 0 ? "+" : "−"}${f1(Math.abs(gain))} points over ${res.H} gameweeks</b><span>against making no transfers, after hits${res.limit ? ". The solver hit its time limit, so this is the best plan it found" : ""}</span></div>
+    <div class="wklist">${weeks}</div>
+    <div class="pillrow"><button class="pillbtn" data-planapply="1">Put on my pitch</button><button class="pillbtn" data-alts="1">Other plans</button><button class="pillbtn" data-stress="1">Stress test</button>${PLANS.filter(p => p.result).length >= 2 ? `<button class="pillbtn" data-plancmp="1">Compare drafts</button>` : ""}<button class="pillbtn" data-solve="1">Solve again</button></div>
+    <p class="sub">${Object.keys(sellPrices(state.squad.ids.map(id => P[id]))).length ? "Uses your selling prices where known." : "Uses current prices; your selling prices may be a little lower."} The pitch shows week-by-week points; drafts never change your real FPL team.</p></section>
+    ${altsHtml()}${stressHtml(state.stress)}`;
+}
+function applyPlanToDraft(res){
+  if (!res) return 0;
+  const moves = [];
+  res.steps.forEach(st => { if (st.chip === "fh" || st.chip === "wc") return; pairsOf(st).forEach(([o, c]) => moves.push({gw: GWS[st.t], out: o.id, in: c.id})); });
+  RULES.moves = moves; state.lu = {}; saveRules(); return moves.length;
+}
+function solveBar(){
+  const n = ruleCount(RULES);
+  return `<section class="solvebar"><div class="sb2"><button class="primary" data-solve="1">Solve ${esc(RULES.name)}</button><button class="secbtn" data-rules="1">Rules${n ? ` · ${n}` : ""}</button></div>
+    <p class="sub">${esc(rulesLine(RULES))}. Plans the next ${RULES.H} gameweeks (your look-ahead, at least 3).</p></section>`;
+}
+// the Rules sheet
+function rulesFound(squad){
+  const q = (state.ruleQ || "").trim().toLowerCase(), gwOpts = (sel, label) => `<option value="">${label}</option>${GWS.map(g => `<option value="${g}" ${+sel === g ? "selected" : ""}>GW${g}</option>`).join("")}`;
+  const found = q.length >= 2 ? D.players.filter(p => available(p) && !squad.includes(p) && (p.n.toLowerCase().includes(q) || (p.fn || "").toLowerCase().includes(q))).sort((a,b) => b.ep6 - a.ep6).slice(0, 6) : [];
+  return found.map(p => { const r = ruleFor(p.id);
+    return `<div class="rrow2"><span><b>${esc(p.n)}</b> <small>${T[p.t].short} ${POS[p.pos]} ${money(p.price)}</small></span><span class="rctl"><select class="mini-sel ${r && r.kind === "buy" ? "on" : ""}" data-buysel="${p.id}" aria-label="Buy ${esc(p.n)} by">${gwOpts(r && r.kind === "buy" ? r.gw : "", "Buy by…")}</select>
+      <button class="mini-btn ${r && r.kind === "ban" ? "on" : ""}" data-ruletoggle="ban" data-pid="${p.id}" aria-pressed="${!!(r && r.kind === "ban")}">${r && r.kind === "ban" ? "Banned" : "Ban"}</button></span></div>`; }).join("");
+}
+function openRules(){
+  const squad = state.squad.ids.map(id => P[id]).filter(Boolean);
+  const gwOpts = sel => `<option value="">Sell by…</option>${GWS.map(g => `<option value="${g}" ${+sel === g ? "selected" : ""}>GW${g}</option>`).join("")}`;
+  const own = [...squad].sort((a,b) => a.pos - b.pos || b.ep6 - a.ep6).map(p => { const r = ruleFor(p.id), k = r ? r.kind : "can";
+    return `<div class="rrow2"><span><b>${esc(p.n)}</b> <small>${POS[p.pos]} ${money(p.price)}</small></span><span class="rctl"><span class="segc mini">
+      <button data-rulemode="can" data-pid="${p.id}" aria-pressed="${k === "can"}">Can sell</button><button data-rulemode="keep" data-pid="${p.id}" aria-pressed="${k === "lock"}">Keep</button></span>
+      <select class="mini-sel ${k === "sell" ? "on" : ""}" data-sellsel="${p.id}" aria-label="Sell ${esc(p.n)} by">${gwOpts(k === "sell" ? r.gw : "")}</select></span></div>`; }).join("");
+  const others = [...RULES.buy.map(r => ({id: r.id, txt: "buy by GW" + r.gw})), ...RULES.ban.map(id => ({id, txt: "banned"}))].filter(x => P[x.id]);
+  const ft = Number(state.squad.ft || 0), bank = Number(state.squad.bank || 0), f0 = fplFT(), b0 = fplBank();
+  const stepper = (key, val, lab) => `<span class="stepper"><button data-step="${key}" data-d="-1" aria-label="Less ${lab}">−</button><b>${val}</b><button data-step="${key}" data-d="1" aria-label="More ${lab}">+</button></span>`;
+  const chipRow = k => { const v = RULES.chips[k] || "off";
+    return `<div class="rrow2"><span><b>${CHIP_LONG[k]}</b></span><span class="rctl"><span class="segc mini"><button data-chipmode="${k}" data-v="off" aria-pressed="${v === "off"}">Don’t use</button><button data-chipmode="${k}" data-v="auto" aria-pressed="${v === "auto"}">Best week</button></span>
+      <select class="mini-sel ${typeof v === "number" ? "on" : ""}" data-chipsel="${k}" aria-label="${CHIP_LONG[k]} week"><option value="">GW…</option>${GWS.map(g => `<option value="${g}" ${v === g ? "selected" : ""}>GW${g}</option>`).join("")}</select></span></div>`; };
+  const have = CHIP_KEYS.filter(hasChip);
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Rules for ${esc(RULES.name)}</h2><p class="sub">What the solver must obey. Changes apply to this draft only.</p>
+    <h4 class="rh">Your squad <small>Can sell: the solver may sell him if it helps</small></h4>${own}
+    <h4 class="rh">Other players</h4>
+    <input type="search" id="ruleq" placeholder="Search a player to buy or ban" value="${esc(state.ruleQ || "")}" aria-label="Search a player" class="rsearch">
+    <div id="rulefound">${rulesFound(squad)}</div>
+    ${others.length ? `<div class="rulechips">${others.map(x => `<span class="rulechip">${esc(P[x.id].n)} <small>${x.txt}</small><button class="term" data-rmrule="${x.id}" aria-label="Remove rule">✕</button></span>`).join("")}</div>` : ""}
+    <h4 class="rh">Transfers</h4>
+    <div class="rrow2"><span><b>Free transfers</b> <small>${f0 != null ? (f0 === ft ? "from FPL" : `FPL says ${f0}`) : ""}</small></span><span class="rctl">${stepper("ft", ft, "free transfers")}</span></div>
+    <div class="rrow2"><span><b>Bank</b> <small>${b0 != null ? (Math.abs(b0 - bank) < 0.01 ? "from FPL" : `FPL says ${money(b0)}`) : ""}</small></span><span class="rctl">${stepper("bank", money(bank), "money in the bank")}</span></div>
+    ${(f0 != null && f0 !== ft) || (b0 != null && Math.abs(b0 - bank) > 0.01) ? `<p class="sub"><button class="term" data-fplreset="1">Reset to FPL</button></p>` : ""}
+    <div class="rrow2"><span><b>Hits</b></span><span class="rctl">${seg("hitsmode", [["on","Any"],["one","Max 1"],["off","None"]], RULES.hits, "Hits")}</span></div>
+    <div class="rrow2"><span><b>A saved transfer is worth</b></span><span class="rctl">${seg("ftv", [[0,"0"],[1.5,"1.5"],[3,"3 pts"]], RULES.ftv, "Free transfer value")}</span></div>
+    <div class="rrow2"><span><b>Later weeks count</b></span><span class="rctl">${seg("decay", [[1,"Equal"],[0.9,"A bit less"],[0.8,"Less"]], RULES.decay, "Weight of later weeks")}</span></div>
+    <h4 class="rh">Chips <small>Chips you have left: tap to change</small></h4>
+    <div class="pillrow">${Object.entries(CHIP_NAMES).map(([k, l]) => `<button class="pillbtn ${state.squad.chips[k] ? "on" : ""}" data-chiptoggle="${k}" aria-pressed="${!!state.squad.chips[k]}">${l}</button>`).join("")}</div>
+    ${have.map(chipRow).join("") || `<p class="sub">No chips left to plan.</p>`}
+    <h4 class="rh">Limits</h4>
+    <div class="rrow2"><span><b>Keeper and defenders per club</b></span><span class="rctl">${seg("defclub", [[0,"3"],[2,"2"],[1,"1"]], RULES.defClub || 0, "Defensive players from one club")}</span></div>
+    <div class="rrow2"><span><b>Most for a keeper</b></span><span class="rctl">${seg("gkmax", [[0,"Any"],[4.5,"£4.5m"],[5,"£5m"],[5.5,"£5.5m"]], RULES.gkMax || 0, "Maximum goalkeeper price")}</span></div>
+    <p class="sub">Weeks to plan follow your look-ahead slider. <button class="term" data-plandel="1">Delete ${esc(RULES.name)}</button></p>
+    ${sheetFoot(`<button class="primary" data-solve="1" data-close="1">Solve ${esc(RULES.name)}</button>`)}`;
+  showSheet();
+}
+function refreshRules(){ const sc = $(".sheet") ? $(".sheet").scrollTop : 0; openRules(); const sh = $(".sheet"); if (sh) sh.scrollTop = sc; }
+// iPhone home-screen apps: after the keyboard closes, the bottom bar can stay where the keyboard's edge was.
+// Hide the bar while the keyboard is up, and nudge the page back into place when it goes.
+(function(){
+  const vv = window.visualViewport; if (!vv) return;
+  let kb = false;
+  const check = () => {
+    const open = vv.height < window.innerHeight * 0.75 && document.activeElement && /^(INPUT|TEXTAREA|SELECT)$/.test(document.activeElement.tagName);
+    if (open !== kb){ kb = open; document.body.classList.toggle("kb", kb);
+      if (!kb) setTimeout(() => { window.scrollTo(window.scrollX, window.scrollY + 1); window.scrollTo(window.scrollX, window.scrollY - 1); const n = $("nav.tabs"); if (n){ n.style.transform = "translateZ(0)"; requestAnimationFrame(() => n.style.transform = ""); } }, 60); }
+  };
+  vv.addEventListener("resize", check); vv.addEventListener("scroll", check);
+  document.addEventListener("focusout", () => setTimeout(check, 80));
+})();
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-capx],[data-plview],[data-vsside],[data-sqfx],[data-sqshow],[data-fswitch],[data-freset],[data-fdir],[data-match],[data-fxhelp],[data-bothsort],[data-ahead],[data-fxone],[data-pitchshow],[data-pmenu],[data-draftrm],[data-trendmode],[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
+  const el = e.target.closest("[data-rules],[data-rulemode],[data-step],[data-fplreset],[data-chipmode],[data-chiptoggle],[data-planapply],[data-plancmp],[data-capx],[data-plview],[data-vsside],[data-sqfx],[data-sqshow],[data-fswitch],[data-freset],[data-fdir],[data-match],[data-fxhelp],[data-bothsort],[data-ahead],[data-fxone],[data-pitchshow],[data-pmenu],[data-draftrm],[data-trendmode],[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
   if (!el){ if (e.target === $("#sheet")) closeSheet(); return; }
   const d = el.dataset;
-  if (d.capx !== undefined){ const k = state.capMode, set = state.capOpen[k] || new Set([0]), i = +d.capx; if (set.has(i)) set.delete(i); else set.add(i); state.capOpen[k] = set; render(); }
+  if (d.rules){ openRules(); }
+  else if (d.rulemode){ const id = +d.pid; if (d.rulemode === "keep") setRule("lock", id); else { clearRule(id); saveRules(); } render(); }
+  else if (d.step){ if (d.step === "ft") state.squad.ft = Math.max(0, Math.min(5, Number(state.squad.ft || 0) + +d.d)); else state.squad.bank = Math.max(0, Math.round((Number(state.squad.bank || 0) + 0.1 * +d.d) * 10) / 10);
+    saveSquad(); state.plan = null; state.chipPlan = null; render(); }
+  else if (d.fplreset){ if (D.my){ state.squad.ft = D.my.ft; state.squad.bank = D.my.bank; saveSquad(); state.plan = null; state.chipPlan = null; } render(); toast("Back to your FPL figures"); }
+  else if (d.chipmode){ RULES.chips[d.chipmode] = d.v; saveRules(); render(); }
+  else if (d.chiptoggle){ state.squad.chips[d.chiptoggle] = !state.squad.chips[d.chiptoggle]; saveSquad(); state.plan = null; state.chipPlan = null; render(); }
+  else if (d.planapply){ const n = applyPlanToDraft(state.exact); state.pitchGw = 0; render(); toast(n ? `${n} move${n === 1 ? "" : "s"} put on your pitch` : "No transfers in this plan"); }
+  else if (d.plancmp){ $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Compare drafts</h2>${plansCompare()}${sheetFoot()}`; showSheet(); }
+  else if (d.capx !== undefined){ const k = state.capMode, set = state.capOpen[k] || new Set([0]), i = +d.capx; if (set.has(i)) set.delete(i); else set.add(i); state.capOpen[k] = set; render(); }
   else if (d.plview){ state.plView = d.plview; window.scrollTo(0, 0); render(); }
   else if (d.vsside){ state.vsSide = d.vsside; render(); }
   else if (d.sqfx){ openSquadFixtures(); }
@@ -4625,6 +4806,7 @@ document.addEventListener("click", e => {
   else if (d.pitch){ openPitchPlayer(+d.pitch); }
   else if (d.luact){ lineupAction(d.luact, +d.pid, d.with ? +d.with : null); closeSheet(); render(); }
   else if (d.luclear){ delete state.lu[state.pitchGw]; render(); }
+  else if (d.solve && d.close){ closeSheet(); setTimeout(() => { const b = $(".solvebar [data-solve]"); if (b) b.click(); }, 50); }
   else if (d.solve){ el.textContent = "Solving…"; el.disabled = true; setTimeout(async () => { const sq = state.squad.ids.map(id => P[id]);
       try { state.exact = await solveExact(sq, Number(state.squad.bank || 0), Number(state.squad.ft || 0), {noHits: d.solve === "nohits"}); state.solveError = null;
         state.exact.gain = planTotal(state.exact) - planBase(state.exact.H); rememberResult(state.exact); state.alts = null; }
@@ -4690,7 +4872,7 @@ document.addEventListener("input", e => {
   if (e.target.id === "tq"){ state.tq = e.target.value; const out = $("#tqlist [data-draftout]"); const oid = out ? +out.dataset.draftout : (state.tqOut || null);
       if (out) state.tqOut = +out.dataset.draftout; if (state.tqOut) { const sc = $(".sheet").scrollTop; openTransferOut(state.tqOut); $(".sheet").scrollTop = sc; } }
   if (e.target.id === "ruleq"){ state.ruleQ = e.target.value; const box = $("#rulefound"); if (box){ const sq = state.squad.ids.map(id => P[id]);
-      const tmp = document.createElement("div"); tmp.innerHTML = plannerPanel(sq); const nb = tmp.querySelector("#rulefound"); if (nb) box.innerHTML = nb.innerHTML; } }
+      box.innerHTML = rulesFound(sq.filter(Boolean)); } }
   if (e.target.id === "minsr"){ const v = $("#minsv"); if (v) v.textContent = e.target.value; }
   if (e.target.classList && (e.target.classList.contains("fprice") || e.target.id === "fown")){
     const a = $("#fpmin"), b = $("#fpmax"), o = $("#fown"), lo = +a.min, hi = +a.max;
@@ -4713,7 +4895,7 @@ document.addEventListener("input", e => {
 document.addEventListener("change", e => {
   if (e.target.dataset && e.target.dataset.sellsel){ const id = +e.target.dataset.sellsel; if (e.target.value) setRule("sell", id, +e.target.value); else { clearRule(id); saveRules(); } render(); }
   if (e.target.dataset && e.target.dataset.buysel){ const id = +e.target.dataset.buysel; if (e.target.value) setRule("buy", id, +e.target.value); else { clearRule(id); saveRules(); } render(); }
-  if (e.target.dataset && e.target.dataset.chipsel){ RULES.chips[e.target.dataset.chipsel] = e.target.value === "off" || e.target.value === "auto" ? e.target.value : +e.target.value; saveRules(); render(); }
+  if (e.target.dataset && e.target.dataset.chipsel && e.target.value){ RULES.chips[e.target.dataset.chipsel] = e.target.value === "off" || e.target.value === "auto" ? e.target.value : +e.target.value; saveRules(); render(); }
   if (e.target.id === "leaguesel"){ setLeague(+e.target.value); render(); }
   if (e.target.classList && (e.target.classList.contains("fprice") || e.target.id === "fown")){
     const a = $("#fpmin"), b = $("#fpmax"), o = $("#fown"), lo = +a.min, hi = +a.max;
