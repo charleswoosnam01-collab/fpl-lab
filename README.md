@@ -119,7 +119,7 @@ Swipeable cards answer one question: *what do you want from your captain this we
 
 <br clear="right">
 
-### 📈 Trends (inside the Teams tab)
+### 📈 Swings (Fixtures › Swings, with Fixtures and Form)
 
 - Each team's **next-four forecast against its last four**, as a dumbbell chart.
 - **Heating up** and **cooling down**, with reasons.
