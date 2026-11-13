@@ -2882,7 +2882,7 @@ def league_from_api(standings, my_id, cur_gw, limit, picks_for, history_for):
             continue
         pk = picks.get("picks", [])
         entries.append(dict(
-            id=r["entry"], team=r.get("entry_name"), manager=r.get("player_name"), rank=r.get("rank"),
+            id=r["entry"], team=r.get("entry_name"), manager=r.get("player_name"), rank=r.get("rank"), last_rank=r.get("last_rank"),
             total=r.get("total"), gw_pts=r.get("event_total"), me=r["entry"] == my_id,
             ids=[p["element"] for p in sorted(pk, key=lambda p: p["position"])],
             cap=next((p["element"] for p in pk if p.get("is_captain")), None),
