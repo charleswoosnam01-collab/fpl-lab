@@ -744,6 +744,108 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   primary 40px dark, secondary outlined, pills 30px; the club colour is used
   only for the current tab and sliders, so red and green keep their meaning.
 
+## Changes in v6.42
+
+- Team: two rows above the pitch (`teamRow1`: draft tabs, ⋯ draft menu, and
+  FT and bank "From FPL", "What-if" or "After moves"; `teamRow2`: Pitch / List
+  / Fixtures and the gameweek arrows with ⋯ for chip and shirt numbers, in
+  `openPitchMenu`). The look-ahead slider moved into the solve bar as "Plan
+  over" (`planOverSlider`, ctx "sq"); the summary adds the plan-window total.
+  Fixtures view = `squadFixtureGrid` inline.
+- Drafts: `nextDraftName()` uses the next unused letter; `openDraftMenu` to
+  rename, duplicate or delete; delete is undoable (`deleteDraftWithUndo`,
+  `actionToast` with an action button).
+- Player sheet (`openPitchPlayer`): a bottom sheet (dialog.mini, `SHEET_MINI`)
+  with shirt, fixture, projection, verdict and confidence, the outcome strip,
+  one row of actions (Captain, Vice, Swap, Transfer, Details), inline swaps and
+  a "Keep him in plans" switch; tapping outside closes it.
+- Drag and drop (`DND`): hold a shirt about 0.4s (touch) or press and move
+  (mouse); legal swaps (same rule as the sheet, `validXI`) light up; dropping
+  calls lineupAction("swap") with an Undo toast. Scrolling is only blocked
+  once a drag has started; a quick swipe still scrolls. Tested with synthetic
+  touch events; worth a check on a phone.
+- League table (`leagueTable`): one row per manager with rank movement (needs
+  last_rank, now saved by the engine), chips as badges, points or six-week
+  projection with the gap to you (`state.lgView`).
+- Chips (`chipsCompact`): one foldable row per chip with a status (Use this
+  week, Hold, Close call when two weeks are within 0.5, Used), a headline and a
+  strip of gameweek cells coloured by value with a star on the best; the
+  general explanation is in `openChipHelp`.
+
+## Changes in v6.43
+
+- Transfers (`moveDecision`, `decisionCard`): every move is judged three ways
+  over the plan window: now (free, or with −4 when no free transfer is left),
+  free next week (gain minus this week's part, minus the value of the free
+  transfer it uses), or not at all (0, or the saved transfer's value for a
+  free move). Labels: Do it now / Marginal / Save the transfer / Wait a week /
+  Take the hit / Close call / Not worth it. Used on Home, the three decisions,
+  drafted moves and hit weeks (`hitDecisions` replaces the old hit card).
+  `savedFtValue()` is RULES.ftv, or 0 when five are already held (FT_CAP).
+  `ftMeter()` shows banked transfers out of five. `openTransfersHelp()`.
+- Verdicts rate the player only: the "in your plan to sell" branch is gone;
+  `planSaleNote(p)` shows the draft's sale separately (player page and pitch
+  sheet). Own players near the sell line get a "borderline" note.
+- Solver: RULES.H follows the slider exactly (1-6, no minimum of 3); the plan
+  header names the window ("1-week solve · GW11 only"); moving the slider
+  clears a plan made for a different window. Risk (`RULES.risk`, `riskEp`):
+  Safe = ep − 2 × blank chance (this week's simulations), Aggressive = ep +
+  2 × chance of 10+ that week (haul_long), Balanced = ep (the tested default).
+  Plan rows show each week's gain against rolling (best XI of the current
+  squad that week) and, on roll weeks, the free transfers you'll have.
+- Chips: info buttons (`chipInfoPills`) with the best week's gain; tapping
+  opens `openChipSheet(k)` (what it does, gain each week, Use in GWx / solver
+  picks / don't use). Owned chips come from FPL; toggles only behind "Correct
+  this" (`state.chipEdit`).
+- Outcome strip adds a legend line when a part is too narrow to label.
+- Pitch sheet (dialog.psheet): plan note, quick minutes (reuses MINS and the
+  data-minset handler, reopens the pitch sheet), "Custom mins" badges.
+- Gestures: swipe a sheet down to close; swipe sideways on a player page to
+  change tab; swipe the pitch to change gameweek. Transitions: sheets slide in
+  and out (closeSheet waits 160ms; showSheet cancels a pending close), the page
+  fades on tab change, swapped shirts glow, the toast slides; all off under
+  prefers-reduced-motion.
+
+## Changes in v6.44
+
+- Fixed three style-name clashes introduced in v6.42-6.43: the league table
+  rows are `.lgrow` (they reused `.lrow` from the Luck view, which broke its
+  layout); the Prices and DEFCON bars are `.pbar2` (they reused `.pbar` from the
+  player Stats percentile rows); drafted move rows are `.mvrow` (they reused
+  `.mv`). Before adding a class, check it isn't already used in older CSS.
+- Set pieces (`viewSetPieces`): By team / Takers (`state.spView`), filters All /
+  Your teams / Taker changes (`state.spFilter`). Each card (`spCard`): set-piece
+  threat and defence (team prof.att/def.setpiece: xG a game, rank), penalties
+  (actual takers from t.sp.pens highlighted, FPL order as "FPL 1st"), corners
+  (FPL order only), direct free kicks (shots plus FPL order), "yours" markers,
+  and a warning when the most frequent penalty taker isn't FPL's first choice
+  (`spChanged`). Takers list (`spTakers`) sortable by team, price or six-week
+  projection. Explanation in `openSpHelp`.
+
+## Changes in v6.45
+
+- Fixtures views: Fixtures, Matches, Swings; More: Referees, Rotation. Old
+  "scores" and "bookies" modes redirect to Matches.
+- Matches (`viewMatches`, `matchCard`): one card per fixture with our model's
+  win/draw/win (from f.mh/f.ma, model only) and the bookmakers' (f.book.ph/pd/
+  pa) as two bars; "We agree" unless either win chance differs by 8 points or
+  more, then "We differ" with a line; xG from both, clean sheets and the most
+  likely score (one decimal) from the blended f.lh/f.la; tags One-sided (60%+),
+  Open game (3+ goals), Tight game (2.3 or fewer); your players; kick-off;
+  grouped by day; gameweek arrows (`state.mGw`), Your matches, sort by
+  kick-off, goals or favourite. Help in `openMatchesHelp`. The bookmakers' bar
+  is `.wbk` (`.bk` collapsed it through an older rule).
+- Swings (`viewSwings`, `swingData`): Fixtures mode compares the model's
+  expectation against the last N opponents with the next N fixtures (N = the
+  look-ahead slider, 2-6), shows both sets as coloured opponent chips, splits
+  Getting easier / Getting harder (0.15 xG or 5 points of clean-sheet chance),
+  and says when it turns (first later week back across the past average).
+  Form mode is the old Trends rows (teamForecast / teamForecastDef over N).
+  Attack / Defence for both. A banner names your players on teams getting
+  harder or easier (attackers by attack, defenders by defence). "More on
+  form" opens the rest of the old Trends page (`openMoreForm`). Teams no
+  longer has a Trends button; #future and teamView "trends" redirect here.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,
