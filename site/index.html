@@ -769,8 +769,8 @@ nav.tabs a[aria-current="page"]{border-top-color:var(--accent, var(--ink))}
 .benchrow2{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 4px;margin-top:8px}
 .benchrow2 .pp2{opacity:.72}.benchrow2 .pp2 .pn{background:var(--muted);color:var(--bg)}
 .pn .bno{font-style:normal;font-size:9.5px;font-weight:900;background:var(--bg);color:var(--ink);border-radius:3px;padding:0 3px;margin-right:3px}
-.moves{margin:8px 0}.mv{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:4px 0;font-size:13.5px}
-.mv span{flex:1}.mv em{font-style:normal;font-weight:800}.mv em small{font-weight:600;color:var(--muted);font-size:11px}
+.moves{margin:8px 0}.mvrow{display:flex;align-items:center;gap:8px;background:var(--surface);border:1px solid var(--line);border-radius:10px;padding:6px 10px;margin:4px 0;font-size:13.5px}
+.mvrow span{flex:1}.mvrow em{font-style:normal;font-weight:800}.mvrow em small{font-weight:600;color:var(--muted);font-size:11px}
 .tsum{display:grid;grid-template-columns:repeat(4,1fr);gap:6px;text-align:center;background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 6px;margin:8px 0 4px}
 .tsum small{display:block;font-size:11px;color:var(--muted);font-weight:700}.tsum b{font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:22px}
 .trows{display:grid;gap:0;margin:6px 0 12px}
@@ -927,7 +927,7 @@ details.fold[open]{padding-bottom:12px}
 .vsb > i{display:block;height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}.vsb > i > i{display:block;height:100%;border-radius:4px}
 .vsb .us{background:#1D9E75}.vsb .fp{background:#888780}.vsb b{color:var(--ink);text-align:right;font-size:13px}
 .vsrow > div:first-child{flex:1;min-width:0}
-.pbar{height:7px;border-radius:4px;background:var(--sunk);overflow:hidden;margin-top:5px;max-width:240px}.pbar i{display:block;height:100%}
+.pbar2{height:7px;border-radius:4px;background:var(--sunk);overflow:hidden;margin-top:5px;max-width:240px}.pbar2 i{display:block;height:100%}
 .prow2 > div:first-child{flex:1;min-width:0}
 i.mine2{font-style:normal;font-size:10px;font-weight:900;background:var(--accent, var(--ink));color:var(--accent-ink, var(--bg));border-radius:999px;padding:0 6px;margin-left:4px;vertical-align:1px}
 @media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .achip.down,:root:not([data-theme="light"]) .xig > span.fl{background:#501313;color:#F7C1C1} :root:not([data-theme="light"]) .achip.warn,:root:not([data-theme="light"]) .vsban.warn{background:#412402;color:#FAC775} }
@@ -999,6 +999,180 @@ body.kb nav.tabs{display:none}
 .segc.mini button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
 .mini-sel{max-width:92px}
 @media (max-width:440px){ .rrow2 > span:first-child small{display:none} .segc.mini button{padding:2px 7px;font-size:11.5px} .mini-sel{max-width:84px;font-size:11.5px;padding:3px 4px} .rctl{gap:4px} }
+
+/* ===== v6.42 ===== */
+.drafttabs{gap:8px}
+.ibtn{display:inline-flex;align-items:center;justify-content:center;min-width:32px;height:32px;border:1px solid var(--line);border-radius:9px;background:var(--surface);color:var(--ink);font-size:16px;font-weight:900;cursor:pointer;padding:0 6px}
+.ibtn:disabled{opacity:.35}
+.row2{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:4px 0 8px}.row2 .seg{margin:0}
+.row2 .gwmini{margin-left:auto;display:flex;align-items:center;gap:4px}.row2 .gwmini b{min-width:44px;text-align:center;font-size:15px}
+.drafttabs .from em{font-style:normal;font-weight:800}
+.planover{margin:0 0 8px}.planover .wkhead b{font-size:14px}
+/* league table */
+.ltable{display:grid;gap:0;margin:6px 0}
+.lgrow{display:grid;grid-template-columns:34px 1fr auto;gap:10px;align-items:center;padding:9px 4px;border-top:1px solid var(--line)}
+.lgrow:first-child{border-top:0}
+.lgrow.me{background:var(--sunk);border-radius:10px;border-top-color:transparent}
+.lrk{text-align:center;font-weight:900;font-size:15px}.lrk small{display:block;font-size:10.5px;font-weight:800;color:var(--muted)}
+.lnm{min-width:0}.lnm b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:14.5px}.lnm small{display:block;color:var(--muted);font-size:11.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cbadges{display:flex;gap:3px;margin-top:3px;flex-wrap:wrap}
+.cbadges i{font-style:normal;font-size:9.5px;font-weight:900;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:var(--ink)}
+.cbadges i.used{opacity:.3;text-decoration:line-through}
+.cbadges i.live{background:#FAEEDA;color:#633806;border-color:#E8B10C}
+.lpts{text-align:right}.lpts b{display:block;font-size:16px;font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800}.lpts small{font-size:12px;font-weight:800}
+/* chips */
+.chipsc{margin:4px 0}
+.cgws{display:grid;grid-template-columns:repeat(var(--n, 9),1fr);gap:3px;font-size:9.5px;color:var(--muted);text-align:center;margin:0 0 2px}
+details.crow{border-top:1px solid var(--line);padding:8px 0}
+details.crow > summary{list-style:none;cursor:pointer;display:block}
+details.crow > summary::-webkit-details-marker{display:none}
+.ctop{display:flex;justify-content:space-between;align-items:center;gap:8px}.ctop b{font-size:14.5px}
+.cst{font-size:11px;font-weight:800;border-radius:999px;padding:2px 9px;white-space:nowrap}
+.cst.now{background:var(--up-soft);color:var(--up)}.cst.hold{background:var(--sunk);color:var(--muted)}.cst.close{background:#FAEEDA;color:#854F0B}.cst.used{background:var(--sunk);color:var(--muted);opacity:.7}
+.csub{display:block;font-size:12.5px;color:var(--muted);margin-top:2px}
+.cheat{display:grid !important;grid-template-columns:repeat(var(--n, 9),1fr);gap:3px;margin-top:6px}
+.cheat small{display:none}
+.cheat i{display:block;height:16px;border-radius:4px;position:relative}
+.cheat i.best::after{content:"★";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:#fff;font-size:10px;font-style:normal}
+.hv1{background:var(--sunk)}.hv2{background:#9FE1CB}.hv3{background:#5DCAA5}.hv4{background:#1D9E75}.hv5{background:#0F6E56}
+.cbul{margin:8px 0 4px;padding-left:18px;font-size:13px;line-height:1.5}
+.risk{border-left:2px solid var(--line);padding-left:8px;color:var(--muted);font-size:12.5px;margin:6px 0}
+/* player sheet */
+dialog.psheet{margin:auto auto 0;width:min(560px,100vw);max-height:80dvh;border-radius:20px 20px 0 0}
+dialog.psheet .sheet{padding-top:6px}
+.grab{width:38px;height:4px;border-radius:2px;background:var(--line);margin:4px auto 10px}
+.pshead{display:grid;grid-template-columns:auto 1fr auto;gap:10px;align-items:center}
+.psshirt svg{width:42px;height:38px}
+.pshead h2{margin:0;font-size:22px}
+.pshead .sub{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.psep{text-align:right}.psep b{display:block;font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:30px;line-height:1}.psep small{font-size:11px;color:var(--muted)}
+.pills{display:flex;gap:5px;flex-wrap:wrap;margin:8px 0 2px}
+.acts5{display:flex;justify-content:space-around;gap:4px;margin:12px 0 4px}
+.acts5 button{border:0;background:none;color:var(--ink);font-size:11.5px;font-weight:700;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px;min-width:56px}
+.acts5 i{display:flex;width:44px;height:44px;border-radius:50%;background:var(--sunk);align-items:center;justify-content:center;font-style:normal;font-size:16px;font-weight:900}
+.acts5 button.pri i{background:var(--ink);color:var(--bg)}
+.acts5 button.on i{background:#F2C14E;color:#101522}
+.swaps{margin:8px 0}.swrow{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px}
+.swrow button{flex:1;min-width:80px;border:1px solid var(--line);border-radius:10px;background:var(--surface);color:var(--ink);padding:6px;font-size:12px;cursor:pointer}.swrow b{display:block;font-size:13.5px}
+/* drag and drop */
+.pp2{touch-action:manipulation;-webkit-user-select:none;user-select:none;-webkit-touch-callout:none}
+.pp2.dsrc{opacity:.35}
+.pp2.ddim{opacity:.35}
+.pp2.dtarget .shirtwrap{outline:2px solid #5DCAA5;outline-offset:3px;border-radius:8px;box-shadow:0 0 0 6px rgba(93,202,165,.25)}
+.pp2.dover .shirtwrap{outline:3px solid #F2C14E;box-shadow:0 0 0 8px rgba(242,193,78,.35)}
+.dghost{position:fixed;left:0;top:0;z-index:60;pointer-events:none;transform-origin:center;opacity:.95;filter:drop-shadow(0 10px 16px rgba(0,0,0,.45))}
+/* toast with an action */
+.toast.act{pointer-events:auto;display:flex;align-items:center;gap:14px}
+.toastbtn{border:0;background:transparent;color:#F2C14E;font-weight:900;font-size:14px;cursor:pointer;padding:4px 2px}
+.optrow.danger{color:#A32D2D}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .cst.close,:root:not([data-theme="light"]) .cbadges i.live{background:#412402;color:#FAC775} :root:not([data-theme="light"]) .optrow.danger{color:#F09595} }
+:root[data-theme="dark"] .cst.close,:root[data-theme="dark"] .cbadges i.live{background:#412402;color:#FAC775}
+
+/* ===== v6.43 ===== */
+.ftmeter{display:inline-flex;align-items:center;gap:3px;vertical-align:-1px}.ftmeter i{width:9px;height:9px;border-radius:50%;border:1.5px solid var(--ink);display:inline-block}.ftmeter i.on{background:var(--ink)}.ftmeter b{margin-left:4px;font-size:12.5px}
+.drafttabs .from small{font-weight:600;color:var(--muted)}
+.dcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--line);border-radius:12px;padding:10px 12px;margin:8px 0}
+.dcard.up{border-left-color:#1D9E75}.dcard.warn{border-left-color:#E8B10C}.dcard.down{border-left-color:#E24B4A}
+.dcard .hh{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.dopts{display:grid;grid-template-columns:repeat(auto-fit,minmax(90px,1fr));gap:6px;margin:8px 0 4px}
+.dopt{border:1px solid var(--line);border-radius:10px;padding:6px;text-align:center;background:var(--bg)}
+.dopt small{display:block;font-size:11px;color:var(--muted)}.dopt b{display:block;font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:22px}
+.dopt.win{border:2px solid #1D9E75}.winlab{color:#1D9E75;font-weight:900}
+.plannote{background:#FAEEDA;color:#633806;border-radius:10px;padding:8px 12px;font-size:13.5px;margin:8px 0}
+.oleg{font-size:12px;color:var(--muted);margin:2px 0 4px}.oleg i{display:inline-block;width:9px;height:9px;border-radius:2px;margin:0 3px 0 8px;vertical-align:0}.oleg i:first-child{margin-left:0}
+.oleg .r{background:#A32D2D}.oleg .m{background:#5F5E5A}.oleg .g{background:#0F6E56}
+.ostrip span,.ostrip b{font-variant-numeric:tabular-nums}
+.riskrow{display:flex;align-items:center;gap:8px;margin:8px 0 0}.riskrow .seg{margin:0}
+.wkrow em .ftmeter i{width:7px;height:7px}
+.cpills{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}
+.cpill{position:relative;text-align:left;border:1px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);padding:7px 26px 7px 10px;cursor:pointer}
+.cpill b{display:block;font-size:13.5px}.cpill small{display:block;font-size:11px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cpill .ci{position:absolute;right:8px;top:8px;width:15px;height:15px;border-radius:50%;border:1px solid var(--muted);font-size:9.5px;font-weight:900;font-style:italic;display:flex;align-items:center;justify-content:center;opacity:.65;font-family:Georgia,serif}
+.cpill.used{opacity:.5}
+.cweeks{display:grid;grid-template-columns:repeat(auto-fit,minmax(30px,1fr));gap:4px;align-items:end;margin:8px 0}
+.cwk{display:flex;flex-direction:column;align-items:center;gap:2px}.cwk small{font-size:9.5px;color:var(--muted)}.cwk i{display:block;width:70%;border-radius:4px;background:#9FE1CB}.cwk b{font-size:10.5px}
+.cwk.best i{background:#0F6E56}.cwk.best b{color:#0F6E56}
+.optrow.on{border-color:var(--ink);box-shadow:inset 0 0 0 1px var(--ink)}
+.qmins{background:var(--surface);border:1px solid var(--line);border-radius:12px;padding:8px 12px;margin:8px 0}
+.qmh,.qmf{display:flex;justify-content:space-between;align-items:center;gap:8px}.qmh b#minsv{font-size:18px}.qmh b#minsv::after{content:"'"}
+.qmins input{width:100%;margin:4px 0}
+/* transitions: short, and off when the phone asks for less motion */
+@media (prefers-reduced-motion: no-preference){
+  dialog[open] .sheet{animation:sheetIn .2s ease-out}
+  dialog.psheet[open]{animation:sheetUp .22s cubic-bezier(.2,.8,.2,1)}
+  dialog.closing{animation:sheetOut .16s ease-in forwards}
+  dialog{transition:transform .18s ease-out}
+  #view.vfade > *{animation:vfade .18s ease-out}
+  .toast{transition:opacity .2s, transform .2s;transform:translate(-50%, 8px)}.toast.on{transform:translate(-50%, 0)}
+  .pp2.flash .shirtwrap{animation:flash .7s ease-out}
+}
+@keyframes sheetIn{from{opacity:.4;transform:translateY(12px)}to{opacity:1;transform:none}}
+@keyframes sheetUp{from{transform:translateY(40%)}to{transform:none}}
+@keyframes sheetOut{to{opacity:0;transform:translateY(30%)}}
+@keyframes vfade{from{opacity:.35}to{opacity:1}}
+@keyframes flash{0%{box-shadow:0 0 0 0 rgba(93,202,165,.8);border-radius:8px}100%{box-shadow:0 0 0 14px rgba(93,202,165,0);border-radius:8px}}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .plannote{background:#412402;color:#FAC775} }
+:root[data-theme="dark"] .plannote{background:#412402;color:#FAC775}
+
+/* v6.44 set pieces */
+.spcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c, var(--line));border-radius:14px;padding:10px 12px;margin:10px 0}
+.sphd{display:flex;justify-content:space-between;align-items:center;gap:8px}.sphd b{font-size:16px}.sphd .term{text-decoration:none;border:0;padding:0}
+.spstats{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:8px 0 4px}
+.spst{background:var(--sunk);border-radius:9px;padding:5px 8px;min-width:0}.spst small{display:block;font-size:10.5px;font-weight:700;color:var(--muted)}
+.spst b{font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:19px}.spst em{font-style:normal;font-size:11px;color:var(--muted);margin-left:4px}
+.sprow{display:grid;grid-template-columns:20px 84px minmax(0,1fr);gap:6px;align-items:center;padding:6px 0;border-top:1px solid var(--line)}
+.sprow .ico{color:var(--muted)}.splab{font-size:12.5px;color:var(--muted);font-weight:700}
+.spppl{display:flex;flex-wrap:wrap;gap:4px;min-width:0}
+.spchip{border:1px solid var(--line);border-radius:12px;background:var(--surface);color:var(--ink);padding:2px 9px;font-size:12.5px;font-weight:700;cursor:pointer;max-width:100%;text-align:left;line-height:1.35}
+.spchip small{font-weight:500;color:var(--muted);margin-left:4px;font-size:11px}
+.spchip.top{background:var(--up-soft);border-color:transparent;color:var(--up)}.spchip.top small{color:var(--up)}
+.spchip .yours{font-style:normal;font-size:9.5px;font-weight:900;background:var(--ink);color:var(--bg);border-radius:999px;padding:0 5px;margin-left:4px;vertical-align:1px}
+.spwarn{background:#FAEEDA;color:#633806;border-radius:9px;padding:7px 10px;font-size:13px;margin:8px 0 2px}
+.sproles{display:flex;flex-wrap:wrap;gap:4px;margin-top:4px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .spwarn{background:#412402;color:#FAC775} }
+:root[data-theme="dark"] .spwarn{background:#412402;color:#FAC775}
+
+/* v6.45 matches and swings */
+.mcard{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--c, var(--line));border-radius:14px;padding:10px 12px;margin:10px 0}
+.mhd{display:flex;justify-content:space-between;align-items:center;gap:8px}.mhd b{font-size:15px}
+.mclab{font-size:11px;font-weight:700;color:var(--muted);margin:8px 0 3px}
+.wdl2{display:flex;height:22px;border-radius:7px;overflow:hidden;font-size:11px;font-weight:800;color:#fff}
+.wdl2 span{display:flex;align-items:center;justify-content:center;white-space:nowrap;overflow:hidden;text-shadow:0 1px 1px rgba(0,0,0,.35)}
+.wdl2 span.dr{background:#888780}.wdl2.wbk{opacity:.75;height:18px;font-size:10.5px}
+.mwhy{font-size:12.5px;background:#FAEEDA;color:#633806;border-radius:8px;padding:6px 9px;margin:8px 0 0}
+.mgrid{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;margin-top:10px}
+.mside{display:flex;flex-direction:column;font-size:11.5px;color:var(--muted);line-height:1.45;min-width:0}.mside b{color:var(--ink);font-size:13px}.mside.r{text-align:right}
+.mscore{text-align:center}.mscore b{display:block;font-family:var(--cond);font-variation-settings:"wdth" 70;font-weight:800;font-size:30px;line-height:1}.mscore small{font-size:10.5px;color:var(--muted)}
+.mfoot{font-size:12px;color:var(--muted);margin-top:8px;line-height:1.6}
+.mtag{font-weight:800}.mtag.info{color:var(--ink)}.mtag.warn{color:#BA7517}
+.mday{margin:16px 0 0;font-size:13px;color:var(--muted)}
+.swban{background:#FAEEDA;color:#633806;border-radius:10px;padding:8px 12px;font-size:13.5px;margin:4px 0 8px}
+.ctrls{display:flex;gap:8px;flex-wrap:wrap;margin:4px 0}.ctrls .seg{margin:0}
+.swrow2{display:grid;grid-template-columns:52px 1fr auto;gap:8px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 2px;color:var(--ink);cursor:pointer}
+.swrow2 b{font-size:13px;white-space:nowrap}.swrow2 small{display:block;font-size:11.5px;color:var(--muted);margin-top:3px}
+.swrow2 em{font-style:normal;font-weight:800;text-align:right;font-size:14px}.swrow2 em small{font-weight:600;font-size:10.5px;margin:0}
+.swfx{display:flex;flex-wrap:wrap;align-items:center;gap:3px}
+.swc{font-style:normal;font-size:10px;font-weight:800;border-radius:4px;padding:1px 4px}
+.swfx .ar{color:var(--muted);font-size:12px;margin:0 2px}
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]) .mwhy,:root:not([data-theme="light"]) .swban{background:#412402;color:#FAC775} }
+:root[data-theme="dark"] .mwhy,:root[data-theme="dark"] .swban{background:#412402;color:#FAC775}
+
+/* v6.46 form and trend */
+.frows{display:grid;margin:6px 0}
+.frow{display:grid;grid-template-columns:52px 86px 1fr;gap:8px;align-items:center;width:100%;text-align:left;background:none;border:0;border-top:1px solid var(--line);padding:8px 2px;color:var(--ink);cursor:pointer}
+.frow.head{font-size:11px;color:var(--muted);font-weight:700;border-top:0;cursor:default}
+.frow .tn{font-weight:800;white-space:nowrap}
+.fres{display:flex;gap:2px}.fres i{font-style:normal;font-size:10px;font-weight:900;width:16px;height:16px;line-height:16px;text-align:center;border-radius:4px;color:#fff}
+.fres .rW{background:#1D9E75}.fres .rD{background:#888780}.fres .rL{background:#A32D2D}
+.fbars2{display:grid;gap:3px;min-width:0}
+.fbar2{display:grid;grid-template-columns:58px 1fr 30px;gap:6px;align-items:center;font-size:11px;color:var(--muted)}
+.fbar2 > i{display:block;height:8px;border-radius:4px;background:var(--sunk);overflow:hidden}.fbar2 > i > i{display:block;height:100%;border-radius:4px}
+.fbar2 b{text-align:right;color:var(--ink);font-size:12.5px}
+.tcards{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;margin:6px 0}
+.tcard{flex:0 0 auto;min-width:104px;text-align:left;border:1px solid var(--line);border-left:3px solid var(--line);border-radius:11px;background:var(--surface);color:var(--ink);padding:7px 10px;cursor:pointer}
+.tcard.up{border-left-color:#1D9E75}.tcard.down{border-left-color:#E24B4A}
+.tcard b{display:block;font-size:13.5px}.tcard .tnum{display:block;font-size:12px;color:var(--muted);margin-top:2px}.tcard small{display:block;font-size:10.5px;color:var(--muted)}
+.tcard em{font-style:normal;font-weight:800;font-size:15px}.tcard.up em{color:var(--up)}.tcard.down em{color:var(--down)}
 </style>
 </head>
 <body>
@@ -1190,7 +1364,7 @@ const VIEWS = {future:viewFuture, week:viewWeek, players:viewPlayers, fixtures:v
 function render(){
   VERDICTS = null; PICK = null; TYPICAL = null; OUTCOME = null;
   let tab = (location.hash || "#week").slice(1);
-  if (tab === "future"){ state.teamView = "trends"; tab = "teams"; history.replaceState(null, "", "#teams"); }
+  if (tab === "future"){ state.fxMode = "swings"; state.swMode = "trend"; tab = "fixtures"; history.replaceState(null, "", "#fixtures"); }
   const name = VIEWS[tab] ? tab : "week";
   const strip = $("#statusStrip"); if (strip) strip.innerHTML = statusStrip();
   if (state.lastTab !== name){ if (state.lastTab) announce(`${{week: "Home", players: "Players", fixtures: "Fixtures", captain: "Captain", teams: "Teams", squad: "Squad", model: "Model and settings"}[name] || name} page`); state.lastTab = name; }
@@ -1198,6 +1372,8 @@ function render(){
   document.querySelectorAll("nav.tabs a").forEach(a => a.setAttribute("aria-current", a.getAttribute("href") === "#" + name ? "page" : "false"));
   $("#view").innerHTML = (name === "week" ? homeCommand() : "") + VIEWS[name]();
   restoreFolds();
+  if (state.fadeTab !== name){ const v = $("#view"); v.classList.remove("vfade"); void v.offsetWidth; v.classList.add("vfade"); state.fadeTab = name; }
+  if (state.flash){ state.flash.forEach(id => document.querySelectorAll(`.pp2[data-pitch="${id}"]`).forEach(b => b.classList.add("flash"))); state.flash = null; }
   if ($("#sheet").open && SHEET_KEY && SHEET_KEY.startsWith("Rules for")) setTimeout(refreshRules, 0);
   if (name === "week" && state.squad.ids.length === 15) { try { saveForecastSnapshot(); } catch(e) {} }
   const cs = $("#capswipe");
@@ -1393,11 +1569,12 @@ function listHtml(list){
 
 function viewFixtures(){
   if (state.fxMode === "attack" || state.fxMode === "defence"){ state.splitSort = state.fxMode === "attack" ? "att" : "def"; state.fxMode = "split"; }
+  if (state.fxMode === "scores" || state.fxMode === "bookies") state.fxMode = "matches";
   const mode = state.fxMode;
-  const modes = segMore("fxmode", [["split","Fixtures"],["scores","Scores"],["swings","Swings"]], [["bookies","Bookies"],["referees","Referees"],["rotation","Rotation"]], mode, "Fixture view");
-  if (mode === "scores") return `<h2>Likely scores</h2>${modes}${viewScores()}`;
+  const modes = segMore("fxmode", [["split","Fixtures"],["matches","Matches"],["swings","Swings"]], [["referees","Referees"],["rotation","Rotation"]], mode, "Fixture view");
+  if (mode === "matches") return `<h2>Matches</h2>${modes}${viewMatches()}`;
   if (mode === "split") return `<h2>Fixtures</h2>${specialBanner(Math.min(state.ahead || 6, FXLIST().length))}${modes}${viewSplit()}`;
-  if (mode === "swings") return `<h2>Fixture swings</h2>${modes}${viewSwings()}`;
+  if (mode === "swings") return `<h2>Swings</h2>${modes}${viewSwings()}`;
   if (mode === "referees"){
     const g = GWS[0], fx = D.fixtures.filter(f => f.gw === g), lg = (D.meta.refs || {}).league, table = D.referees || [];
     const line = r => `${f2(r.pens)} penalties and ${f1(r.yel)} yellow cards a game over ${r.n} matches`;
@@ -1477,14 +1654,13 @@ function setPieceLines(t){
 }
 function viewTeams(){
   const view = state.teamView;
-  const head = `<h2>Teams</h2>${segMore("teamview", [["strength","Teams"],["trends","Trends"],["form","Form table"]], [["quality","Quality map"],["map","Form map"],["luck","Luck"],["h2h","Head to head"],["setpieces","Set pieces"]], view, "Team view")}`;
-  if (view === "trends") return head + viewFuture().replace("<h2>Trend spotter</h2>", "");
+  const head = `<h2>Teams</h2>${segMore("teamview", [["strength","Teams"],["form","Form table"],["luck","Luck"]], [["quality","Quality map"],["map","Form map"],["h2h","Head to head"],["setpieces","Set pieces"]], view, "Team view")}`;
+  if (view === "trends"){ state.teamView = "strength"; state.fxMode = "swings"; state.swMode = "trend"; setTimeout(() => { location.hash = "#fixtures"; }, 0); return head; }
   if (view === "form") return head + viewFormTable();
   if (view === "map") return head + viewFormMap();
   if (view === "quality") return head + `<p class="lede">How good each team is at both ends this season.</p>${qualityMap()}`;
   if (view === "h2h") return head + viewTeamH2H();
-  if (view === "setpieces") return head + `<p class="lede">Who’s on penalties and free kicks. The FPL order is the official list; “actually taken” comes from this season’s shot data, so it shows who really stepped up. The match data doesn’t record corner takers, so corners use FPL’s order only.</p>
-    ${D.teams.map(t => `<h3>${esc(t.name)}</h3>${setPieceLines(t)}`).join("")}`;
+  if (view === "setpieces") return head + viewSetPieces();
   if (view === "luck"){
     return head + luckBars();
   }
@@ -1699,10 +1875,7 @@ function viewRivals(){
   <ul class="list">${threats.map(id => { const p = P[id]; return playerRow(p, pct(share(id)), "of rivals", true, `<div class="sub">${f1(p.ep6)} projected over ${GWS.length} GWs${caps[id] ? `; captained by ${caps[id]} of them` : ""}</div>`); }).join("") || `<li class="lede">No player is owned by a quarter of your rivals that you don’t have.</li>`}</ul>
   <h3>Your edge</h3><ul class="list">${edges.map(id => playerRow(P[id], pct(share(id)), "of rivals", false, `<div class="sub">${f1(P[id].ep6)} projected over ${GWS.length} GWs</div>`)).join("") || `<li class="lede">Add your squad on the My team tab to see your differentials.</li>`}</ul>
   <h3>Captains last gameweek</h3><dl class="kv">${Object.entries(caps).sort((a,b) => b[1] - a[1]).slice(0, 6).map(([id, c]) => `<dt>${P[id] ? esc(P[id].n) : "–"}</dt><dd>${c} of ${n}</dd>`).join("")}</dl>
-  <h3>Table and projections</h3><div class="scroller"><table class="log"><thead><tr><th>#</th><th>Team</th><th class="n">Pts</th><th class="n">GW${GWS[0]}</th><th class="n">${GWS.length} GWs</th><th>Chips left</th></tr></thead><tbody>
-  ${R.entries.map(e => { const pr = e.me && me ? me : proj(e.ids); const d = pr && me && !e.me ? pr[1] - me[1] : null;
-    return `<tr style="${e.me ? "font-weight:800" : ""}"><td>${e.rank}</td><td>${esc(e.team)}${e.chip ? ` <span class="chip">${esc(CHIP_NAMES[e.chip] || e.chip)}</span>` : ""}</td><td class="n">${e.total}</td><td class="n">${pr ? f1(pr[0]) : "–"}</td><td class="n">${pr ? f1(pr[1]) : "–"}${d != null ? `<div class="sub" style="color:var(--${d > 0 ? "down" : "up"})">${sgn(d)} vs you</div>` : ""}</td><td class="sub">${chipsLeft(e).join(", ") || "None"}</td></tr>`; }).join("")}</tbody></table></div>
-  <p class="sub">Projections pick each manager’s best XI and captain every week and assume no transfers.</p>`;
+  ${leagueTable(R, me, proj, chipsLeft)}`;
 }
 function viewMine(mode = "team"){
   const squad = state.squad.ids.map(id => P[id]);
@@ -1759,16 +1932,15 @@ function viewMine(mode = "team"){
     : `<p class="lede">The ${term("solver", "exact solver")} checks every combination of transfers, ${term("hit", "hits")}, captains, line-ups and the chips you allow over the next ${RULES.H} gameweeks, obeying your locks, bans and other rules, and finds the plan with the most projected points. It takes a few seconds, a little longer with chips switched on.</p><button class="primary" data-solve="1">Solve ${esc(RULES.name)}</button>`}
   ${plansCompare()}
   <details class="fold"><summary><b>Quick single transfers</b><span>${top ? `Best: ${esc(top.o.n)} → ${esc(top.c.n)}, +${f1(top.gain)}` : "No move clearly helps"}</span></summary>${ideas.length ? ideas.map(x => `<button class="swap row" data-open="${x.c.id}"><div><div class="sub">Sell ${esc(x.o.n)} (${money(x.o.price)})</div><div class="name">Buy ${esc(x.c.n)} <span class="sub">${T[x.c.t].short}, ${money(x.c.price)}</span></div><div class="chips">${reasonChips(x.c)}</div></div><div class="gain">+${f1(x.gain)}<div class="sub">pts</div></div></button>`).join("") : `<p class="lede">No single transfer adds more than a third of a point.</p>`}</details>
-  <details class="fold"><summary><b>Chips and wildcard</b><span>${chipsum || "Timing for each chip you have left"}</span></summary>${chipCalendar(squad)}${specialBanner(30)}${chipSection}</details>`;
+  <details class="fold"><summary><b>Chips and wildcard</b><span>${chipsum || "Timing for each chip you have left"}</span></summary>${specialBanner(30)}${(() => { try { if (!state.chipPlan) state.chipPlan = chipPlan(squad, state.plan); } catch(e) {} return chipsCompact(state.chipPlan); })()}</details>`;
   }
   return `${alertsHome()}
-  ${draftTabs()}
-  ${seg("sqshow", [["pitch","Pitch"],["list","List"]], state.sqShow || "pitch", "Show your squad as")}
-  ${state.sqShow === "list" ? `<div class="slotlist">${slots}</div>` : pitchView(squad)}
+  ${teamRow1()}${teamRow2()}
+  ${state.sqShow === "list" ? `<div class="slotlist">${slots}</div>` : state.sqShow === "fx" ? `<p class="sub">Each player’s next opponents, coloured for his position: attackers by goals expected, defenders and keepers by clean-sheet chance.</p>${squadFixtureGrid(squad)}` : pitchView(squad)}
   ${solveBar()}
   ${state.exact ? planTimeline(state.exact) : state.solveError ? `<p class="lede">The solver couldn’t run here (${esc(state.solveError)}), so this is the quick planner instead.</p>${planHtml}` : ""}
-  <details class="fold" data-fold="chips"><summary><b>Chips and wildcard</b><span>${(() => { try { const c = state.chipPlan; if (!c) return "Timing for each chip you have left"; const bits = []; if (hasChip("tc") && c.tcBest && c.tcBest.p) bits.push(`TC: GW${c.tcBest.g}`); if (hasChip("bb") && c.bbBest) bits.push(`BB: GW${c.bbBest.g}`); if (hasChip("fh") && c.fhBest) bits.push(`FH: GW${c.fhBest.g}`); return bits.join(" · ") || "Timing for each chip you have left"; } catch(e){ return ""; } })()}</span></summary>${chipCalendar(squad)}${specialBanner(30)}${chipSection}</details>
-  <div class="optgrid sqlinks">${b.cap ? `<button class="optrow" data-goto="captain" data-capsrc="squad">${icon("crown")} Why ${esc(b.cap.n)} as captain? Compare all five options</button>` : ""}<button class="optrow" data-sqfx="1">${icon("trend")} Your fixtures: the next ones for your 15</button></div>
+  <details class="fold" data-fold="chips"><summary><b>Chips and wildcard</b><span>${(() => { try { const c = state.chipPlan; if (!c) return "Timing for each chip you have left"; const bits = []; if (hasChip("tc") && c.tcBest && c.tcBest.p) bits.push(`TC: GW${c.tcBest.g}`); if (hasChip("bb") && c.bbBest) bits.push(`BB: GW${c.bbBest.g}`); if (hasChip("fh") && c.fhBest) bits.push(`FH: GW${c.fhBest.g}`); return bits.join(" · ") || "Timing for each chip you have left"; } catch(e){ return ""; } })()}</span></summary>${specialBanner(30)}${(() => { try { if (!state.chipPlan) state.chipPlan = chipPlan(squad, state.plan); } catch(e) {} return chipsCompact(state.chipPlan); })()}</details>
+  <div class="optgrid sqlinks">${b.cap ? `<button class="optrow" data-goto="captain" data-capsrc="squad">${icon("crown")} Why ${esc(b.cap.n)} as captain? Compare all five options</button>` : ""}</div>
   <details class="fold" data-fold="health"><summary><b>Health check</b><span>${health.length ? `${health.length} note${health.length === 1 ? "" : "s"}` : "Nothing to flag"}</span></summary>${health.length ? `<ul class="health">${health.map(([t, s]) => `<li>${toneDot(t)}<span>${s}</span></li>`).join("")}</ul>` : `<p class="lede">No injuries, rotation worries or price falls.</p>`}</details>
   <details class="fold" data-fold="source"><summary><b>Squad source</b><span>${D.my ? "Imported from FPL" : "Added by hand"}</span></summary>${my}<p class="sub">Bank, free transfers and chips come from FPL; change them for a what-if under Rules.</p></details>`;
 }
@@ -1887,7 +2059,7 @@ function openPlayer(id){
   const tabs = `<div class="seg ptabs" role="group" aria-label="Player sections">${[["overview","Overview"],["stats","Stats"],["fixtures","Fixtures"],["role","Role"]].map(([k, l]) => `<button data-ptab="${k}" data-pid="${p.id}" aria-pressed="${tab === k}">${l}</button>`).join("")}</div>`;
   const star = `<button class="starbtn" data-watch="${p.id}" aria-pressed="${isWatched(p.id)}">${isWatched(p.id) ? "★ Watching" : "☆ Watch"}</button>`;
   const body = {
-    overview: () => `${verdictLine(p)}${p.next ? triple(p) : ""}${disagreeLine(p)}${cardLine(p)}${outcomeLine(p)}${statusChips(p)}${betterOptions(p)}${playerWeek(p)}${p.hot_fpl_off ? `<p class="sub">FPL’s own projection (${f1(p.fpl_ep)}) is left out this week because he scored 10+ in one of his last three games; straight after a haul it has overrated players by about 60% in testing.</p>` : ""}${p.summary ? `<p class="lede">${esc(p.summary)}</p>` : ""}
+    overview: () => `${verdictLine(p)}${planSaleNote(p)}${p.next ? triple(p) : ""}${disagreeLine(p)}${cardLine(p)}${outcomeLine(p)}${statusChips(p)}${betterOptions(p)}${playerWeek(p)}${p.hot_fpl_off ? `<p class="sub">FPL’s own projection (${f1(p.fpl_ep)}) is left out this week because he scored 10+ in one of his last three games; straight after a haul it has overrated players by about 60% in testing.</p>` : ""}${p.summary ? `<p class="lede">${esc(p.summary)}</p>` : ""}
   ${plainCard(p)}
   ${p.news ? `<div class="callout">${esc(p.news)}</div>` : ""}
   ${n ? `<div class="versus"><div class="big">${f1(p.ep[0])}</div><div class="sm">projected for GW${GWS[0]}<br>${esc(fxText(p.t, GWS[0]))}${p.fpl_ep != null ? `<br>FPL’s own projection: ${f1(p.fpl_ep)}` : ""}</div></div>
@@ -2011,8 +2183,11 @@ function openPicker(pos){
   draw(); $("#pickq").addEventListener("input", e => { pk.q = e.target.value; draw(); }); showSheet();
 }
 let SHEET_KEY = null;
+let SHEET_MINI = false;
 function showSheet(){
   const d = $("#sheet"), sh = d.querySelector(".sheet"), t = $("#sheetTitle"), key = t ? t.textContent : "";
+  if (d.classList.contains("closing")){ clearTimeout(CLOSE_T); d.classList.remove("closing"); }
+  d.classList.toggle("psheet", SHEET_MINI); SHEET_MINI = false;
   const same = d.open && key === SHEET_KEY, keep = same ? sh.scrollTop : 0;
   if (!d.open){
     SHEET_OPENER = document.activeElement;
@@ -2027,7 +2202,13 @@ function showSheet(){
   requestAnimationFrame(() => { sh.scrollTop = keep; });
 }
 let SHEET_OPENER = null;
-function closeSheet(){ const d = $("#sheet"); if (d.open) d.close(); document.body.classList.remove("sheet-open"); SHEET_KEY = null; returnFocus(); }
+let CLOSE_T = null;
+function closeSheet(){
+  const d = $("#sheet"); clearTimeout(CLOSE_T);
+  const done = () => { d.classList.remove("closing"); d.style.transform = ""; if (d.open) d.close(); document.body.classList.remove("sheet-open"); SHEET_KEY = null; returnFocus(); };
+  if (!d.open || REDUCED){ done(); return; }
+  d.classList.add("closing"); CLOSE_T = setTimeout(done, 160);
+}
 function returnFocus(){ const o = SHEET_OPENER; SHEET_OPENER = null; if (o && document.contains(o) && o.focus) try { o.focus({preventScroll: true}); } catch(e) {} }
 
 // FPL Lab exact transfer solver: a mixed-integer programme solved with HiGHS.
@@ -2395,7 +2576,7 @@ let RULES = PLANS[ACTIVE];
 function persistPlans(){ try { localStorage.setItem(PLANS_STORE, JSON.stringify({plans: PLANS, active: ACTIVE})); } catch(e) {} }
 function saveRules(){ RULES.result = null; persistPlans(); state.exact = null; state.stress = null; state.alts = null; }
 function switchPlan(i){ ACTIVE = i; RULES = PLANS[i]; persistPlans(); state.exact = null; state.stress = null; state.alts = null; }
-function newPlan(copy){ const name = "Draft " + "ABCDEFGH"[PLANS.length] ; if (PLANS.length >= 8) return;
+function newPlan(copy){ const name = nextDraftName(); if (PLANS.length >= 8) return;
   const p = copy ? Object.assign(JSON.parse(JSON.stringify(RULES)), {name, result: null}) : blankPlan(name); PLANS.push(p); switchPlan(PLANS.length - 1); }
 function deletePlan(){ if (PLANS.length <= 1){ PLANS = [blankPlan("Draft A")]; switchPlan(0); return; } PLANS.splice(ACTIVE, 1); switchPlan(Math.max(0, ACTIVE - 1)); }
 function clearRule(id){ ["lock","ban"].forEach(k => RULES[k] = RULES[k].filter(x => x !== id)); ["buy","sell"].forEach(k => RULES[k] = RULES[k].filter(r => r.id !== id)); }
@@ -2437,7 +2618,7 @@ async function newHighs(){
 async function solveExact(squad, bank, ft, opts = {}){
   await loadHighs();
   const H = Math.min(opts.H || RULES.H || GWS.length, GWS.length);
-  const epAt = opts.epAt || ((p, t) => p.ep[t]);
+  const epAt = opts.epAt || (RULES.risk && RULES.risk !== "balanced" ? riskEp : (p, t) => p.ep[t]);
   // captaincy this week uses the Lab captain score (the ranking that picked better captains in testing)
   const capAt = opts.epAt ? epAt : (p, t) => (t === 0 && p.cap != null && !p.edited ? p.cap : p.ep[t]);
   const idx = gw => Math.max(0, GWS.indexOf(gw));
@@ -2778,21 +2959,6 @@ function fixtureSwings(){
       n3: n3.map(f => T[f.opp].short + (f.home ? " H" : " A")).join(", "), l3: l3.map(f => T[f.opp].short + (f.home ? " H" : " A")).join(", ")};
   });
 }
-function viewSwings(){
-  const s = fixtureSwings(), pick = (k, dir) => [...s].filter(x => x[k] != null && !isNaN(x[k])).sort((a,b) => dir * (b[k] - a[k])).slice(0, 4).filter(x => dir * x[k] >= (k.startsWith("cs") ? 0.06 : 0.2));
-  const line = (x, k) => { const t = x.t, now = k.endsWith("Now");
-    const what = k.startsWith("atk") ? `${f1(Math.abs(x[k]))} ${x[k] > 0 ? "more" : "fewer"} expected goals a game` : `${pct(Math.abs(x[k]))} ${x[k] > 0 ? "better" : "worse"} clean sheet odds`;
-    return `<li><button class="row" data-team="${t.id}"><div><div class="name">${dot(t.id)}${esc(t.name)}</div><div class="sub">${now ? `Next three (${esc(x.n3)}) against their last three: ${what}.` : `From GW${GWS[3]} (${esc(x.l3)}) against the next three: ${what}.`}</div></div></button></li>`; };
-  const block = (title, k, dir, hint) => { const l = pick(k, dir); return l.length ? `<h3>${title}</h3><p class="lede">${hint}</p><ul class="list">${l.map(x => line(x, k)).join("")}</ul>` : ""; };
-  return `<p class="lede">Where fixtures are about to turn. Buy just before a team’s run gets easier, and sell before it gets harder.</p>
-    ${block("Attack: fixtures getting easier now", "atkNow", 1, "Their next three are kinder than the last three. A good time to bring in their attackers.")}
-    ${block("Attack: fixtures getting harder now", "atkNow", -1, "Their next three are tougher than the last three. Consider moving their attackers on.")}
-    ${block("Defence: fixtures getting easier now", "csNow", 1, "Better clean sheet chances ahead. Look at their defenders and keeper.")}
-    ${block("Defence: fixtures getting harder now", "csNow", -1, "Clean sheets get less likely from here.")}
-    ${block("Coming later: attack swings from GW" + GWS[3], "atkLater", 1, "Fixtures turn kind in three weeks: one to plan for.")}
-    ${block("Coming later: attack gets tougher from GW" + GWS[3], "atkLater", -1, "Enjoy the next three, then they get harder.")}`;
-}
-
 /* ---------- v6.5: team form multiplier, split FDR, variance spotter, minutes security ---------- */
 // 1. Team attacking form multiplier: a team's xG over its last N games against the league average over the same window
 const FORM_N = 4;
@@ -3309,10 +3475,9 @@ function buildVerdicts(){
       const repl = pool.filter(q => q.pos === p.pos && !owned.has(q.id) && !banned.has(q.id) && q.price <= budget + 1e-9 && minutesSecurity(q).level === "green").sort((a,b) => b.ep6 - a.ep6)[0];
       const gain = repl ? repl.ep6 - p.ep6 - 1.5 : 0;   // what a free transfer is worth, roughly
       if (out_){ word = "Sell"; strength = "Strong"; reasons.unshift(p.news || "unavailable"); }
-      else if (ps){ word = "Sell"; strength = "Lean"; reasons.unshift(`in your plan to sell in GW${ps}`); }
       else if (ms.level === "red"){ word = "Sell"; strength = "Lean"; reasons.unshift("rarely starting"); }
-      else if (gain >= 3){ word = "Sell"; strength = gain >= 7 ? "Strong" : "Lean"; reasons.unshift(`${repl.n} would add ${f1(gain + 1.5)} over ${GWS.length} for money you have`); }
-      else { word = "Hold"; strength = s && s.score >= 70 ? "Strong" : "Lean"; }
+      else if (gain >= 3){ word = "Sell"; strength = gain >= 7 ? "Strong" : "Lean"; reasons.unshift(`${repl.n} would add ${f1(gain + 1.5)} over ${GWS.length} for money you have${gain < 4 ? ` (borderline: the line is 4.5, so small changes can flip this)` : ""}`); }
+      else { word = "Hold"; strength = s && s.score >= 70 ? "Strong" : "Lean"; if (repl && gain >= 2) weak.push(`borderline: ${repl.n} would add ${f1(gain + 1.5)} over ${GWS.length}; he’d become a sell at 4.5`); }
       tone = word === "Sell" ? "down" : "flat";
     } else if (!s || out_){
       word = "Don’t buy"; tone = "down"; strength = "Strong"; if (out_) reasons.unshift(p.news || "unavailable");
@@ -3882,7 +4047,7 @@ function homeCards(){
       if (opts[0]) card(opts[0][1] === g ? 15 : 65, "▣", "Chip tip", `${opts[0][0]} GW${opts[0][1]}`, opts[0][2] ? `About +${f1(opts[0][2])} points` : "Best week for it", `data-goto="squad"`, opts[0][1] === g ? "up" : "");
     } catch(e) {} }
   const heat = D.teams.map(t => ({t, f: teamForecast(t.id)})).filter(x => x.f.next != null && x.f.change >= 0.2).sort((a,b) => b.f.change - a.f.change);
-  if (heat[0]) card(70, "▲", "Heating up", heat.slice(0, 2).map(x => x.t.name).join(", "), `${esc(heat[0].t.short)} ${f2(heat[0].f.last)} → ${f2(heat[0].f.next)} xG`, `data-goto="future"`, "up");
+  if (heat[0]) card(70, "▲", "Heating up", heat.slice(0, 2).map(x => x.t.name).join(", "), `${esc(heat[0].t.short)} ${f2(heat[0].f.last)} → ${f2(heat[0].f.next)} xG`, `data-goto="fixtures" data-fxset="swings" data-swset="trend"`, "up");
   return out.sort((a,b) => a.pri - b.pri).map(x => x.html).join("");
 }
 function thisWeekStrip(){
@@ -3997,15 +4162,15 @@ function statusChips(p){
 }
 
 /* ---------- v6.28: calmer rows, tabs, five-tab nav, status strip, watchlist, search, guide, what's new, accent ---------- */
-const APP_VERSION = "6.41";
+const APP_VERSION = "6.46";
 const WHATS_NEW = [
-  "Drafting and the solver now live on Team, under your pitch, with all rules in one Rules sheet and the plan shown week by week",
-  "All your mini-leagues, including head-to-head ones and leagues you’re far down",
-  "Sharper, smaller buttons across the app, and folded sections that stay open",
-  "A Captain tab: the five captain cards, each card’s best options with the first one explained in full, the compass, Triple Captain timing and your captain record",
-  "Home is now your gameweek: decisions, your XI, captain, transfer, alerts, chips and leagues, in the order that matters for the week",
-  "Squad split into Team, Plan, Season and Rivals, with the planner settings and extras folded away",
-  "Players gets Model vs FPL, Prices, DEFCON and Best by position views; the old points chart is now a simple outcome strip",
+  "Matches: our forecast and the bookmakers’ on one card, with the most likely score, clean sheets and your players",
+  "Swings now has three views: Fixtures (the schedule), Form (what each team has actually done) and Trend (where they’re heading, and who to buy)",
+  "Set pieces redesigned: a card per team with set-piece threat and defence, takers as chips, and a warning when FPL’s penalty taker isn’t the one taking them",
+  "Every transfer judged three ways: now, free next week, or not at all, so you can see when a −4 is worth it",
+  "The solver plans exactly the weeks on its slider, with a Safe, Balanced or Aggressive setting",
+  "Verdicts rate the player; your draft's plan to sell him is shown separately",
+  "Chip buttons show what each chip would add and when, swipe down to close sheets, and swipe the pitch to change gameweek",
 ];
 // a row of main views, with the rest behind "More"
 state.more = {};
@@ -4216,8 +4381,8 @@ function movesLine(i){
   if (!list.length) return `<p class="moves sub">No transfers in GW${g}.</p>`;
   return `<div class="moves">${list.map(({m, k}) => { const o = P[m.out], c = P[m.in]; if (!o || !c) return "";
     let d = 0; const end = Math.min(GWS.length, i + aheadN()); for (let j = i; j < end; j++) d += (c.ep[j] || 0) - (o.ep[j] || 0);
-    const lab = actionLabel(d, 0);
-    return `<div class="mv"><span>${esc(o.n)} → <b>${esc(c.n)}</b> ${draftState().weeks[i].hits ? "" : actionPill(lab)}</span><em class="${d >= 0 ? "upc" : "downc"}">${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}<small> to GW${GWS[Math.min(GWS.length, i + aheadN()) - 1]}</small></em><button class="ghost small" data-draftrm="${k}" aria-label="Undo this transfer">Undo</button></div>`; }).join("")}</div>`;
+    const lab = moveDecision(o, c, i, false);
+    return `<div class="mvrow"><span>${esc(o.n)} → <b>${esc(c.n)}</b> ${draftState().weeks[i].hits ? "" : decisionPill(lab)}</span><em class="${d >= 0 ? "upc" : "downc"}">${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}<small> to GW${GWS[Math.min(GWS.length, i + aheadN()) - 1]}</small></em><button class="ghost small" data-draftrm="${k}" aria-label="Undo this transfer">Undo</button></div>`; }).join("")}</div>`;
 }
 function pitchView(baseSquad){
   const i = state.pitchGw, g = GWS[i], squad = draftSquadAt(i), L = lineupFor(squad, i), base = new Set(state.squad.ids);
@@ -4233,10 +4398,10 @@ function pitchView(baseSquad){
       <span class="shirtwrap">${shirt(p.t)}${corner}${capTag}<span class="sc">${val}</span></span>
       <span class="pn">${bench ? `<i class="bno">${benchNo[p.id]}</i>` : ""}${minutesSecurity(p).level !== "green" ? msDot(p) : ""}${esc(p.n)}${p.edited ? " ✎" : ""}</span><span class="fxw">${fxChip(p)}</span></button>`; };
   const rows = [1,2,3,4].map(pos => `<div class="prow">${L.xi.filter(p => p.pos === pos).map(p => card(p)).join("")}</div>`).join("");
-  return `${pitchHeader(i)}${weeksSlider("sq")}
-    <div class="pitch">${rows}</div>
+  return `<div class="pitch">${rows}</div>
     <div class="prow benchrow2">${L.bench.map(p => card(p, true)).join("")}</div>
-    ${movesLine(i)}${hitCard(i)}
+    ${movesLine(i)}${hitDecisions(i)}
+    ${aheadN() > 1 ? `<p class="sub" style="text-align:center;margin:6px 0 0">Over your ${aheadN()}-week plan window: <b>${f1(GWS.slice(0, aheadN()).reduce((s_, g, k) => s_ + lineupFor(draftSquadAt(k), k).total, 0))}</b> projected, best line-up each week.</p>` : ""}
     <div class="tsum"><div><small>Projected</small><b>${f1(out.mean)}</b></div><div><small>40+ points</small><b>${pct(out.p40)}</b></div><div><small>60+ points</small><b>${pct(out.p60)}</b></div><div><small>80+ points</small><b>${pct(out.p80)}</b></div></div>
     <p class="sub" style="text-align:center">With ${esc(L.cap.n)} as ${out.chip === "tc" ? "triple " : ""}captain${out.chip === "bb" ? " and your bench counting" : ""}${L.custom ? " (your line-up)" : " (best line-up)"}; his shirt shows his own score, the total counts it ×${capM}. The chances come from each player’s simulations and treat players as independent, so they slightly understate the spread when you own several players from one team. Tap a player to transfer, captain or swap him.${L.custom ? ` <button class="term" data-luclear="1">Reset line-up</button>` : ""}</p>`;
 }
@@ -4279,6 +4444,12 @@ function actionLabel(gain, hits = 0){
 }
 const actionPill = l => `<span class="apill ${l.c}">${l.w}</span>`;
 // the hit tracker: for a gameweek where the draft takes a hit, does it pay?
+function hitDecisions(i){
+  const st = draftState(), w = st.weeks[i], g = GWS[i];
+  if (!w || !w.hits) return "";
+  const all = draftMoves().filter(m => m.gw === g).map(m => ({o: P[m.out], c: P[m.in]})).filter(x => x.o && x.c);
+  return all.slice(Math.max(0, all.length - w.hits)).map(x => decisionCard(x.o, x.c, i, true)).join("");
+}
 function hitCard(i){
   const st = draftState(), w = st.weeks[i], g = GWS[i];
   if (!w || !w.hits) return "";
@@ -4339,6 +4510,9 @@ const ICONS = {
   users: '<circle cx="9" cy="8" r="3"/><path d="M3.5 19c.7-3 3-4.5 5.5-4.5s4.8 1.5 5.5 4.5"/><circle cx="17" cy="9" r="2.5"/><path d="M16 14.5c2.3 0 4 1.3 4.6 3.5"/>',
   eye: '<path d="M2.5 12S6 5.5 12 5.5 21.5 12 21.5 12 18 18.5 12 18.5 2.5 12 2.5 12z"/><circle cx="12" cy="12" r="2.8"/>',
   ok: '<path d="M5 12.5l4.5 4.5L19 7.5"/>',
+  pen: '<circle cx="12" cy="12" r="8.5"/><circle cx="12" cy="12" r="2" fill="currentColor"/>',
+  corner: '<path d="M5 21V4"/><path d="M5 4l9 3-9 3"/><path d="M5 21h14"/>',
+  fk: '<path d="M4 18c4-9 10-12 16-12"/><circle cx="19" cy="6" r="2"/><path d="M8 20v-4M11 20v-5M14 20v-4"/>',
 };
 const icon = (k, cls = "") => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-hidden="true">${ICONS[k] || ""}</svg>`;
 
@@ -4347,12 +4521,17 @@ const icon = (k, cls = "") => `<svg class="ico ${cls}" viewBox="0 0 24 24" aria-
 const AHEAD_STORE = "fpllab.ahead.v1";
 state.ahead = (() => { try { const v = +localStorage.getItem(AHEAD_STORE); return v >= 1 && v <= 10 ? v : 6; } catch(e){ return 6; } })();
 const aheadN = () => Math.min(state.ahead || 6, GWS.length);
-function setAhead(n){ state.ahead = n; try { localStorage.setItem(AHEAD_STORE, String(n)); } catch(e) {} if (typeof RULES !== "undefined" && RULES){ RULES.H = Math.max(3, Math.min(GWS.length, n)); saveRules(); } }
+function setAhead(n){ state.ahead = n; try { localStorage.setItem(AHEAD_STORE, String(n)); } catch(e) {} if (typeof RULES !== "undefined" && RULES){ RULES.H = Math.max(1, Math.min(GWS.length, n)); saveRules(); } }
 // the weeks slider: drag to choose; the label follows as you drag, the page updates when you let go
 function weeksLabel(v, max, list){ return {lab: v === 1 ? (max > GWS.length ? "One week" : "Next gameweek") : `Next ${v} weeks`, range: v === 1 && max > GWS.length ? "use the arrows to pick the week" : `GW${list[0]} to GW${list[Math.min(v, list.length) - 1]}`}; }
 const FXLIST = () => LONG.slice(0, 10);   // the fixtures slider looks up to ten weeks ahead
 function weeksSlider(ctx){
   const fx = ctx === "fx", list = fx ? FXLIST() : GWS, max = list.length, v = Math.min(state.ahead || 6, max), L = weeksLabel(v, max, list);
+  const formMode = ctx === "pl" && state.swMode === "form" && state.fxMode === "swings" && (location.hash || "").includes("fixtures");
+  if (formMode){ const L2 = {lab: `Last ${v} game${v === 1 ? "" : "s"}`, range: "each team’s most recent"};
+    return `<div class="wks"><div class="wkhead"><b id="wkl-${ctx}">${L2.lab}</b><small id="wkr-${ctx}">${L2.range}</small></div>
+      <input type="range" class="wkrange" id="wk-${ctx}" data-ctx="${ctx}" min="1" max="${max}" step="1" value="${v}" aria-label="How many recent games to show" style="--pct:${max > 1 ? 100 * (v - 1) / (max - 1) : 0}%">
+      <div class="wkticks" aria-hidden="true">${list.map((g, k) => `<span class="${k < v ? "on" : ""}">${k + 1}</span>`).join("")}</div></div>`; }
   const capNote = !fx && (state.ahead || 6) > GWS.length ? `<p class="sub wknote">Projections go ${GWS.length} weeks ahead, so this uses ${GWS.length}. Fixtures can look up to ${FXLIST().length} weeks ahead.</p>` : "";
   return `<div class="wks"><div class="wkhead"><b id="wkl-${ctx}">${L.lab}</b><small id="wkr-${ctx}">${L.range}</small></div>
     <input type="range" class="wkrange" id="wk-${ctx}" data-ctx="${ctx}" min="1" max="${max}" step="1" value="${v}" aria-label="How many weeks to look ahead" aria-valuetext="${L.lab}" style="--pct:${max > 1 ? 100 * (v - 1) / (max - 1) : 0}%">
@@ -4400,8 +4579,8 @@ function threeDecisions(){
   const rows = [];
   if (cap){ const c = confidence(cap), f = (FX[cap.t][GWS[0]] || [])[0];
     rows.push(row("crown", `Captain ${esc(cap.n)}`, `${f1(cap.ep[0])} expected${f ? `, ${f.home ? "home to" : "away at"} ${esc(T[f.opp].name)}` : ""}${C.vice ? `; ${esc(C.vice.n)} vice` : ""}`, `<span class="apill ${c.c}">${c.lv} confidence</span>`, `data-goto="captain" data-capsrc="squad"`)); }
-  if (move){ const lab = actionLabel(move.gain, ftNow < 1 ? 1 : 0);
-    rows.push(row("swap", `${esc(move.o.n)} → ${esc(move.c.n)}`, `${esc(lab.say)}, over the next ${aheadN()} GW${aheadN() === 1 ? "" : "s"}`, actionPill(lab), `data-open="${move.c.id}"`)); }
+  if (move){ const lab = moveDecision(move.o, move.c, 0, ftNow < 1);
+    rows.push(row("swap", `${esc(move.o.n)} → ${esc(move.c.n)}`, esc(lab.say[0].toUpperCase() + lab.say.slice(1)), decisionPill(lab), `data-open="${move.c.id}"`)); }
   else rows.push(row("swap", "Hold your transfer", ftNow >= 1 ? "No move clearly beats saving it" : "No move is worth a hit", `<span class="apill up">Save it</span>`, `data-goto="squad"`));
   if (hurt.length) rows.push(row("alert", hurt.length === 1 ? `${esc(hurt[0].n)} is flagged` : `${hurt.length} flagged in your XI`, esc((hurt[0].news || "Check the news before the deadline").slice(0, 70)), `<span class="apill down">Check</span>`, `data-open="${hurt[0].id}"`));
   else if (edge) rows.push(row("card", `${esc(edge.n)} on ${edge.cards.y} yellows`, `About a ${pct(edge.cards.risk)} chance of a ban in the next ${GWS.length} GWs`, `<span class="apill warn">Watch</span>`, `data-open="${edge.id}"`));
@@ -4437,6 +4616,7 @@ function outcomeStrip(p, opts = {}){
   const b = blank(p), h = haul(p), m = Math.max(0, 1 - b - h), r10 = v => Math.round(v * 10);
   const seg = (w, cls, big, small) => w >= 0.07 ? `<span class="${cls}" style="width:${100 * w}%"><b>${pct(w)}</b>${small}</span>` : `<span class="${cls}" style="width:${100 * w}%" title="${pct(w)} ${small}"></span>`;
   return `<div class="ostrip" role="img" aria-label="${pct(b)} chance of 2 points or fewer, ${pct(m)} chance of 3 to 9, ${pct(h)} chance of 10 or more">${seg(b, "r", 0, "blank")}${seg(m, "m", 0, "3 to 9 points")}${seg(h, "g", 0, "10+")}</div>
+    ${[b, m, h].some(x => x > 0 && x < 0.07) ? `<p class="oleg"><i class="r"></i>${pct(b)} blank <i class="m"></i>${pct(m)} 3 to 9 points <i class="g"></i>${pct(h)} 10+</p>` : ""}
     ${opts.plain === false ? "" : `<p class="sub ostext">If this week were played ten times, he’d blank about ${r10(b)}, score 3 to 9 about ${r10(m)} times, and haul 10+ about ${r10(h)} time${r10(h) === 1 ? "" : "s"}.${opts.captain ? " As captain the points double." : ""}</p>`}`;
 }
 const elLine = p => p.el ? `Owned by ${pct(p.el.own)} of the top ${D.meta.elite.n} managers${eliteCaptainsKnown() ? ` and captained by ${pct(p.el.cap)} of them` : ""}.` : "";
@@ -4529,8 +4709,8 @@ function transferHome(){
   const squad = state.squad.ids.map(id => P[id]).filter(Boolean); if (squad.length !== 15) return "";
   const ft = Number(state.squad.ft || 1), move = transferIdeas(squad)[0];
   if (!move) return homeCard("swap", "Transfer", `<span class="hl"><b>Save your transfer</b> <span class="apill up">Hold</span></span><span class="sub">No move beats ${ft >= 1 ? "keeping the free transfer" : "waiting for a free one"} over the next ${aheadN()} GWs.</span>`, `data-goto="squad" data-squadview="mine"`);
-  const lab = actionLabel(move.gain, ft < 1 ? 1 : 0);
-  return homeCard("swap", "Transfer", `<span class="hl"><b>${esc(move.o.n)} → ${esc(move.c.n)}</b> ${actionPill(lab)}</span><span class="sub">${esc(lab.say)} over the next ${aheadN()} GW${aheadN() === 1 ? "" : "s"}${ft < 1 ? ", and it costs a hit" : ""}. Plan more in Squad.</span>`, `data-open="${move.c.id}"`);
+  const lab = moveDecision(move.o, move.c, 0, ft < 1);
+  return homeCard("swap", "Transfer", `<span class="hl"><b>${esc(move.o.n)} → ${esc(move.c.n)}</b> ${decisionPill(lab)}</span><span class="sub">${esc(lab.say[0].toUpperCase() + lab.say.slice(1))}.</span>${ftMeter(ft)}`, `data-open="${move.c.id}"`);
 }
 function alertsHome(){
   const squad = state.squad.ids.map(id => P[id]).filter(Boolean); if (squad.length !== 15) return "";
@@ -4602,7 +4782,7 @@ function pricesView(){
     const up = withPc.filter(p => p.pc.src === "fpl" && p.pc.pct >= 50).sort((a,b) => b.pc.pct - a.pc.pct).slice(0, 12);
     const down = withPc.filter(p => p.pc.src === "fpl" && p.pc.pct <= -50).sort((a,b) => a.pc.pct - b.pc.pct).slice(0, 12);
     const row = (p, rise) => `<li><button class="row prow2" data-open="${p.id}"><div><div class="name">${esc(p.n)}${tagMine(p)}</div><div class="sub">${posLab(p.pos)} ${T[p.t].short}, ${money(p.price)}${p.pc.steps && Math.abs(p.pc.steps[0]) >= 100 ? " · likely tonight" : ""}</div>
-      <div class="pbar"><i style="width:${Math.min(100, Math.abs(p.pc.pct))}%;background:${rise ? "#1D9E75" : "#E24B4A"}"></i></div></div><div class="metric">${Math.round(Math.abs(p.pc.pct))}%<small>to ${rise ? "a rise" : "a fall"}</small></div></button></li>`;
+      <div class="pbar2"><i style="width:${Math.min(100, Math.abs(p.pc.pct))}%;background:${rise ? "#1D9E75" : "#E24B4A"}"></i></div></div><div class="metric">${Math.round(Math.abs(p.pc.pct))}%<small>to ${rise ? "a rise" : "a fall"}</small></div></button></li>`;
     return `<p class="lede">How close each player is to his next price change, from FPL’s own price predictor. 100% means it changes at the next overnight update.</p>
       <h3>Likely to rise</h3><ul class="list">${up.map(p => row(p, true)).join("") || `<li class="lede">Nobody is close to rising.</li>`}</ul>
       <h3>Likely to fall</h3><ul class="list">${down.map(p => row(p, false)).join("") || `<li class="lede">Nobody is close to falling.</li>`}</ul>`;
@@ -4616,7 +4796,7 @@ function defconView(){
   const pos = state.pl.pos, pool = D.players.filter(p => available(p) && (p.pos === 2 || p.pos === 3) && (!pos || p.pos === pos) && p.next).sort((a,b) => b.next.dc_p - a.next.dc_p).slice(0, 15);
   return `<p class="lede">The chance of reaching the defensive-contribution threshold in GW${GWS[0]}: his own hit rate, adjusted for how much defending the opponent forces.</p>
     <ul class="list">${pool.map(p => `<li><button class="row prow2" data-open="${p.id}"><div><div class="name">${esc(p.n)} ${verdictPill(p)}</div><div class="sub">${posLab(p.pos)} ${T[p.t].short}, ${money(p.price)}, ${esc(fxText(p.t, GWS[0]))}</div>
-      <div class="pbar"><i style="width:${100 * p.next.dc_p}%;background:#378ADD"></i></div></div><div class="metric">${pct(p.next.dc_p)}<small>${f1(p.next.dc_proj)} pts</small></div></button></li>`).join("")}</ul>`;
+      <div class="pbar2"><i style="width:${100 * p.next.dc_p}%;background:#378ADD"></i></div></div><div class="metric">${pct(p.next.dc_p)}<small>${f1(p.next.dc_proj)} pts</small></div></button></li>`).join("")}</ul>`;
 }
 function byPosView(){
   const pool = D.players.filter(p => available(p) && p.next), g = GWS[0];
@@ -4647,13 +4827,16 @@ function draftTabs(){
 // the plan, week by week
 function planTimeline(res){
   if (!res) return "";
+  const sq0 = state.squad.ids.map(id => P[id]).filter(Boolean);
   const gain = planTotal(res) - planBase(res.H); res.gain = gain;
   const weeks = res.steps.map(st => {
     const pairs = pairsOf(st), g = GWS[st.t];
     const what = st.chip === "wc" ? "Wildcard" : st.chip === "fh" ? "Free Hit for one week" : pairs.length ? pairs.map(([o, c]) => `${esc(o.n)} → <b>${esc(c.n)}</b>`).join(", ") : "Save your transfer";
     const extra = [st.cap ? `Captain ${esc(st.cap.n)}${st.chip === "tc" ? " (Triple Captain)" : ""}` : "", st.chip === "bb" ? "Bench Boost" : "", st.hits ? `−${st.hits * 4} hit` : ""].filter(Boolean).join(" · ");
-    return `<div class="wkrow ${pairs.length || st.chip ? "" : "roll"}"><b>GW${g}</b><span>${what}<small>${extra}</small></span><em>${f1(st.pts)}<small>pts</small></em></div>`; }).join("");
-  return `<section class="plancard"><div class="planhead"><b>${gain >= 0 ? "+" : "−"}${f1(Math.abs(gain))} points over ${res.H} gameweeks</b><span>against making no transfers, after hits${res.limit ? ". The solver hit its time limit, so this is the best plan it found" : ""}</span></div>
+    const base = bestXI(sq0, st.t).total, dv = st.pts - (st.hits || 0) * 4 - base, nextFt = Math.min(FT_CAP, (st.ft || 0) - Math.max(0, pairs.length - (st.hits || 0)) + 1);
+    const right = pairs.length || st.chip ? `<em class="${dv >= 0 ? "upc" : "downc"}">${dv >= 0 ? "+" : "−"}${f1(Math.abs(dv))}<small>vs rolling</small></em>` : `<em>${ftMeter(nextFt, false)}<small>${nextFt} free next</small></em>`;
+    return `<div class="wkrow ${pairs.length || st.chip ? "" : "roll"}"><b>GW${g}</b><span>${what}<small>${extra}${extra ? " · " : ""}${f1(st.pts)} pts</small></span>${right}</div>`; }).join("");
+  return `<section class="plancard"><div class="planhead"><b>${res.H === 1 ? `1-week solve · GW${GWS[0]} only` : `${res.H}-week solve · GW${GWS[0]} to GW${GWS[res.H - 1]}`}</b><span><b class="${gain >= 0 ? "upc" : "downc"}">${gain >= 0 ? "+" : "−"}${f1(Math.abs(gain))} points</b> against rolling your transfers every week, after hits${res.risk && res.risk !== "balanced" ? ` · ${res.risk === "safe" ? "Safe" : "Aggressive"} setting` : ""}${res.limit ? ". The solver hit its time limit, so this is the best plan it found" : ""}</span></div>
     <div class="wklist">${weeks}</div>
     <div class="pillrow"><button class="pillbtn" data-planapply="1">Put on my pitch</button><button class="pillbtn" data-alts="1">Other plans</button><button class="pillbtn" data-stress="1">Stress test</button>${PLANS.filter(p => p.result).length >= 2 ? `<button class="pillbtn" data-plancmp="1">Compare drafts</button>` : ""}<button class="pillbtn" data-solve="1">Solve again</button></div>
     <p class="sub">${Object.keys(sellPrices(state.squad.ids.map(id => P[id]))).length ? "Uses your selling prices where known." : "Uses current prices; your selling prices may be a little lower."} The pitch shows week-by-week points; drafts never change your real FPL team.</p></section>
@@ -4667,8 +4850,9 @@ function applyPlanToDraft(res){
 }
 function solveBar(){
   const n = ruleCount(RULES);
-  return `<section class="solvebar"><div class="sb2"><button class="primary" data-solve="1">Solve ${esc(RULES.name)}</button><button class="secbtn" data-rules="1">Rules${n ? ` · ${n}` : ""}</button></div>
-    <p class="sub">${esc(rulesLine(RULES))}. Plans the next ${RULES.H} gameweeks (your look-ahead, at least 3).</p></section>`;
+  return `<section class="solvebar">${planOverSlider()}<div class="sb2"><button class="primary" data-solve="1">Solve ${esc(RULES.name)}</button><button class="secbtn" data-rules="1">Rules${n ? ` · ${n}` : ""}</button></div>
+    <div class="riskrow"><span class="sub">Risk</span>${seg("risk", [["safe","Safe"],["balanced","Balanced"],["aggressive","Aggressive"]], RULES.risk || "balanced", "Risk setting")}</div>
+    <p class="sub">${esc(RISK_TXT[RULES.risk || "balanced"])}. ${esc(rulesLine(RULES))}.</p></section>`;
 }
 // the Rules sheet
 function rulesFound(squad){
@@ -4699,14 +4883,16 @@ function openRules(){
     <div id="rulefound">${rulesFound(squad)}</div>
     ${others.length ? `<div class="rulechips">${others.map(x => `<span class="rulechip">${esc(P[x.id].n)} <small>${x.txt}</small><button class="term" data-rmrule="${x.id}" aria-label="Remove rule">✕</button></span>`).join("")}</div>` : ""}
     <h4 class="rh">Transfers</h4>
-    <div class="rrow2"><span><b>Free transfers</b> <small>${f0 != null ? (f0 === ft ? "from FPL" : `FPL says ${f0}`) : ""}</small></span><span class="rctl">${stepper("ft", ft, "free transfers")}</span></div>
+    <div class="rrow2"><span><b>Free transfers</b> ${ftMeter(ft, false)} <small>${f0 != null ? (f0 === ft ? "from FPL" : `FPL says ${f0}`) : ""}</small></span><span class="rctl">${stepper("ft", ft, "free transfers")}</span></div>
     <div class="rrow2"><span><b>Bank</b> <small>${b0 != null ? (Math.abs(b0 - bank) < 0.01 ? "from FPL" : `FPL says ${money(b0)}`) : ""}</small></span><span class="rctl">${stepper("bank", money(bank), "money in the bank")}</span></div>
     ${(f0 != null && f0 !== ft) || (b0 != null && Math.abs(b0 - bank) > 0.01) ? `<p class="sub"><button class="term" data-fplreset="1">Reset to FPL</button></p>` : ""}
     <div class="rrow2"><span><b>Hits</b></span><span class="rctl">${seg("hitsmode", [["on","Any"],["one","Max 1"],["off","None"]], RULES.hits, "Hits")}</span></div>
     <div class="rrow2"><span><b>A saved transfer is worth</b></span><span class="rctl">${seg("ftv", [[0,"0"],[1.5,"1.5"],[3,"3 pts"]], RULES.ftv, "Free transfer value")}</span></div>
     <div class="rrow2"><span><b>Later weeks count</b></span><span class="rctl">${seg("decay", [[1,"Equal"],[0.9,"A bit less"],[0.8,"Less"]], RULES.decay, "Weight of later weeks")}</span></div>
-    <h4 class="rh">Chips <small>Chips you have left: tap to change</small></h4>
-    <div class="pillrow">${Object.entries(CHIP_NAMES).map(([k, l]) => `<button class="pillbtn ${state.squad.chips[k] ? "on" : ""}" data-chiptoggle="${k}" aria-pressed="${!!state.squad.chips[k]}">${l}</button>`).join("")}</div>
+    <h4 class="rh">Chips <small>Tap one for what it would do and when</small></h4>
+    ${chipInfoPills()}
+    <p class="sub">Chips you have left come from FPL. <button class="term" data-chipedit="1">${state.chipEdit ? "Done" : "Correct this"}</button></p>
+    ${state.chipEdit ? `<div class="pillrow">${Object.entries(CHIP_NAMES).map(([k, l]) => `<button class="pillbtn ${state.squad.chips[k] ? "on" : ""}" data-chiptoggle="${k}" aria-pressed="${!!state.squad.chips[k]}">${l}${state.squad.chips[k] ? " · have it" : " · used"}</button>`).join("")}</div>` : ""}
     ${have.map(chipRow).join("") || `<p class="sub">No chips left to plan.</p>`}
     <h4 class="rh">Limits</h4>
     <div class="rrow2"><span><b>Keeper and defenders per club</b></span><span class="rctl">${seg("defclub", [[0,"3"],[2,"2"],[1,"1"]], RULES.defClub || 0, "Defensive players from one club")}</span></div>
@@ -4730,12 +4916,584 @@ function refreshRules(){ const sc = $(".sheet") ? $(".sheet").scrollTop : 0; ope
   document.addEventListener("focusout", () => setTimeout(check, 80));
 })();
 
+/* ---------- v6.42: compact Team header, fixtures view, draft menu, league table, chips, drag and drop, player sheet ---------- */
+// drafts: names take the next unused letter; delete with undo
+function nextDraftName(){ const used = new Set(PLANS.map(p => p.name)); for (const ch of "ABCDEFGH") if (!used.has("Draft " + ch)) return "Draft " + ch; return "Draft " + (PLANS.length + 1); }
+let DELETED_DRAFT = null;
+function deleteDraftWithUndo(){
+  if (PLANS.length <= 1){ toast("You need at least one draft"); return; }
+  DELETED_DRAFT = {plan: PLANS[ACTIVE], at: ACTIVE};
+  PLANS.splice(ACTIVE, 1); switchPlan(Math.max(0, ACTIVE - 1)); render();
+  actionToast(`${DELETED_DRAFT.plan.name} deleted`, "Undo", "undodraft");
+}
+function undoDeleteDraft(){ if (!DELETED_DRAFT) return; PLANS.splice(DELETED_DRAFT.at, 0, DELETED_DRAFT.plan); switchPlan(DELETED_DRAFT.at); DELETED_DRAFT = null; render(); toast("Draft restored"); }
+function actionToast(msg, label, act){
+  const t = $("#toast"); t.innerHTML = `<span>${esc(msg)}</span><button class="toastbtn" data-${act}="1">${esc(label)}</button>`; t.classList.add("on", "act");
+  clearTimeout(toast.t); toast.t = setTimeout(() => t.classList.remove("on", "act"), 6000);
+}
+function openDraftMenu(){
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">${esc(RULES.name)}</h2>
+    <label class="sflab" for="draftname">Name</label><div class="sfsort"><input id="draftname" class="rsearch" value="${esc(RULES.name)}" maxlength="24" aria-label="Draft name"><button class="secbtn" data-draftrename="1">Save</button></div>
+    <div class="optgrid" style="margin-top:12px"><button class="optrow" data-plannew="copy">Duplicate ${esc(RULES.name)}</button><button class="optrow" data-plannew="blank">New empty draft</button>
+    <button class="optrow danger" data-draftdelete="1">Delete ${esc(RULES.name)}</button></div>
+    <p class="sub">Deleting can be undone for a few seconds. Drafts never change your real FPL team.</p>${sheetFoot()}`;
+  showSheet();
+}
+// the compact rows above the pitch
+function teamRow1(){
+  const st = state.squad.ids.length === 15 ? draftState() : null, w = st && st.weeks[state.pitchGw || 0];
+  const moved = draftMoves().some(m => m.gw === GWS[state.pitchGw || 0]);
+  const ft = Number(state.squad.ft || 0), bank = Number(state.squad.bank || 0), f0 = fplFT(), b0 = fplBank();
+  const whatIf = (f0 != null && f0 !== ft) || (b0 != null && Math.abs(b0 - bank) > 0.01);
+  const right = moved && w ? `After moves: <b>${Math.max(0, w.ftBefore - w.n)} FT · ${money(w.bank)}</b>${w.hits ? ` <em class="downc">−${w.hits * 4}</em>` : ""}`
+    : `${ftMeter(ft, false)} <b>${ft} FT · ${money(bank)}</b>${whatIf ? " <small>what-if</small>" : f0 != null ? " <small>from FPL</small>" : ""}`;
+  return `<div class="drafttabs"><span class="segc">${PLANS.map((p, k) => `<button data-planswitch="${k}" aria-pressed="${k === ACTIVE}" aria-label="${esc(p.name)}">${esc(p.name.replace(/^Draft /, ""))}</button>`).join("")}${PLANS.length < 8 ? `<button data-plannew="copy" aria-label="New draft, copying this one's rules">+</button>` : ""}</span>
+    <button class="ibtn" data-draftmenu="1" aria-label="Rename, duplicate or delete ${esc(RULES.name)}">⋯</button><span class="from">${right}</span></div>`;
+}
+function teamRow2(){
+  const i = state.pitchGw || 0, mode = state.sqShow || "pitch";
+  return `<div class="row2">${seg("sqshow", [["pitch","Pitch"],["list","List"],["fx","Fixtures"]], mode, "Show your squad as")}
+    ${mode === "pitch" ? `<span class="gwmini"><button class="ibtn" data-gwstep="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${GWS[i]}</b><button class="ibtn" data-gwstep="1" ${i === GWS.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button>
+      <button class="ibtn" data-pmenu="1" aria-label="Chip, numbers on shirts and draft actions">⋯</button></span>` : ""}</div>`;
+}
+function openPitchMenu(){
+  const g = GWS[state.pitchGw || 0], chip = chipAt(g), opts = [["", "None"], ...["tc","bb","fh","wc"].filter(k => hasChip(k)).map(k => [k, CHIP_LONG[k]])];
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">Pitch options</h2>
+    <div class="rrow2"><span><b>Chip in GW${g}</b></span><span class="rctl"><select id="pchipsel" class="mini-sel" style="max-width:none" aria-label="Chip for GW${g}">${opts.map(([k, l]) => `<option value="${k}" ${chip === k || (!chip && !k) ? "selected" : ""}>${l}</option>`).join("")}</select></span></div>
+    <div class="rrow2"><span><b>On the shirts</b></span><span class="rctl">${seg("pitchshow", [["pts","Points"],["price","Price"],["own","Owned"]], state.pitchShow, "Number on the shirts")}</span></div>
+    <h4 class="rh">${esc(RULES.name)}</h4>
+    <div class="optgrid"><button class="optrow" data-draftundo="1">Undo last move</button><button class="optrow" data-draftreset="1">Clear this draft’s moves</button>
+    <button class="optrow" data-draftapply="1" ${draftState().weeks[0].n ? "" : "disabled"}>Make GW${GWS[0]} moves my squad</button></div>
+    <p class="sub">“Make GW${GWS[0]} moves my squad” is for after you’ve made the same transfers in FPL.</p>${sheetFoot()}`;
+  showSheet();
+}
+// the plan window, shown next to Solve
+function planOverSlider(){
+  const v = Math.min(state.ahead || 6, GWS.length);
+  return `<div class="wks planover"><div class="wkhead"><b id="wkl-sq">Plan over ${v} week${v === 1 ? "" : "s"}</b><small id="wkr-sq">GW${GWS[0]} to GW${GWS[v - 1]}</small></div>
+    <input type="range" class="wkrange" id="wk-sq" data-ctx="sq" min="1" max="${GWS.length}" step="1" value="${v}" aria-label="How many weeks to plan over" style="--pct:${GWS.length > 1 ? 100 * (v - 1) / (GWS.length - 1) : 0}%">
+    <div class="wkticks" aria-hidden="true">${GWS.map((g, k) => `<span class="${k < v ? "on" : ""}">${k + 1}</span>`).join("")}</div></div>`;
+}
+// league table, one row per manager
+state.lgView = state.lgView || "table";
+const CHIP_SHORT = {wildcard: "WC", freehit: "FH", bboost: "BB", "3xc": "TC"};
+function leagueTable(R, me, proj, chipsLeft){
+  const proj6 = state.lgView === "proj";
+  const rows = R.entries.map(e => { const pr = e.me && me ? me : proj(e.ids), left = new Set(chipsLeft(e).map(l => Object.keys(CHIP_NAMES).find(k => CHIP_NAMES[k] === l)));
+    const mv = e.last_rank ? e.last_rank - e.rank : 0;
+    const val = proj6 ? (pr ? pr[1] : null) : e.total, mine = proj6 ? (me ? me[1] : null) : (R.entries.find(x => x.me) || {}).total;
+    const gap = val != null && mine != null && !e.me ? val - mine : null;
+    return `<div class="lgrow ${e.me ? "me" : ""}"><span class="lrk">${e.rank}<small class="${mv > 0 ? "upc" : mv < 0 ? "downc" : ""}">${mv > 0 ? "▲" + mv : mv < 0 ? "▼" + (-mv) : "–"}</small></span>
+      <span class="lnm"><b>${esc(e.team)}${e.me ? " (you)" : ""}</b><small>${esc(e.manager || "")}</small><span class="cbadges">${Object.keys(CHIP_SHORT).map(k => `<i class="${left.has(k) ? "" : "used"}" title="${CHIP_NAMES[k]}${left.has(k) ? " left" : " used"}">${CHIP_SHORT[k]}</i>`).join("")}${e.chip ? `<i class="live">${esc(CHIP_SHORT[e.chip] || e.chip)} now</i>` : ""}</span></span>
+      <span class="lpts"><b>${val == null ? "–" : proj6 ? f1(val) : val}</b><small class="${gap == null ? "" : gap > 0 ? "downc" : "upc"}">${e.me ? "you" : gap == null ? "" : `${gap > 0 ? "+" : "−"}${proj6 ? f1(Math.abs(gap)) : Math.abs(gap)}`}</small></span></div>`; }).join("");
+  return `<h3>Table</h3>${seg("lgview", [["table","Points so far"],["proj","Next 6 GWs"]], state.lgView, "Table view")}
+    <div class="ltable">${rows}</div>
+    <p class="sub">${proj6 ? "Projections pick each manager’s best XI and captain every week and assume no transfers." : "The number under each total is the gap to you: red if they’re ahead, green if you are."} Badges are chips still to play; faded ones are used.</p>`;
+}
+// chips, compact
+function chipsCompact(c){
+  if (!c) return "";
+  const have = state.squad.chips || {}, win = c.win || [];
+  const heat = (rows, key, best) => { const vals = rows.map(r => r[key] || 0), mx = Math.max(...vals, 0.01);
+    return win.map(g => { const r = rows.find(x => x.g === g); const v = r ? r[key] || 0 : 0, lv = v <= 0 ? 1 : Math.max(1, Math.min(5, Math.ceil(5 * v / mx)));
+      return `<i class="hv${lv} ${best && best.includes(g) ? "best" : ""}" title="GW${g}: ${f1(v)}"></i>`; }).join(""); };
+  const head = `<div class="cgws" style="--n:${win.length}">${win.map(g => `<span>GW${g}</span>`).join("")}</div>`;
+  const row = (k, name, status, cls, sub, strip, details) => `<details class="crow" data-fold="chip-${k}"><summary><span class="ctop"><b>${name}</b><span class="cst ${cls}">${status}</span></span><span class="csub">${sub}</span>${strip ? `<span class="cheat" style="--n:${win.length}"><small></small>${strip}</span>` : ""}</summary>${details || ""}</details>`;
+  const out = [];
+  // Triple Captain: a close call when two weeks are within half a point
+  if (have["3xc"] && c.tcBest && c.tcBest.p){
+    const t = c.tcBest, near = c.tc.filter(x => x.g !== t.g && Math.abs((x.gain + 6 * x.haul) - (t.gain + 6 * t.haul)) < 0.5).sort((a,b) => a.g - b.g);
+    const pickG = near.length && near[0].g < t.g ? near[0] : t, close = near.length > 0;
+    const thisWeek = pickG.g === GWS[0];
+    out.push(row("tc", "Triple Captain", close ? `Close call: GW${Math.min(t.g, near[0].g)} or GW${Math.max(t.g, near[0].g)}` : thisWeek ? "Use this week" : `Hold: best GW${t.g}`, close ? "close" : thisWeek ? "now" : "hold",
+      `${esc(t.p.n)} +${f1(t.gain)} and a ${pct(t.haul)} chance of 10+${close ? ". The sooner week carries less risk." : "."}`,
+      heat(c.tc, "gain", [t.g, ...near.map(x => x.g)]),
+      `<ul class="cbul"><li>${c.tc.filter(x => x.p).sort((a,b) => b.gain - a.gain).slice(0, 3).map(x => `GW${x.g}: ${esc(x.p.n)} (${esc(fxText(x.p.t, x.g))}), +${f1(x.gain)}`).join("</li><li>")}</li>
+        <li>${(D.meta.special || []).some(x => x.gw <= c.half && x.doubles.length) ? "A double gameweek is coming before the deadline: it will usually beat these weeks." : `No double gameweek is scheduled before the GW${c.half} deadline; if one is announced, it would likely beat these.`}</li><li>Weeks are compared as if he’s fit.</li></ul>
+        <p class="risk">Risk of waiting: about 1 in 8 nailed forwards weren’t starting four weeks later last season. If that happens, you’d keep the chip.</p>`));
+  } else out.push(row("tc", "Triple Captain", "Used", "used", "Already played this half of the season.", "", ""));
+  if (have.bboost && c.bbBest){
+    const b = c.bbBest, thisWeek = b.g === GWS[0];
+    out.push(row("bb", "Bench Boost", thisWeek ? "Use this week" : `Hold: best GW${b.g}`, thisWeek ? "now" : "hold", `Your bench projects ${f1(b.gain)} in GW${b.g}.`, heat(c.bb, "gain", [b.g]),
+      `<ul class="cbul"><li>Bench Boost is worth what your four subs score; GW${b.g} is their best week.</li><li>It’s worth most in a double gameweek with all 15 playing twice, often straight after a Wildcard.</li></ul>`));
+  } else out.push(row("bb", "Bench Boost", "Used", "used", "Already played this half of the season.", "", ""));
+  if (have.freehit && c.fhBest){
+    const h = c.fhBest, worth = h.gain > 4;
+    out.push(row("fh", "Free Hit", worth ? `Best: GW${h.g}` : "Hold", worth ? "hold" : "hold", worth ? `A one-week squad beats your XI by ${f1(h.gain)} in GW${h.g}.` : "No week where a one-week squad gains much yet.", heat(c.fh, "gain", [h.g]),
+      `<ul class="cbul"><li>Free Hit earns its keep in blank gameweeks when several of your players don’t play.</li></ul>`));
+  } else out.push(row("fh", "Free Hit", "Used", "used", "Already played this half of the season.", "", ""));
+  if (have.wildcard){
+    const g = c.wc.gain;
+    out.push(row("wc", "Wildcard", g >= 12 ? "Worth considering now" : "Hold", g >= 12 ? "now" : "hold", `The best squad for the next ${GWS.length} weeks would score ${g >= 0 ? "+" : "−"}${f1(Math.abs(g))} against yours.`, "",
+      g >= 12 ? `<ul class="list">${[...c.wc.squad].sort((a,x) => a.pos - x.pos || x.ep6 - a.ep6).map(p => playerRow(p, f1(p.ep6), `${GWS.length} GWs`, false)).join("")}</ul>` : `<p class="sub">A Wildcard pays when it gains about 12 points or more over six weeks; yours would gain ${f1(g)}.</p>`));
+  } else out.push(row("wc", "Wildcard", "Used", "used", "Already played this half of the season.", "", ""));
+  return `<div class="chipsc">${head}${out.join("")}</div><p class="sub"><button class="term" data-chiphelp="1">How chip weeks are judged</button></p>`;
+}
+function openChipHelp(c){
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">How chip weeks are judged</h2>
+    <p class="lede">Every gameweek up to the GW${c ? c.half : 19} deadline, when your first set of chips expires, is checked. Weeks beyond the planner’s six assume you keep your current squad.</p>
+    <p class="lede"><b>Triple Captain</b>: the extra points from tripling your best captain that week, plus a bonus for his chance of 10+. When two weeks are within half a point, the sooner one is the safer choice, because injuries and rotation can take the later one away. <b>Bench Boost</b>: what your bench is projected to score. <b>Free Hit</b>: how much a one-week squad beats your XI. <b>Wildcard</b>: how much the best squad for the next six weeks beats yours.</p>
+    <p class="lede">The coloured squares show every week at a glance: darker green is a better week, and the star marks the best.</p>${sheetFoot()}`;
+  showSheet();
+}
+// the player sheet: information first, actions in one row
+function openPitchPlayer(id){
+  const i = state.pitchGw || 0, squad = draftSquadAt(i), L = lineupFor(squad, i), p = P[id];
+  const inXI = L.xi.includes(p), isC = L.cap === p, isV = L.vice === p;
+  const swaps = (inXI ? L.bench : L.xi).filter(q => validXI((inXI ? L.xi.map(x => x === p ? q : x) : L.xi.map(x => x === q ? p : x)).map(x => x.id)));
+  const v = verdict(p), cf = p.next ? confidence(p) : null, locked = RULES.lock.includes(id);
+  const fx = (FX[p.t][GWS[i]] || []).map(f => `<span class="fxc d${p.pos >= 3 ? xgClass(f.lf) : csClass(Math.exp(-f.la))}">${esc(T[f.opp].short)} ${f.home ? "H" : "A"}</span>`).join("") || `<span class="fxc d5">Blank</span>`;
+  SHEET_MINI = true;
+  $("#sheetBody").innerHTML = `<div class="grab" aria-hidden="true"></div>
+    <div class="pshead"><span class="psshirt">${shirt(p.t)}</span><div><h2 id="sheetTitle">${esc(p.n)}</h2><div class="sub">${posLab(p.pos)} ${esc(T[p.t].name)} · ${money(p.price)} ${fx}</div></div>
+      <div class="psep"><b>${f1(p.ep[i] || 0)}</b><small>GW${GWS[i]}</small></div></div>
+    <div class="pills">${MINS[p.id] ? `<span class="apill warn">Custom mins</span>` : ""}${v ? verdictPill(p) : ""}${cf ? `<span class="apill ${cf.c}">${cf.lv} confidence</span>` : ""}${isC ? `<span class="apill up">Captain</span>` : isV ? `<span class="apill">Vice-captain</span>` : ""}${inXI ? "" : `<span class="apill">On the bench</span>`}</div>
+    ${planSaleNote(p)}
+    ${p.sim && i === 0 ? outcomeStrip(p, {plain: false}) : ""}
+    ${p.epf ? (() => { const e = MINS[p.id], cur = e ? e.m : Math.round(p.mins * p.av[0] * ((p.next && p.next.rot) || 1)), model = Math.round(p.mins * p.av[0] * ((p.next && p.next.rot) || 1));
+      return `<div class="qmins"><div class="qmh"><span><b>Expected minutes</b>${e ? ` <span class="apill warn">Custom mins</span>` : ""}</span><b id="minsv">${cur}</b></div>
+        <input type="range" id="minsr" min="0" max="90" step="5" value="${cur}" aria-label="Expected minutes">
+        <div class="qmf"><span class="sub">Model: ${model}'${e ? ` · Yours: ${e.m}'` : ""}</span><span class="segc mini"><button data-minset="gw" data-pid="${id}">This GW</button><button data-minset="all" data-pid="${id}">All six</button>${e ? `<button data-minset="reset" data-pid="${id}">Reset</button>` : ""}</span></div></div>`; })() : ""}
+    <div class="acts5">
+      ${inXI ? `<button data-luact="cap" data-pid="${id}" class="${isC ? "on" : ""}" aria-pressed="${isC}"><i>C</i>Captain</button><button data-luact="vice" data-pid="${id}" class="${isV ? "on" : ""}" aria-pressed="${isV}"><i>V</i>Vice</button>` : ""}
+      <button data-swapsopen="1" aria-expanded="false"><i>⇅</i>Swap</button>
+      <button class="pri" data-draftoutsheet="${id}"><i>→</i>Transfer</button>
+      <button data-open="${id}"><i>i</i>Details</button></div>
+    <div class="swaps" id="pswaps" hidden><div class="sub">${inXI ? "Swap with a bench player" : "Bring him on for"}</div><div class="swrow">${swaps.map(q => `<button data-luact="swap" data-pid="${id}" data-with="${q.id}"><b>${esc(q.n)}</b>${f1(q.ep[i] || 0)}</button>`).join("") || `<span class="sub">No swap keeps a legal formation.</span>`}</div></div>
+    <div class="fsw" style="border-top:0;margin-top:6px"><span>Keep him in plans<small>The solver won’t sell him</small></span><button class="tgl ${locked ? "on" : ""}" data-ruletoggle="lock" data-pid="${id}" role="switch" aria-checked="${locked}" aria-label="Keep him in plans"><i></i></button></div>`;
+  showSheet();
+}
+// drag and drop on the pitch: hold a shirt, drop it on a highlighted one to swap
+const DND = {timer: null, active: false, from: null, ghost: null, over: null, sx: 0, sy: 0, eatClick: false};
+function dndTargets(id){
+  const i = state.pitchGw || 0, squad = draftSquadAt(i), L = lineupFor(squad, i), p = P[id]; if (!p) return [];
+  const inXI = L.xi.includes(p);
+  return (inXI ? L.bench : L.xi).filter(q => validXI((inXI ? L.xi.map(x => x === p ? q : x) : L.xi.map(x => x === q ? p : x)).map(x => x.id))).map(q => q.id);
+}
+function dndStart(el, x, y){
+  const id = +el.dataset.pitch, ok = new Set(dndTargets(id)); if (!ok.size){ toast("No swap keeps a legal formation"); return; }
+  DND.active = true; DND.from = id;
+  document.querySelectorAll(".pp2[data-pitch]").forEach(b => { const t = +b.dataset.pitch; b.classList.toggle("dtarget", ok.has(t)); b.classList.toggle("ddim", t !== id && !ok.has(t)); });
+  el.classList.add("dsrc");
+  const g = el.cloneNode(true); g.classList.add("dghost"); g.removeAttribute("data-pitch"); document.body.appendChild(g); DND.ghost = g;
+  dndMove(x, y); if (navigator.vibrate) try { navigator.vibrate(15); } catch(e) {}
+}
+function dndMove(x, y){
+  if (!DND.ghost) return;
+  DND.ghost.style.transform = `translate(${x - DND.ghost.offsetWidth / 2}px, ${y - DND.ghost.offsetHeight * 0.8}px)`;
+  DND.ghost.style.visibility = "hidden"; const under = document.elementFromPoint(x, y); DND.ghost.style.visibility = "";
+  const t = under && under.closest && under.closest(".pp2.dtarget");
+  document.querySelectorAll(".pp2.dover").forEach(b => b !== t && b.classList.remove("dover")); if (t) t.classList.add("dover"); DND.over = t ? +t.dataset.pitch : null;
+}
+function dndEnd(drop){
+  clearTimeout(DND.timer); DND.timer = null;
+  if (!DND.active) return;
+  const from = DND.from, to = DND.over;
+  if (DND.ghost) DND.ghost.remove();
+  document.querySelectorAll(".pp2.dtarget,.pp2.ddim,.pp2.dsrc,.pp2.dover").forEach(b => b.classList.remove("dtarget", "ddim", "dsrc", "dover"));
+  DND.active = false; DND.ghost = null; DND.over = null; DND.eatClick = true; setTimeout(() => DND.eatClick = false, 400);
+  if (drop && to){ lineupAction("swap", from, to); state.flash = [from, to]; render(); actionToast(`Swapped ${P[from].n} and ${P[to].n}`, "Undo", "undoswap"); DND.lastSwap = [from, to]; }
+}
+document.addEventListener("touchstart", e => {
+  const el = e.target.closest && e.target.closest(".pp2[data-pitch]"); if (!el || e.touches.length !== 1) return;
+  const t = e.touches[0]; DND.sx = t.clientX; DND.sy = t.clientY;
+  DND.timer = setTimeout(() => dndStart(el, DND.sx, DND.sy), 420);
+}, {passive: true});
+document.addEventListener("touchmove", e => {
+  const t = e.touches[0]; if (!t) return;
+  if (DND.active){ e.preventDefault(); dndMove(t.clientX, t.clientY); return; }
+  if (DND.timer && (Math.abs(t.clientX - DND.sx) > 10 || Math.abs(t.clientY - DND.sy) > 10)){ clearTimeout(DND.timer); DND.timer = null; }
+}, {passive: false});
+document.addEventListener("touchend", () => dndEnd(true));
+document.addEventListener("touchcancel", () => dndEnd(false));
+// mouse: press and move a little to drag
+document.addEventListener("mousedown", e => { const el = e.target.closest && e.target.closest(".pp2[data-pitch]"); if (!el || e.button !== 0) return; DND.sx = e.clientX; DND.sy = e.clientY; DND.mouseEl = el; });
+document.addEventListener("mousemove", e => {
+  if (DND.active){ dndMove(e.clientX, e.clientY); return; }
+  if (DND.mouseEl && (Math.abs(e.clientX - DND.sx) > 8 || Math.abs(e.clientY - DND.sy) > 8)){ const el = DND.mouseEl; DND.mouseEl = null; dndStart(el, e.clientX, e.clientY); }
+});
+document.addEventListener("mouseup", () => { DND.mouseEl = null; dndEnd(true); });
+document.addEventListener("click", e => { if (DND.eatClick && e.target.closest && e.target.closest(".pp2")){ e.stopPropagation(); e.preventDefault(); } }, true);
+document.addEventListener("contextmenu", e => { if (e.target.closest && e.target.closest(".pp2[data-pitch]")) e.preventDefault(); });
+
+/* ---------- v6.43: transfers judged now / next week / not at all, chips, risk, minutes, gestures ---------- */
+// what a saved free transfer is worth: nothing once you already hold five, because the next one would be lost
+const FT_CAP = 5;
+const savedFtValue = (ftHeld = Number(state.squad.ft || 0)) => ftHeld >= FT_CAP ? 0 : (RULES && RULES.ftv != null ? RULES.ftv : 1.5);
+function ftMeter(n, label = true){
+  n = Math.max(0, Math.min(FT_CAP, Number(n) || 0));
+  return `<span class="ftmeter" aria-label="${n} of ${FT_CAP} free transfers">${Array.from({length: FT_CAP}, (_, k) => `<i class="${k < n ? "on" : ""}"></i>`).join("")}${label ? `<b>${n} of ${FT_CAP}</b>` : ""}</span>`;
+}
+// one move, three ways: now (free or with a hit), free next week, or not at all
+function moveDecision(o, c, i = 0, hit = false){
+  const end = Math.min(GWS.length, i + aheadN()), d = [];
+  for (let j = i; j < end; j++) d.push((c.ep[j] || 0) - (o.ep[j] || 0));
+  const total = d.reduce((a,b) => a + b, 0), first = d[0] || 0, weeks = end - i;
+  const ftv = savedFtValue();
+  if (hit){
+    const now = total - 4, wait = weeks > 1 ? total - first - ftv : null, opts = [["now", now], ["wait", wait == null ? -1e9 : wait], ["dont", 0]];
+    const best = opts.sort((a,b) => b[1] - a[1])[0][0];
+    const w = best === "now" ? (now - Math.max(0, wait || 0) >= 2 ? "Take the hit" : "Close call: hit now") : best === "wait" ? "Wait a week" : "Not worth it";
+    const cls = best === "now" ? (w === "Take the hit" ? "up" : "warn") : best === "wait" ? "warn" : "down";
+    return {hit, total, first, weeks, now, wait, dont: 0, best, w, c: cls,
+      say: best === "wait" ? `${sgn(total)} over ${weeks} GWs, but ${first > 0 ? `only ${sgn(first)} this week: waiting costs about ${f1(first)}` : `nothing this week`}, while the hit costs 4`
+        : best === "now" ? `${sgn(now)} after the −4, against ${wait == null ? "nothing more by waiting" : `${sgn(wait)} if you wait and use next week’s free transfer`}`
+        : `${sgn(total)} over ${weeks} GWs isn’t enough: it doesn’t cover the −4, or a free transfer next week`};
+  }
+  // free transfer: use it now, a week later, or save it (worth ftv)
+  const now = total, wait = weeks > 1 ? total - first : null;
+  let best, w, cls;
+  if (wait != null && first < 0 && wait - now >= 0.5){ best = "wait"; w = "Wait a week"; cls = "warn"; }
+  else if (now >= ftv + 2.5){ best = "now"; w = "Do it now"; cls = "up"; }
+  else if (now >= ftv){ best = "now"; w = "Marginal"; cls = "warn"; }
+  else { best = "dont"; w = ftv > 0 ? "Save the transfer" : "Not worth it"; cls = "down"; }
+  return {hit, total, first, weeks, now, wait, dont: ftv, best, w, c: cls,
+    say: best === "wait" ? `his new club’s fixture this week is worse (${sgn(first)}); the move pays more from next week`
+      : best === "dont" ? (ftv > 0 ? `+${f1(now)}: saving the transfer is worth about ${f1(ftv)}` : `+${f1(now)} is too small to bother`)
+      : `+${f1(now)} over ${weeks} GW${weeks === 1 ? "" : "s"}, no hit`};
+}
+const decisionPill = m => `<span class="apill ${m.c}">${m.w}</span>`;
+function decisionCard(o, c, i, hit){
+  const m = moveDecision(o, c, i, hit), g = GWS[i], g2 = GWS[i + 1];
+  const tile = (key, lab, val, sub) => `<div class="dopt ${m.best === key ? "win" : ""}"><small>${lab}</small><b>${val}</b><small>${m.best === key ? "<span class=\"winlab\">Best</span>" : sub}</small></div>`;
+  const tiles = hit
+    ? tile("now", "Now, with a −4", sgn(m.now), `over ${m.weeks} GWs`) + (m.wait != null ? tile("wait", `Free in GW${g2}`, sgn(m.wait), "after its free transfer") : "") + tile("dont", "Don’t do it", "0", `keep ${esc(o.n)}`)
+    : tile("now", "Now", sgn(m.now), "uses this week’s free transfer") + (m.wait != null ? tile("wait", `In GW${g2}`, sgn(m.wait), "still free") : "") + tile("dont", "Save it", `+${f1(m.dont)}`, m.dont > 0 ? "a saved transfer" : "you already have 5");
+  return `<div class="dcard ${m.c}"><div class="hh"><b>${esc(o.n)} → ${esc(c.n)}</b>${decisionPill(m)}</div>
+    <p class="sub" style="margin:2px 0 0">${hit ? `No free transfers left in GW${g}, so doing it now costs −4.` : `Uses a free transfer in GW${g}.`}</p>
+    <div class="dopts">${tiles}</div>
+    <p class="sub">${esc(m.say[0].toUpperCase() + m.say.slice(1))}. <button class="term" data-xferhelp="1">How transfers and hits work</button></p></div>`;
+}
+function openTransfersHelp(){
+  const ft = Number(state.squad.ft || 0);
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">How transfers and hits work</h2>
+    <p class="lede"><b>The rules.</b> You get one free transfer each gameweek. If you don’t use it, it carries over, up to five. Every transfer beyond your free ones costs 4 points. Wildcard and Free Hit don’t use up your saved transfers.</p>
+    <p class="lede"><b>Saving a transfer</b> gives you flexibility later: a future move without a −4, or two fixes in one week. FPL Lab counts a saved transfer as worth ${f1(RULES.ftv)} points (you can change this in Rules), and nothing once you already hold five, because the next one would be lost. ${ftMeter(ft)}</p>
+    <p class="lede"><b>Is a −4 worth it?</b> The real choice is usually not “hit or never”, but “hit now, or the same move free next week”. Waiting only loses this week’s gain, so a hit pays when the move gains more than 4 points before your next free transfer: usually when a player is injured or suspended this week, a double gameweek is about to be missed, or a price rise would put him out of reach.</p>
+    <p class="lede">That’s why each move shows three options: now, free next week, and not at all, each over your plan window, with the best one highlighted.</p>${sheetFoot()}`;
+  showSheet();
+}
+// which of your players the draft's plan sells, and what it buys with the money
+function planSaleInfo(id){
+  const r = RULES && RULES.result; if (!r || r.gw0 !== GWS[0]) return null;
+  const k = r.steps.findIndex(st => st.sells.includes(id)); if (k < 0) return null;
+  const st = r.steps[k]; return {gw: GWS[k], buys: (st.buys || []).map(x => P[x]).filter(Boolean)};
+}
+function planSaleNote(p){
+  const s = planSaleInfo(p.id); if (!s) return "";
+  return `<p class="plannote">${esc(RULES.name)}’s plan sells him in GW${s.gw}${s.buys.length ? ` to fund ${(n => n.length > 1 ? n.slice(0, -1).join(", ") + " and " + n[n.length - 1] : n[0])(s.buys.map(x => esc(x.n)))}` : ""}. That’s a squad decision, not a verdict on him. <button class="term" data-goto="squad" data-squadview="mine">See the plan</button></p>`;
+}
+// risk setting for the solver: Balanced is the tested one; the others trade a little average for safety or upside
+const RISK_TXT = {safe: "Safe: avoids players who often blank (uses each player’s blank chance from this week’s simulations)", balanced: "Balanced: the most points on average, the setting tested for accuracy", aggressive: "Aggressive: favours big-haul chances (each week’s chance of 10+)"};
+function riskEp(p, t){
+  const base = p.ep[t] || 0, r = (RULES && RULES.risk) || "balanced";
+  if (r === "aggressive") return base + 2 * ((p.haul_long && p.haul_long[t] != null) ? p.haul_long[t] : (t === 0 && p.sim ? p.sim.haul : 0));
+  if (r === "safe") return base - 2 * (p.sim ? p.sim.blank : (base >= 1 ? 0.55 : 0.9));
+  return base;
+}
+// chip sheets: what the chip does, its value each week, and a button to plan it
+const CHIP_FPLKEY = {tc: "3xc", bb: "bboost", fh: "freehit", wc: "wildcard"};
+const CHIP_WHAT = {tc: "Your captain scores three times his points instead of twice, for one gameweek.", bb: "Your four substitutes score as well, for one gameweek.", fh: "Make unlimited transfers for one gameweek; your squad goes back to normal the week after.", wc: "Make unlimited permanent transfers in one gameweek."};
+function chipRows(k){ const c = state.chipPlan; if (!c) return []; return k === "tc" ? c.tc || [] : k === "bb" ? c.bb || [] : k === "fh" ? c.fh || [] : []; }
+function chipBest(k){ const c = state.chipPlan; if (!c) return null; return k === "tc" ? c.tcBest : k === "bb" ? c.bbBest : k === "fh" ? c.fhBest : null; }
+function openChipSheet(k){
+  try { if (!state.chipPlan){ const sq = state.squad.ids.map(id => P[id]).filter(Boolean); if (sq.length === 15) state.chipPlan = chipPlan(sq, state.plan); } } catch(e) {}
+  const rows = chipRows(k), best = chipBest(k), mx = Math.max(...rows.map(r => r.gain || 0), 0.01), cur = RULES.chips[k] || "off", have = hasChip(k);
+  const cells = rows.map(r => `<div class="cwk ${best && r.g === best.g ? "best" : ""}"><small>GW${r.g}</small><i style="height:${Math.max(4, 44 * Math.max(0, r.gain || 0) / mx)}px"></i><b>${f1(r.gain || 0)}</b></div>`).join("");
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">${CHIP_LONG[k]}</h2><p class="lede">${CHIP_WHAT[k]}</p>
+    ${!have ? `<p class="sub">You’ve already played this chip in this half of the season.</p>`
+      : k === "wc" ? `<p class="lede">The best squad for the next ${GWS.length} weeks would score <b>${state.chipPlan ? sgn(state.chipPlan.wc.gain) : "–"}</b> against yours. A Wildcard tends to pay when that’s about 12 or more.</p>`
+      : `<p class="sub">Projected gain each week${k === "tc" ? " (the extra captain points)" : k === "bb" ? " (what your bench would add)" : " (how much a one-week squad beats your XI)"}:</p><div class="cweeks">${cells}</div>
+        ${best ? `<p class="lede">Best: <b>GW${best.g}</b>, about <b>+${f1(best.gain)}</b>.</p>` : ""}`}
+    ${have ? `<div class="optgrid">${best && k !== "wc" ? `<button class="optrow ${String(cur) === String(best.g) ? "on" : ""}" data-chipuse="${k}" data-g="${best.g}">Use in GW${best.g}</button>` : ""}
+      <button class="optrow ${cur === "auto" ? "on" : ""}" data-chipuse="${k}" data-g="auto">Let the solver pick the week</button><button class="optrow ${cur === "off" ? "on" : ""}" data-chipuse="${k}" data-g="off">Don’t use it in plans</button></div>
+      <p class="sub">This sets ${esc(RULES.name)}’s plan only; it doesn’t play the chip in FPL.</p>` : ""}${sheetFoot()}`;
+  showSheet();
+}
+function chipInfoPills(){
+  try { if (!state.chipPlan){ const sq = state.squad.ids.map(id => P[id]).filter(Boolean); if (sq.length === 15) state.chipPlan = chipPlan(sq, state.plan); } } catch(e) {}
+  return `<div class="cpills">${["tc","bb","fh","wc"].map(k => { const have = hasChip(k), b = chipBest(k), c = state.chipPlan;
+    const sub = !have ? "Used" : k === "wc" ? (c ? `${sgn(c.wc.gain)} over ${GWS.length} GWs` : "Tap for info") : b ? `+${f1(b.gain)} in GW${b.g}` : "Tap for info";
+    return `<button class="cpill ${have ? "" : "used"}" data-chipinfo="${k}"><span class="ci" aria-hidden="true">i</span><b>${CHIP_LONG[k]}</b><small>${sub}${have ? " · Tap for info" : ""}</small></button>`; }).join("")}</div>`;
+}
+// gestures
+const REDUCED = window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+(function sheetSwipe(){
+  const d = () => $("#sheet"); let y0 = null, x0 = 0, dy = 0, t0 = 0, mode = null;
+  document.addEventListener("touchstart", e => {
+    const dl = d(); if (!dl || !dl.open || !e.target.closest || !e.target.closest("#sheet")) return;
+    const sh = dl.querySelector(".sheet"); if (e.target.closest("input,select,textarea,.wkrange,.dual,.cweeks")) return;
+    if (sh && sh.scrollTop > 2 && !e.target.closest(".grab")) return;
+    y0 = e.touches[0].clientY; x0 = e.touches[0].clientX; dy = 0; t0 = Date.now(); mode = null;
+  }, {passive: true});
+  document.addEventListener("touchmove", e => {
+    if (y0 == null) return; const dl = d(), t = e.touches[0], my = t.clientY - y0, mx = t.clientX - x0;
+    if (!mode){ if (Math.abs(my) > 8 || Math.abs(mx) > 8) mode = Math.abs(my) > Math.abs(mx) && my > 0 ? "down" : Math.abs(mx) > Math.abs(my) * 1.5 ? "side" : "none"; }
+    if (mode === "down"){ dy = Math.max(0, my); dl.style.transform = `translateY(${dy}px)`; dl.style.transition = "none"; e.preventDefault(); }
+  }, {passive: false});
+  document.addEventListener("touchend", e => {
+    if (y0 == null) return; const dl = d(), fast = dy > 50 && Date.now() - t0 < 250;
+    if (mode === "down"){ dl.style.transition = ""; if (dy > 120 || fast){ dl.style.transform = ""; closeSheet(); } else dl.style.transform = ""; }
+    if (mode === "side"){ const t = e.changedTouches[0], mx = t.clientX - x0; const tabs = dl.querySelector(".ptabs");
+      if (tabs && Math.abs(mx) > 60){ const order = ["overview","stats","fixtures","role"], cur = order.indexOf(state.ptab || "overview"), nx = order[Math.max(0, Math.min(3, cur + (mx < 0 ? 1 : -1)))];
+        const pid = +(tabs.querySelector("[data-pid]") || {}).dataset.pid; if (pid && nx !== order[cur]){ state.ptab = nx; SHEET_KEY = null; openPlayer(pid); } } }
+    y0 = null; mode = null;
+  });
+})();
+(function pitchSwipe(){
+  let x0 = null, y0 = 0;
+  document.addEventListener("touchstart", e => { if (!e.target.closest || !e.target.closest(".pitch") || e.touches.length !== 1) return; x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; }, {passive: true});
+  document.addEventListener("touchend", e => {
+    if (x0 == null) return; const t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0; x0 = null;
+    if (DND.active || DND.eatClick) return;
+    if (Math.abs(dx) > 70 && Math.abs(dx) > 2 * Math.abs(dy)){ const n = Math.max(0, Math.min(GWS.length - 1, (state.pitchGw || 0) + (dx < 0 ? 1 : -1))); if (n !== state.pitchGw){ state.pitchGw = n; render(); announce(`Gameweek ${GWS[n]}`); } }
+  });
+})();
+
+/* ---------- v6.44: set pieces as team cards and a takers list ---------- */
+state.spView = state.spView || "team"; state.spFilter = state.spFilter || "all"; state.spSort = state.spSort || "team";
+const spOf = t => t.sp || {pens: [], fk: [], order: {pen: [], corner: [], fk: []}};
+function spChanged(t){ const s = spOf(t), top = [...(s.pens || [])].sort((a,b) => b[1] - a[1])[0], first = (s.order.pen || [])[0];
+  return !!(top && first && top[0] !== first && top[1] >= 1); }
+const spMine = () => new Set(state.squad.ids.map(id => P[id] && P[id].t).filter(Boolean));
+function spRank(t, side){ const v = t.prof && t.prof[side] && t.prof[side].setpiece; if (!v) return null; const n = D.teams.length;
+  return side === "att" ? {v: v[0], txt: `xG a game · ${ordinal(v[2])}`, good: v[2] <= 6, bad: v[2] > n - 6}
+    : {v: v[0], txt: v[2] <= n / 2 ? `conceded · ${ordinal(v[2])} most` : `conceded · ${ordinal(n + 1 - v[2])} fewest`, good: v[2] > n - 6, bad: v[2] <= 6}; }
+function spChip(id, note, top){ const p = P[id]; if (!p) return "";
+  const yours = state.squad.ids.includes(id);
+  return `<button class="spchip ${top ? "top" : ""}" data-open="${id}">${esc(p.n)}${yours ? `<i class="yours">yours</i>` : ""}${note ? `<small>${note}</small>` : ""}</button>`; }
+function spPeople(taken, order, unit, orderOnly){
+  if (orderOnly) return (order || []).slice(0, 3).map((id, k) => spChip(id, ordinal(k + 1), false)).join("") || `<span class="sub">Not known</span>`;
+  // the most frequent actual taker is highlighted; FPL's order fills in the rest
+  const counts = new Map((taken || []).map(([id, n]) => [id, n])), ids = [...new Set([...[...(taken || [])].sort((a,b) => b[1] - a[1]).map(x => x[0]), ...(order || [])])];
+  const topId = (taken && taken.length) ? [...taken].sort((a,b) => b[1] - a[1])[0][0] : (order || [])[0];
+  return ids.slice(0, 4).map(id => { const k = (order || []).indexOf(id), n = counts.get(id);
+    const bits = [n ? `${n} ${unit}${n === 1 || unit === "taken" ? "" : "s"}` : "", k >= 0 && !(n && k === 0 && id === topId) ? `FPL ${ordinal(k + 1)}` : ""].filter(Boolean).join(" · ");
+    return spChip(id, bits, id === topId); }).join("") || `<span class="sub">Not known</span>`;
+}
+function spCard(t){
+  const s = spOf(t), a = spRank(t, "att"), d = spRank(t, "def"), ch = spChanged(t), col = colours(t.id)[0] === "#F5F5F5" ? colours(t.id)[1] : colours(t.id)[0];
+  const top = [...(s.pens || [])].sort((x,y) => y[1] - x[1])[0];
+  const stat = (lab, r) => r ? `<div class="spst"><small>${lab}</small><b class="${r.good ? "upc" : r.bad ? "downc" : ""}">${f2(r.v)}</b><em>${r.txt}</em></div>` : "";
+  const row = (ic, lab, html) => `<div class="sprow">${icon(ic)}<span class="splab">${lab}</span><span class="spppl">${html}</span></div>`;
+  return `<section class="spcard" style="--c:${col}"><div class="sphd"><button class="term" data-team="${t.id}"><b>${dot(t.id)}${esc(t.name)}</b></button>${ch ? `<span class="apill warn">Taker change</span>` : ""}</div>
+    <div class="spstats">${stat("Set-piece threat", a)}${stat("Set-piece defence", d)}</div>
+    ${row("pen", "Penalties", spPeople(s.pens, s.order.pen, "taken"))}
+    ${row("corner", "Corners", spPeople([], s.order.corner, "", true))}
+    ${row("fk", "Direct free kicks", spPeople(s.fk, s.order.fk, "shot"))}
+    ${ch && top && P[top[0]] && P[s.order.pen[0]] ? `<p class="spwarn">FPL lists ${esc(P[s.order.pen[0]].n)} first for penalties, but ${esc(P[top[0]].n)} has taken ${top[1] === 1 ? "the one" : top[1] === 2 ? "both" : `${top[1]}`} this season.</p>` : ""}</section>`;
+}
+function spTakers(){
+  const rows = new Map();
+  const add = (id, role, extra) => { if (!P[id]) return; const r = rows.get(id) || {p: P[id], roles: []}; r.roles.push(role + (extra ? ` (${extra})` : "")); rows.set(id, r); };
+  D.teams.forEach(t => { const s = spOf(t), top = [...(s.pens || [])].sort((a,b) => b[1] - a[1])[0];
+    if (top) add(top[0], "Penalties", `${top[1]} taken`); else if (s.order.pen[0]) add(s.order.pen[0], "Penalties", "FPL 1st");
+    if (top && s.order.pen[0] && s.order.pen[0] !== top[0]) add(s.order.pen[0], "Penalties", "FPL 1st, not taking them");
+    (s.order.corner || []).slice(0, 1).forEach(id => add(id, "Corners"));
+    const fk = [...(s.fk || [])].sort((a,b) => b[1] - a[1])[0]; if (fk) add(fk[0], "Free kicks", `${fk[1]} shot${fk[1] === 1 ? "" : "s"}`); else if (s.order.fk[0]) add(s.order.fk[0], "Free kicks", "FPL 1st"); });
+  let list = [...rows.values()].filter(r => available(r.p));
+  if (state.spFilter === "mine"){ const m = spMine(); list = list.filter(r => m.has(r.p.t)); }
+  if (state.spFilter === "changed"){ const ch = new Set(D.teams.filter(spChanged).map(t => t.id)); list = list.filter(r => ch.has(r.p.t)); }
+  list.sort(state.spSort === "price" ? (a,b) => a.p.price - b.p.price : state.spSort === "proj" ? (a,b) => b.p.ep6 - a.p.ep6 : (a,b) => T[a.p.t].short.localeCompare(T[b.p.t].short) || a.p.n.localeCompare(b.p.n));
+  return `<label class="sortsel">Sort by <select id="spsortsel" aria-label="Sort takers"><option value="team" ${state.spSort === "team" ? "selected" : ""}>Team</option><option value="price" ${state.spSort === "price" ? "selected" : ""}>Price, cheapest first</option><option value="proj" ${state.spSort === "proj" ? "selected" : ""}>Projected, next ${GWS.length} GWs</option></select></label>
+    <ul class="list">${list.map(r => playerRow(r.p, f1(r.p.ep6), `${GWS.length} GWs`, false, `<div class="sproles">${r.roles.map(x => `<span class="chip">${esc(x)}</span>`).join("")}</div>`)).join("") || `<li class="lede">No takers match.</li>`}</ul>`;
+}
+function viewSetPieces(){
+  const ch = D.teams.filter(spChanged).length, mine = spMine();
+  let teams = [...D.teams].sort((a,b) => (spChanged(b) - spChanged(a)) || a.name.localeCompare(b.name));
+  if (state.spFilter === "mine") teams = teams.filter(t => mine.has(t.id));
+  if (state.spFilter === "changed") teams = teams.filter(spChanged);
+  return `<p class="lede">Who takes penalties, corners and free kicks, and how dangerous each team is from set pieces. <button class="term" data-sphelp="1">How to read this</button></p>
+    ${seg("spview", [["team","By team"],["takers","Takers"]], state.spView, "Set pieces view")}
+    <div class="pillrow">${[["all","All teams"],["mine","Your teams"],["changed",`Taker changes (${ch})`]].map(([k, l]) => `<button class="pillbtn ${state.spFilter === k ? "on" : ""}" data-spfilter="${k}" aria-pressed="${state.spFilter === k}">${l}</button>`).join("")}</div>
+    ${state.spView === "takers" ? spTakers() : teams.map(spCard).join("") || `<p class="lede">No teams match.</p>`}`;
+}
+function openSpHelp(){
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">How to read set pieces</h2>
+    <p class="lede"><b>Penalties</b>: the highlighted name is whoever has actually taken them this season, from the shot data, with how many. “FPL 1st” and “FPL 2nd” are FPL’s official order. When they differ, the card says so: the actual taker is usually the better bet.</p>
+    <p class="lede"><b>Corners</b>: the match data doesn’t record who takes corners, so these use FPL’s order only. <b>Direct free kicks</b>: shots from direct free kicks this season, plus FPL’s order.</p>
+    <p class="lede"><b>Set-piece threat</b>: expected goals a game from set pieces, and the team’s rank; good for its attackers and defenders who go up for corners. <b>Set-piece defence</b>: expected goals conceded a game from set pieces; a team that concedes a lot is a good opponent for attackers.</p>${sheetFoot()}`;
+  showSheet();
+}
+
+/* ---------- v6.45: Matches (our forecast and the bookmakers on one card), Swings with Fixtures and Form ---------- */
+state.mGw = state.mGw || 0; state.mSort = state.mSort || "ko"; state.mMine = state.mMine || false;
+const pc1 = v => (100 * v).toFixed(1) + "%";
+function matchTag(f, o){
+  const tot = f.lh + f.la, fav = Math.max(o.w, o.l);
+  return fav >= 0.6 ? ["One-sided", "info"] : tot >= 3.0 ? ["Open game", "warn"] : tot <= 2.3 ? ["Tight game", ""] : null;
+}
+function matchCard(f){
+  const H = T[f.h], A = T[f.a], g = f.gw;
+  const lhM = f.mh != null ? f.mh : f.lh, laM = f.ma != null ? f.ma : f.la, ours = outcome(lhM, laM), b = f.book, bk = b ? {w: b.ph != null ? b.ph : outcome(b.lh, b.la).w, d: b.pd != null ? b.pd : outcome(b.lh, b.la).d, l: b.pa != null ? b.pa : outcome(b.lh, b.la).l} : null;
+  const col = id => { const c = colours(id); return c[0] === "#F5F5F5" ? c[1] : c[0]; };
+  const bar = (o, faded) => `<div class="wdl2 ${faded ? "wbk" : ""}"><span style="width:${100 * o.w}%;background:${col(f.h)}">${o.w >= 0.12 ? `${esc(H.short)} ${pct(o.w)}` : ""}</span><span class="dr" style="width:${100 * o.d}%">${o.d >= 0.12 ? `Draw ${pct(o.d)}` : ""}</span><span style="width:${100 * o.l}%;background:${col(f.a)}">${o.l >= 0.12 ? `${esc(A.short)} ${pct(o.l)}` : ""}</span></div>`;
+  let badge = "", why = "";
+  if (bk){ const dw = bk.w - ours.w, dl = bk.l - ours.l, big = Math.max(Math.abs(dw), Math.abs(dl));
+    if (big >= 0.08){ const t = Math.abs(dw) >= Math.abs(dl) ? [H, dw, ours.w, bk.w] : [A, dl, ours.l, bk.l];
+      badge = `<span class="apill warn">We differ</span>`; why = `<p class="mwhy">Bookmakers rate ${esc(t[0].name)}’s chances ${t[1] > 0 ? "higher" : "lower"} than we do: ${pct(t[3])} against our ${pct(t[2])}.</p>`; }
+    else badge = `<span class="apill up">We agree</span>`; }
+  const sc = scorelines(f.lh, f.la, 1)[0], tag = matchTag(f, ours), mine = state.squad.ids.map(id => P[id]).filter(p => p && (p.t === f.h || p.t === f.a));
+  const nb = b && b.src ? (b.src.match(/(\d+) bookmakers/) || [])[1] : null;
+  return `<section class="mcard" style="--c:${col(f.h)}"><div class="mhd"><b>${dot(f.h)}${esc(H.name)} v ${dot(f.a)}${esc(A.name)}</b>${badge}</div>
+    <div class="mclab">FPL Lab model</div>${bar(ours)}
+    ${bk ? `<div class="mclab">Bookmakers${nb ? `, average of ${nb}` : ""}</div>${bar(bk, true)}` : `<p class="sub" style="margin:4px 0 0">Odds not out yet for GW${g}.</p>`}
+    ${why}
+    <div class="mgrid"><div class="mside"><b>${esc(H.short)}</b><span>${f2(lhM)} xG${b ? ` · odds ${f2(b.lh)}` : ""}</span><span>Clean sheet ${pct(Math.exp(-f.la))}</span></div>
+      <div class="mscore"><b>${sc[0]}–${sc[1]}</b><small>most likely, ${pc1(sc[2])}</small></div>
+      <div class="mside r"><b>${esc(A.short)}</b><span>${f2(laM)} xG${b ? ` · odds ${f2(b.la)}` : ""}</span><span>Clean sheet ${pct(Math.exp(-f.lh))}</span></div></div>
+    <div class="mfoot">${mine.length ? `<i class="mine2">Yours</i>${mine.map(p => esc(p.n)).join(", ")} · ` : ""}${tag ? `<span class="mtag ${tag[1]}">${tag[0]}</span> · ` : ""}${f.ko ? esc(dayTime(f.ko)) + " · " : ""}<button class="term" data-match="${g}:h:${f.a}" data-mteam="${f.h}">Score grid and referee</button></div></section>`;
+}
+function viewMatches(){
+  const i = Math.max(0, Math.min(state.mGw || 0, LONG.length - 1)), g = LONG[i];
+  let fx = D.fixtures.filter(f => f.gw === g);
+  const mineT = new Set(state.squad.ids.map(id => P[id] && P[id].t).filter(Boolean));
+  if (state.mMine) fx = fx.filter(f => mineT.has(f.h) || mineT.has(f.a));
+  const goals = f => f.lh + f.la, fav = f => { const o = outcome(f.lh, f.la); return Math.max(o.w, o.l); };
+  fx.sort(state.mSort === "goals" ? (a,b) => goals(b) - goals(a) : state.mSort === "fav" ? (a,b) => fav(b) - fav(a) : (a,b) => String(a.ko).localeCompare(String(b.ko)));
+  let html = "", day = null;
+  fx.forEach(f => { if (state.mSort === "ko" && f.ko){ const dd = new Date(f.ko).toLocaleDateString("en-GB", {weekday: "long", day: "numeric", month: "short"}); if (dd !== day){ day = dd; html += `<h4 class="mday">${esc(dd)}</h4>`; } } html += matchCard(f); });
+  const o = D.meta.odds || {};
+  return `<p class="lede">Every match: our model and the bookmakers side by side, the most likely score, and your players. <button class="term" data-mhelp="1">How to read this</button></p>
+    <div class="row2"><span class="gwmini"><button class="ibtn" data-mgw="-1" ${i === 0 ? "disabled" : ""} aria-label="Previous gameweek">‹</button><b>GW${g}</b><button class="ibtn" data-mgw="1" ${i >= LONG.length - 1 ? "disabled" : ""} aria-label="Next gameweek">›</button></span>
+      <button class="pillbtn ${state.mMine ? "on" : ""}" data-mmine="1" aria-pressed="${state.mMine}">Your matches</button>
+      <label class="sortsel" style="margin:0">Sort <select id="msortsel" aria-label="Sort matches"><option value="ko" ${state.mSort === "ko" ? "selected" : ""}>Kick-off</option><option value="goals" ${state.mSort === "goals" ? "selected" : ""}>Most goals expected</option><option value="fav" ${state.mSort === "fav" ? "selected" : ""}>Biggest favourite</option></select></label></div>
+    ${html || `<p class="lede">No matches${state.mMine ? " involving your players" : ""} in GW${g}.</p>`}`;
+}
+function openMatchesHelp(){
+  const o = D.meta.odds || {};
+  $("#sheetBody").innerHTML = `<h2 id="sheetTitle">How to read the matches</h2>
+    <p class="lede">The top bar is our model on its own: the chance of a home win, a draw and an away win. The fainter bar underneath is the bookmakers’, from the average of their prices. When the two are within 8 points of each other, the card says <b>We agree</b>; otherwise <b>We differ</b>, with a line saying where.</p>
+    <p class="lede">For the coming gameweek, the projections you see across the app lean ${o.weight != null ? pct(o.weight) : "heavily"} on the bookmakers, because that blend was the most accurate in testing, so the two rarely differ by much; when they do, it’s worth noticing. Later gameweeks have no odds yet and show our model only.</p>
+    <p class="lede">The most likely score is shown with one decimal: even the likeliest score usually happens about one time in ten, so read it as a guide to how open the game should be. Tags: <b>One-sided</b> when a team has a 60%+ chance to win, <b>Open game</b> when 3+ goals are expected, <b>Tight game</b> when 2.3 or fewer are.</p>${sheetFoot()}`;
+  showSheet();
+}
+// Swings: Fixtures (schedule only) and Form (recent output against the forecast), attack or defence
+state.swMode = state.swMode || "fix"; state.swSide = state.swSide || "att";
+function swingData(N){
+  const mu = D.meta, att = state.swSide === "att";
+  const val = f => att ? f.lf : Math.exp(-f.la), grade = f => att ? xgClass(f.lf) : csClass(Math.exp(-f.la));
+  return D.teams.map(t => {
+    const past = (t.results || []).slice(-N).map(r => { const O = D.teams.find(x => x.short === r[1]); if (!O) return null;
+      return {opp: O.id, home: !!r[2], lf: r[2] ? mu.mu_h * t.att * O.dfn : mu.mu_a * t.att * O.dfn, la: r[2] ? mu.mu_a * O.att * t.dfn : mu.mu_h * O.att * t.dfn}; }).filter(Boolean);
+    const nextF = GWS.slice(0, N).flatMap(g => (FX[t.id][g] || []).map(f => ({...f, g})));
+    const avg = l => l.length ? l.reduce((s, f) => s + val(f), 0) / l.length : null;
+    const a = avg(past), b = avg(nextF);
+    // when does it turn: the first later week that's back on the other side of the past average
+    const weekVal = GWS.map(g => { const l = FX[t.id][g] || []; return l.length ? avg(l) : null; });
+    const up = b != null && a != null && b > a;
+    let turn = null;
+    for (let k = 1; k < GWS.length; k++){ const v = weekVal[k]; if (v == null) continue; if (up ? v < a : v >= a){ turn = GWS[k]; break; } }
+    return {t, past, nextF, a, b, d: b != null && a != null ? b - a : null, turn, grade};
+  }).filter(x => x.d != null);
+}
+function swingChips(list, grade){ return list.map(f => `<i class="swc d${grade(f)}">${esc(T[f.opp].short)}</i>`).join(""); }
+function viewSwings(){
+  if (!["fix","form","trend"].includes(state.swMode)) state.swMode = "fix";
+  const N = Math.min(aheadN() >= 2 ? aheadN() : 3, 6), att = state.swSide === "att", form = state.swMode === "form";
+  const mySquad = state.squad.ids.map(id => P[id]).filter(Boolean);
+  const head = `<p class="lede">${state.swMode === "trend" ? "What’s coming: where teams are heading and who to buy." : form ? `What each team has actually done in its last ${N} league games.` : (att ? `Fixtures only: how kind the next ${N} opponents are compared with the last ${N}, for attackers.` : `Fixtures only: clean-sheet chances against the next ${N} opponents compared with the last ${N}.`)}</p>
+    <div class="ctrls">${seg("swmode", [["fix","Fixtures"],["form","Form"],["trend","Trend"]], state.swMode, "What to show")}${seg("swside", [["att","Attack"],["def","Defence"]], state.swSide, "Attack or defence")}</div>${state.swMode === "trend" ? "" : weeksSlider("pl")}`;
+  // your players affected, from the fixtures view of their own side of the game
+  const fixAtt = (() => { const keep = state.swSide; state.swSide = "att"; const r = swingData(N); state.swSide = "def"; const r2 = swingData(N); state.swSide = keep; return {att: r, def: r2}; })();
+  const lim = {att: 0.15, def: 0.05}, affected = (dir) => mySquad.filter(p => { const s = (p.pos <= 2 ? fixAtt.def : fixAtt.att).find(x => x.t.id === p.t); return s && dir * s.d >= lim[p.pos <= 2 ? "def" : "att"]; });
+  const harder = affected(-1), easier = affected(1), nm = l => l.slice(0, 4).map(p => esc(p.n)).join(", ") + (l.length > 4 ? ` and ${l.length - 4} more` : "");
+  const banner = mySquad.length === 15 && (harder.length || easier.length) ? `<p class="swban">${harder.length ? `Getting harder for your ${harder.length === 1 ? "player" : "players"}: <b>${nm(harder)}</b>. ` : ""}${easier.length ? `Getting easier: <b>${nm(easier)}</b>.` : ""}</p>` : "";
+  if (state.swMode === "trend") return head + banner + viewTrend();
+  if (form) return head + banner + viewForm(N);
+  const s = swingData(N), th = att ? 0.15 : 0.05, fmt = d => att ? `${d >= 0 ? "+" : "−"}${f1(Math.abs(d))}` : `${d >= 0 ? "+" : "−"}${Math.round(100 * Math.abs(d))}%`;
+  const row = x => `<button class="swrow2" data-team="${x.t.id}"><b>${dot(x.t.id)}${esc(x.t.short)}</b><span><span class="swfx">${swingChips(x.past, x.grade)}<span class="ar">→</span>${swingChips(x.nextF, x.grade)}</span>
+      <small>${x.d > 0 ? (x.turn ? `Easier now, harder from GW${x.turn}` : "Easier now") : (x.turn ? `Harder now, easier from GW${x.turn}` : "Harder now")}</small></span>
+      <em class="${x.d > 0 ? "upc" : "downc"}">${fmt(x.d)}<small>${att ? "xG a game" : "clean sheet"}</small></em></button>`;
+  const up = s.filter(x => x.d >= th).sort((a,b) => b.d - a.d), dn = s.filter(x => x.d <= -th).sort((a,b) => a.d - b.d);
+  return head + banner + `<h3>Getting easier</h3>${up.map(row).join("") || `<p class="sub">No big improvements over the next ${N}.</p>`}
+    <h3>Getting harder</h3>${dn.map(row).join("") || `<p class="sub">No big drops over the next ${N}.</p>`}
+    <p class="sub">Chips are opponents, coloured for ${att ? "attackers (goals expected)" : "defenders (clean-sheet chance)"}: last ${N} on the left, next ${N} on the right.</p>`;
+}
+/* ---------- v6.46: Swings = Fixtures (schedule) · Form (what they've done) · Trend (what's coming, and who to buy) ---------- */
+// what a team has actually done in its last N league games: no fixtures, no forecast
+function formRows(N){
+  const att = state.swSide === "att";
+  return D.teams.map(t => { const r = (t.results || []).slice(-N);
+    if (!r.length) return null;
+    const n = r.length, gf = r.reduce((s, x) => s + x[5], 0), ga = r.reduce((s, x) => s + x[6], 0), xg = r.reduce((s, x) => s + x[3], 0), xga = r.reduce((s, x) => s + x[4], 0);
+    const res = r.map(x => x[5] > x[6] ? "W" : x[5] === x[6] ? "D" : "L");
+    return {t, n, g: (att ? gf : ga) / n, x: (att ? xg : xga) / n, res, opp: r.map(x => x[1] + (x[2] ? " H" : " A"))};
+  }).filter(Boolean);
+}
+function viewForm(N){
+  const att = state.swSide === "att", rows = formRows(N);
+  rows.sort((a,b) => att ? b.x - a.x : a.x - b.x);
+  const max = Math.max(...rows.flatMap(r => [r.g, r.x]), 1.2);
+  const lg = rows.reduce((s, r) => s + r.x, 0) / rows.length;
+  return `<div class="frows"><div class="frow head"><span>Team</span><span>Last ${N}</span><span>${att ? "Goals and chances a game" : "Conceded and chances a game"}</span></div>
+    ${rows.map(r => { const good = att ? r.x >= lg : r.x <= lg;
+      return `<button class="frow" data-team="${r.t.id}"><span class="tn">${dot(r.t.id)}${esc(r.t.short)}</span>
+        <span class="fres">${r.res.map(x => `<i class="r${x}">${x}</i>`).join("")}</span>
+        <span class="fbars2"><span class="fbar2"><small>${att ? "Scored" : "Conceded"}</small><i><i style="width:${100 * r.g / max}%;background:${att ? "#D85A30" : "#E24B4A"}"></i></i><b>${f1(r.g)}</b></span>
+          <span class="fbar2"><small>Chances</small><i><i style="width:${100 * r.x / max}%;background:${good ? "#1D9E75" : "#888780"}"></i></i><b>${f2(r.x)}</b></span></span></button>`; }).join("")}</div>
+    <p class="sub">What each team has actually done in its last ${N} league games: ${att ? "goals scored and the expected goals from their chances" : "goals conceded and the expected goals from the chances they allowed"}, per game. No fixtures or forecasts here; league average is ${f2(lg)}. For whether results have been better or worse than deserved, see the <button class="term" data-goto="teams" data-teamview="form">Form table</button>.</p>`;
+}
+// Trend: where teams are heading, and the players who should benefit
+function viewTrend(){
+  const ft = D.meta.future_test || {}, att = state.swSide === "att";
+  const all = D.teams.map(t => ({t, f: att ? teamForecast(t.id, 4) : teamForecastDef(t.id, 4)})).filter(x => x.f.next != null);
+  const better = x => att ? x.f.change : -x.f.change;
+  all.sort((a,b) => better(b) - better(a));
+  const up = all.filter(x => better(x) >= 0.3), down = [...all].reverse().filter(x => better(x) <= -0.3);
+  const upIds = new Set(up.map(x => x.t.id)), downIds = new Set(down.map(x => x.t.id));
+  const playerFc = p => { const s = pieSlice(p, GWS.slice(0, 4)), g = (p.form || []).slice(-4), last = g.reduce((a, r) => a + r[4] + r[5], 0); return {next: s.xgi, last, games: g.length}; };
+  const pool = ids => D.players.filter(p => available(p) && ids.has(p.t) && minutesSecurity(p).level === "green" && (att ? p.pos >= 3 && (p.share_g + p.share_a) >= 0.12 : p.pos <= 2));
+  const buys = att ? pool(upIds).map(p => ({p, fc: playerFc(p)})).sort((a,b) => (b.fc.next - b.fc.last) - (a.fc.next - a.fc.last)).slice(0, 8)
+    : pool(upIds).map(p => ({p})).sort((a,b) => b.p.ep6 - a.p.ep6).slice(0, 8);
+  const sells = att ? pool(downIds).map(p => ({p, fc: playerFc(p)})).sort((a,b) => (a.fc.next - a.fc.last) - (b.fc.next - b.fc.last)).slice(0, 6)
+    : pool(downIds).map(p => ({p})).sort((a,b) => b.p.ep6 - a.p.ep6).slice(0, 6);
+  const mine = new Set(state.squad.ids);
+  const prow = x => playerRow(x.p, x.fc ? `${x.fc.next - x.fc.last >= 0 ? "+" : "−"}${f1(Math.abs(x.fc.next - x.fc.last))}` : f1(x.p.ep6), x.fc ? "chances change" : `${GWS.length} GWs`, true,
+    `<div class="sub">${mine.has(x.p.id) ? `<i class="mine2">yours</i> ` : ""}${x.fc ? `Last 4: ${f1(x.fc.last)} xG+xA → next 4 forecast ${f1(x.fc.next)}. ` : ""}${f1(x.p.own)}% owned</div>`);
+  const teamBlock = (list, dir) => list.length ? `<div class="tcards">${list.slice(0, 5).map(x => `<button class="tcard ${dir}" data-team="${x.t.id}"><b>${dot(x.t.id)}${esc(x.t.short)}</b><span class="tnum">${f2(x.f.last)} → ${f2(x.f.next)}</span><small>${att ? "xG a game" : "xG conceded a game"}</small><em>${better(x) >= 0 ? "+" : "−"}${f2(Math.abs(x.f.change))}</em></button>`).join("")}</div>` : `<p class="sub">No clear ${dir === "up" ? "risers" : "fallers"} this week.</p>`;
+  return `<p class="lede">Where teams are heading over the next four, from their recent level and the fixtures ahead, and the players who should benefit. This is the forecast, not a record of what’s happened.</p>
+    <h3>${att ? "Attacks about to improve" : "Defences about to tighten"}</h3>${teamBlock(up, "up")}
+    <h3>Get ahead: ${att ? "attackers" : "defenders and keepers"} from those teams</h3>
+    <p class="lede">${att ? "Nailed players with a real share of their team’s chances, ranked by how much their expected goals and assists should rise." : "Nailed defenders and keepers from teams whose defence is tightening, ranked by projected points."} Ownership is shown so you can spot a differential.</p>
+    <ul class="list">${buys.map(prow).join("") || `<li class="lede">No clear candidates this week.</li>`}</ul>
+    <h3>${att ? "Attacks about to fade" : "Defences about to leak"}</h3>${teamBlock(down, "down")}
+    <h3>Think about moving on</h3><ul class="list">${sells.map(prow).join("") || `<li class="lede">Nobody stands out.</li>`}</ul>
+    <div class="evidence"><b>Does this work?</b> Tested on ${ft.windows || 540} four-game windows across ${esc(ft.seasons || "the last two seasons")}:
+      <ul><li>When the forecast said a team would create at least 0.3 xG a game more than in its last four, it did <b>${pct(ft.rise_hit || 0.89)}</b> of the time (${ft.rise_n || 93} cases).</li>
+      <li>Falls were called right <b>${pct(ft.fall_hit || 0.87)}</b> of the time.</li>
+      <li>Teams already on a hot run created ${f2(Math.abs(ft.hot_change || 0.43))} less a game over the next four on average, so a hot streak alone is a poor guide.</li></ul></div>
+    ${surpriseHtml()}${trackRecordHtml()}
+    <p class="sub">Forecasts use the model’s expected goals for each upcoming fixture, which already blend team quality, the opponent, home advantage and bookmaker odds where available.</p>`;
+}
+
 /* ---------- events ---------- */
 document.addEventListener("click", e => {
-  const el = e.target.closest("[data-rules],[data-rulemode],[data-step],[data-fplreset],[data-chipmode],[data-chiptoggle],[data-planapply],[data-plancmp],[data-capx],[data-plview],[data-vsside],[data-sqfx],[data-sqshow],[data-fswitch],[data-freset],[data-fdir],[data-match],[data-fxhelp],[data-bothsort],[data-ahead],[data-fxone],[data-pitchshow],[data-pmenu],[data-draftrm],[data-trendmode],[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
+  const el = e.target.closest("[data-mgw],[data-mmine],[data-mhelp],[data-swmode],[data-swside],[data-spview],[data-spfilter],[data-sphelp],[data-xferhelp],[data-chipinfo],[data-chipuse],[data-risk],[data-chipedit],[data-draftmenu],[data-draftrename],[data-draftdelete],[data-undodraft],[data-undoswap],[data-swapsopen],[data-lgview],[data-chiphelp],[data-rules],[data-rulemode],[data-step],[data-fplreset],[data-chipmode],[data-chiptoggle],[data-planapply],[data-plancmp],[data-capx],[data-plview],[data-vsside],[data-sqfx],[data-sqshow],[data-fswitch],[data-freset],[data-fdir],[data-match],[data-fxhelp],[data-bothsort],[data-ahead],[data-fxone],[data-pitchshow],[data-pmenu],[data-draftrm],[data-trendmode],[data-moretoggle],[data-ptab],[data-watch],[data-search],[data-guide],[data-whatsnew],[data-open],[data-team],[data-gwview],[data-capmode],[data-pos],[data-more],[data-fxmode],[data-teamview],[data-teamsort],[data-pick],[data-remove],[data-add],[data-pickadd],[data-close],[data-cmp],[data-cmpopen],[data-cmpclear],[data-plan],[data-chips],[data-loadmy],[data-fxwin],[data-fxsort],[data-squadview],[data-filters],[data-sortpick],[data-maxpick],[data-term],[data-minset],[data-gwstep],[data-pitch],[data-luact],[data-luclear],[data-solve],[data-stress],[data-ftvenue],[data-ftwin],[data-ftkey],[data-pfn],[data-pfm],[data-pfpos],[data-setrule],[data-rmrule],[data-clearrules],[data-hitsmode],[data-horizon],[data-draftoutsheet],[data-draftin],[data-draftundo],[data-draftreset],[data-draftsolve],[data-draftapply],[data-flipdir],[data-quick],[data-capsrc],[data-backup],[data-compass],[data-pbview],[data-plverdict],[data-goto],[data-formtoggle],[data-venuetoggle],[data-key],[data-splitsort],[data-ruletoggle],[data-planswitch],[data-plannew],[data-plandel],[data-decay],[data-ftv],[data-defclub],[data-gkmax],[data-alts],[data-paidsave]");
   if (!el){ if (e.target === $("#sheet")) closeSheet(); return; }
   const d = el.dataset;
-  if (d.rules){ openRules(); }
+  if (d.mgw){ state.mGw = Math.max(0, Math.min(LONG.length - 1, (state.mGw || 0) + +d.mgw)); render(); }
+  else if (d.mmine){ state.mMine = !state.mMine; render(); }
+  else if (d.mhelp){ openMatchesHelp(); }
+  else if (d.swmode){ state.swMode = d.swmode; render(); }
+  else if (d.swside){ state.swSide = d.swside; render(); }
+  else if (d.spview){ state.spView = d.spview; render(); }
+  else if (d.spfilter){ state.spFilter = d.spfilter; render(); }
+  else if (d.sphelp){ openSpHelp(); }
+  else if (d.xferhelp){ openTransfersHelp(); }
+  else if (d.chipinfo){ openChipSheet(d.chipinfo); }
+  else if (d.chipuse){ RULES.chips[d.chipuse] = d.g === "auto" || d.g === "off" ? d.g : +d.g; saveRules(); state.exact = null; render(); openChipSheet(d.chipuse); toast(d.g === "auto" ? "The solver will pick the week" : d.g === "off" ? "Left out of plans" : `Planned for GW${d.g}`); }
+  else if (d.risk){ RULES.risk = d.risk; saveRules(); state.exact = null; RULES.result = null; VERDICTS = null; render(); }
+  else if (d.chipedit){ state.chipEdit = !state.chipEdit; refreshRules(); }
+  else if (d.draftmenu){ openDraftMenu(); }
+  else if (d.draftrename){ const v = ($("#draftname") || {}).value; if (v && v.trim()){ RULES.name = v.trim().slice(0, 24); saveRules(); persistPlans(); } closeSheet(); render(); }
+  else if (d.draftdelete){ closeSheet(); deleteDraftWithUndo(); }
+  else if (d.undodraft){ $("#toast").classList.remove("on", "act"); undoDeleteDraft(); }
+  else if (d.undoswap){ $("#toast").classList.remove("on", "act"); if (DND.lastSwap){ lineupAction("swap", DND.lastSwap[1], DND.lastSwap[0]); DND.lastSwap = null; render(); } }
+  else if (d.swapsopen){ const box = $("#pswaps"); if (box){ box.hidden = !box.hidden; el.setAttribute("aria-expanded", String(!box.hidden)); } }
+  else if (d.lgview){ state.lgView = d.lgview; render(); }
+  else if (d.chiphelp){ openChipHelp(state.chipPlan); }
+  else if (d.rules){ openRules(); }
   else if (d.rulemode){ const id = +d.pid; if (d.rulemode === "keep") setRule("lock", id); else { clearRule(id); saveRules(); } render(); }
   else if (d.step){ if (d.step === "ft") state.squad.ft = Math.max(0, Math.min(5, Number(state.squad.ft || 0) + +d.d)); else state.squad.bank = Math.max(0, Math.round((Number(state.squad.bank || 0) + 0.1 * +d.d) * 10) / 10);
     saveSquad(); state.plan = null; state.chipPlan = null; render(); }
@@ -4749,7 +5507,7 @@ document.addEventListener("click", e => {
   else if (d.vsside){ state.vsSide = d.vsside; render(); }
   else if (d.sqfx){ openSquadFixtures(); }
   else if (d.sqshow){ state.sqShow = d.sqshow; render(); }
-  else if (d.match){ const [g, side, opp] = d.match.split(":"), tr = el.closest("tr"), tc = tr && tr.querySelector("[data-team]"); if (tc) openMatch(+g, side, +opp, +tc.dataset.team); }
+  else if (d.match){ const [g, side, opp] = d.match.split(":"); if (d.mteam){ openMatch(+g, side, +opp, +d.mteam); } else { const tr = el.closest("tr"), tc = tr && tr.querySelector("[data-team]"); if (tc) openMatch(+g, side, +opp, +tc.dataset.team); } }
   else if (d.fxhelp){ openFxHelp(); }
   else if (d.bothsort){ state.bothSort = d.bothsort; render(); }
   else if (d.ahead){ setAhead(+d.ahead); if (state.pl.sort === "next" || state.pl.sort === "six") state.pl.sort = +d.ahead === 1 ? "next" : "six"; render(); announce(`Looking ahead ${d.ahead} week${d.ahead === "1" ? "" : "s"}`); }
@@ -4769,13 +5527,13 @@ document.addEventListener("click", e => {
   else if (d.term){ openGlossary(d.term); }
   else if (d.setrule){ setRule(d.setrule, +d.pid, d.gw ? +d.gw : null); render(); openPlayer(+d.pid); toast("Rule saved. Solve again to see the new plan."); }
   else if (d.rmrule){ clearRule(+d.rmrule); saveRules(); render(); if ($("#sheet").open && $("#sheetTitle") && P[+d.rmrule] && $("#sheetTitle").textContent.includes(P[+d.rmrule].n)) openPlayer(+d.rmrule); }
-  else if (d.goto){ if (d.capsrc) state.capSrc = d.capsrc; if (d.squadview) state.squadView = d.squadview; if (d.quickset !== undefined){ state.pl.quick = d.quickset || null; state.pl.limit = 50; } closeSheet(); if (location.hash === "#" + d.goto) render(); else location.hash = "#" + d.goto; }
+  else if (d.goto){ if (d.capsrc) state.capSrc = d.capsrc; if (d.squadview) state.squadView = d.squadview; if (d.teamview) state.teamView = d.teamview; if (d.fxset) state.fxMode = d.fxset; if (d.swset) state.swMode = d.swset; if (d.quickset !== undefined){ state.pl.quick = d.quickset || null; state.pl.limit = 50; } closeSheet(); if (location.hash === "#" + d.goto) render(); else location.hash = "#" + d.goto; }
   else if (d.venuetoggle){ state.venueMode = !state.venueMode; try { localStorage.setItem("fpllab.venue.v1", state.venueMode ? "on" : "off"); } catch(e) {} applyWhatIfs(); state.exact = null; render(); toast(state.venueMode ? "Using each team’s home and away record, including xGC" : "Back to the normal projections"); }
   else if (d.formtoggle){ state.formMode = !state.formMode; try { localStorage.setItem("fpllab.form.v1", state.formMode ? "on" : "off"); } catch(e) {} applyFormMode(); state.exact = null; render(); toast(state.formMode ? "Showing every projection as if recent team form continues" : "Back to the normal projections"); }
   else if (d.key){ openKey(); }
   else if (d.splitsort){ state.splitSort = d.splitsort; render(); }
   else if (d.ruletoggle){ const id = +d.pid, r = ruleFor(id); if (r && r.kind === d.ruletoggle){ clearRule(id); saveRules(); } else setRule(d.ruletoggle, id);
-    render(); if ($("#sheet").open) openPlayer(id); }
+    render(); if ($("#sheet").open){ if ($("#sheet").classList.contains("psheet")) openPitchPlayer(id); else openPlayer(id); } }
   else if (d.planswitch !== undefined){ switchPlan(+d.planswitch); render(); }
   else if (d.plannew){ newPlan(d.plannew === "copy"); render(); toast(`${RULES.name} created${d.plannew === "copy" ? " as a copy of your rules" : ""}. Change the rules and solve to compare.`); }
   else if (d.plandel){ deletePlan(); render(); }
@@ -4800,16 +5558,17 @@ document.addEventListener("click", e => {
   else if (d.ftkey){ state.ft.key = d.ftkey; render(); }
   else if (d.minset){ const pid = +d.pid, v = +(($("#minsr") || {}).value || 0);
     if (d.minset === "reset") delete MINS[pid]; else MINS[pid] = {m: v, all: d.minset === "all"};
-    saveMins(); P[pid].ep_noform = null; applyMinutes(P[pid]); applyWhatIfs(); state.plan = null; state.exact = null; state.chipPlan = null; render(); openPlayer(pid);
+    const mini = $("#sheet").classList.contains("psheet");
+    saveMins(); P[pid].ep_noform = null; applyMinutes(P[pid]); applyWhatIfs(); state.plan = null; state.exact = null; state.chipPlan = null; VERDICTS = null; render(); if (mini) openPitchPlayer(pid); else openPlayer(pid);
     toast(d.minset === "reset" ? "Back to the model’s minutes" : `Set to ${v} minutes for ${d.minset === "all" ? "all six gameweeks" : "this gameweek"}`); }
   else if (d.gwstep){ state.pitchGw = Math.max(0, Math.min(GWS.length - 1, state.pitchGw + +d.gwstep)); render(); }
   else if (d.pitch){ openPitchPlayer(+d.pitch); }
-  else if (d.luact){ lineupAction(d.luact, +d.pid, d.with ? +d.with : null); closeSheet(); render(); }
+  else if (d.luact){ lineupAction(d.luact, +d.pid, d.with ? +d.with : null); if (d.luact === "swap") state.flash = [+d.pid, +d.with]; closeSheet(); render(); }
   else if (d.luclear){ delete state.lu[state.pitchGw]; render(); }
   else if (d.solve && d.close){ closeSheet(); setTimeout(() => { const b = $(".solvebar [data-solve]"); if (b) b.click(); }, 50); }
   else if (d.solve){ el.textContent = "Solving…"; el.disabled = true; setTimeout(async () => { const sq = state.squad.ids.map(id => P[id]);
       try { state.exact = await solveExact(sq, Number(state.squad.bank || 0), Number(state.squad.ft || 0), {noHits: d.solve === "nohits"}); state.solveError = null;
-        state.exact.gain = planTotal(state.exact) - planBase(state.exact.H); rememberResult(state.exact); state.alts = null; }
+        state.exact.gain = planTotal(state.exact) - planBase(state.exact.H); state.exact.risk = RULES.risk || "balanced"; rememberResult(state.exact); state.alts = null; VERDICTS = null; }
       catch(err){ if (String(err.message) === "INFEASIBLE"){ state.exact = null; state.solveError = null; toast("Those rules can’t all be met: check the budget, positions or three-per-club limit."); }
         else { state.solveError = String(err.message || err).slice(0, 80); state.plan = planTransfers(sq, Number(state.squad.bank || 0), Number(state.squad.ft || 0)); } }
       state.stress = null; render(); }, 40); }
@@ -4883,7 +5642,8 @@ document.addEventListener("input", e => {
     const n = filterCount({min: vmin > lo ? vmin : 0, max: vmax < hi ? vmax : 0, own: own < 100 ? own : 0}); const c = $("#fcount"); if (c) c.textContent = `Show ${n} player${n === 1 ? "" : "s"}`;
     return; }
   if (e.target.classList && e.target.classList.contains("wkrange")){ const ctx = e.target.dataset.ctx, fx = ctx === "fx", list = fx ? FXLIST() : GWS, v = +e.target.value, L = weeksLabel(v, list.length, list);
-    const a = $("#wkl-" + ctx), b = $("#wkr-" + ctx); if (a) a.textContent = L.lab; if (b) b.textContent = L.range; e.target.setAttribute("aria-valuetext", L.lab);
+    const a = $("#wkl-" + ctx), b = $("#wkr-" + ctx); if (a) a.textContent = ctx === "sq" ? `Plan over ${v} week${v === 1 ? "" : "s"}` : L.lab;
+    if (ctx === "pl" && state.swMode === "form" && state.fxMode === "swings" && (location.hash || "").includes("fixtures")){ if (a) a.textContent = `Last ${v} game${v === 1 ? "" : "s"}`; if (b) b.textContent = "each team’s most recent"; } if (b) b.textContent = L.range; e.target.setAttribute("aria-valuetext", L.lab);
     e.target.style.setProperty("--pct", `${list.length > 1 ? 100 * (v - 1) / (list.length - 1) : 0}%`);
     document.querySelectorAll(`#wk-${ctx} ~ .wkticks span`).forEach((sp, k) => sp.classList.toggle("on", k < v)); }
   if (e.target.id === "gq"){ state.gq = e.target.value; const r = $("#gqres"); if (r) r.innerHTML = searchResults(); }
@@ -4901,7 +5661,10 @@ document.addEventListener("change", e => {
     const a = $("#fpmin"), b = $("#fpmax"), o = $("#fown"), lo = +a.min, hi = +a.max;
     Object.assign(state.pl, {min: +a.value > lo ? +a.value : 0, max: +b.value < hi ? +b.value : 0, own: +o.value < 100 ? +o.value : 0, limit: 50}); refreshFilters(); return; }
   if (e.target.id === "fsortsel"){ state.pl.sort = e.target.value; state.pl.dir = "desc"; state.pl.quick = null; state.pl.limit = 50; refreshFilters(); return; }
-  if (e.target.classList && e.target.classList.contains("wkrange")){ const v = +e.target.value; setAhead(v); if (state.pl.sort === "next" || state.pl.sort === "six") state.pl.sort = Math.min(v, GWS.length) === 1 ? "next" : "six"; render(); announce(`Looking ahead ${v} week${v === 1 ? "" : "s"}`); }
+  if (e.target.classList && e.target.classList.contains("wkrange")){ const v = +e.target.value; setAhead(v);
+    if (state.exact && state.exact.H !== RULES.H){ state.exact = null; RULES.result = null; saveRules(); VERDICTS = null; toast(`Plan cleared: solve again for ${RULES.H} week${RULES.H === 1 ? "" : "s"}`); } if (state.pl.sort === "next" || state.pl.sort === "six") state.pl.sort = Math.min(v, GWS.length) === 1 ? "next" : "six"; render(); announce(`Looking ahead ${v} week${v === 1 ? "" : "s"}`); }
+  if (e.target.id === "msortsel"){ state.mSort = e.target.value; render(); }
+  if (e.target.id === "spsortsel"){ state.spSort = e.target.value; render(); }
   if (e.target.id === "pchipsel"){ const g = GWS[state.pitchGw]; RULES.chips = RULES.chips || {};
     ["tc","bb","fh","wc"].forEach(k => { if (String(RULES.chips[k]) === String(g)) RULES.chips[k] = "off"; });
     if (e.target.value) RULES.chips[e.target.value] = g; saveRules(); render(); }
@@ -4917,6 +5680,7 @@ document.addEventListener("change", e => {
 window.addEventListener("hashchange", () => { render(); window.scrollTo(0, 0); });
 loadLive(); registerApp();
 document.addEventListener("keydown", e => { if ((e.key === "Enter" || e.key === " ") && e.target.matches && e.target.matches("[data-match]")){ e.preventDefault(); e.target.click(); } });
+$("#sheet").addEventListener("click", e => { if (e.target === $("#sheet")) closeSheet(); });
 $("#sheet").addEventListener("close", () => { document.body.classList.remove("sheet-open"); SHEET_KEY = null; returnFocus(); });
 document.addEventListener("click", e => { const a = e.target.closest("nav.tabs a"); if (a && a.getAttribute("href") === (location.hash || "#week")){ e.preventDefault(); window.scrollTo({top: 0, behavior: "smooth"}); } });
 
