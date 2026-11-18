@@ -846,6 +846,48 @@ The Model tab lists which sources each run actually used (`meta.sources`).
   form" opens the rest of the old Trends page (`openMoreForm`). Teams no
   longer has a Trends button; #future and teamView "trends" redirect here.
 
+## Changes in v6.47
+
+- Bug fixed: team profiles had not opened anywhere since v6.33, because the
+  squad's outlook function reused the name `teamOutlook` (the team profile's).
+  The squad one is now `squadOutlook`. Old versions of replaced functions are
+  kept with an `Old` suffix (openTeamOld, viewTeamH2HOld, trackRecordHtmlOld,
+  surpriseHtmlOld) and are unused.
+- Team profile (`openTeam`): header with ratings and ranks, next five fixtures
+  (A and D), tabs Overview / Attack / Defence / Players / Set pieces
+  (`state.ttab`); Overview has the manager note, talisman card, form, stats,
+  outlook; Attack and Defence have shot maps (shots for, shots against).
+- Manager changes: `MANAGER_CHANGES` near the top of the v6.47 module, kept BY
+  HAND: {t: team short name, out, inn (new manager or null), date, gw: first
+  gameweek under the new manager}. Update it when a manager changes. Shows a
+  "New manager" badge on tiles and profiles and "since the new manager" stats.
+  Projections do not react to a manager change (to be tested first).
+- Teams slider (`state.tWin`, `TWIN`): tiles and sorting use the last 3-10
+  games' xG, or the season ratings. Its input id is `tmwin`; the shared
+  `wkrange` handlers skip it so it never changes the look-ahead.
+- Talismans (`talisman`): the available player with the biggest share_g +
+  share_a; on profiles, tiles and the Players > Talismans view.
+- Triple Captain for anyone (`tcAnyone`, `state.tcSrc`): best captain value
+  per week across all outfield players (same measure as chipPlan), marked
+  yours or "needs a transfer"; switch in the TC chip sheet; a line on the
+  Captain tab when the best option isn't owned.
+- Shot maps (`shotMapSvg`, `shotMapBlock`): engine exports each player's
+  shots this season as p.shots = [[x, y, xg, outcome g/s/m/b, opponent id,
+  penalty 0/1]] (SHOT_MAPS; x is distance from the goal line, y across the
+  pitch, both 0-100). Team maps are built in the app (`teamShots`).
+- Players views: Talismans, Leaders (npxG, xA, both, box touches per 90 with a
+  minimum-minutes filter). Teams view: Expected table (`viewExpectedTable`).
+- Visual head to head (mirrored bars in `visibleColour`s, meetings, next match
+  card), track record (ring plus ✓/✗ rows), surprise runs (cards).
+- Player odds, collect-only (engine `fetch_sgo_props`, secret SGO_API_KEY,
+  passed in update.yml): SportsGameOdds free tier, anytime scorer, assist and
+  shot-on-target yes/no markets (oddIDs in SGO_ODDS), fair odds to chances,
+  names matched within each match's two teams. Once a day within SCORER_DAYS
+  of the gameweek; cache site/history/sgo_props.json, per-gameweek log
+  site/history/sgo_history.json for the later accuracy test; p.bk = {g, a, s,
+  n}; meta.sgo = coverage report (also printed as "SportsGameOdds: ..."). NOT
+  used in projections. Tested only against simulated replies.
+
 ## Docs
 
 - README.md is the project's front page (what FPL Lab is, features, model,

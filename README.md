@@ -144,6 +144,10 @@ Swipeable cards answer one question: *what do you want from your captain this we
   <img src="docs/screenshots/08-quality-map.png" width="200" alt="Quality map">
 </p>
 
+### 🧭 New in v6.47
+
+Team profiles with tabs and shot maps, each team's talisman, Triple Captain options for any player, a Teams slider for recent games with new-manager notes, an expected league table, xG leaderboards, and bookmakers' player odds collected for comparison.
+
 ### 👕 Squad
 
 <img src="docs/screenshots/09-squad-pitch.png" width="220" align="right" alt="Squad pitch">
