@@ -314,7 +314,7 @@ def build_history(pg, pm, players, fixtures):
 
 def build_shots(sh, fixtures):
     if sh.empty:
-        return pd.DataFrame(columns=["fixture", "event", "team", "opp", "player", "xg", "xgot", "zone", "head", "sit", "pen", "raw"])
+        return pd.DataFrame(columns=["fixture", "event", "team", "opp", "player", "xg", "xgot", "zone", "head", "sit", "pen", "raw", "x", "y", "outcome"])
     f = fixtures.set_index("id")
     sh = sh[sh["match_id"].astype(str).isin(f.index)].copy()
     sh["fixture"] = sh["match_id"].astype(str)
@@ -331,7 +331,10 @@ def build_shots(sh, fixtures):
     sh["player"] = pd.to_numeric(sh["player_id"], errors="coerce")
     sh["raw"] = sh["situation"].astype(str)
     sh["xgot"] = pd.to_numeric(sh["xgot"], errors="coerce")
-    return sh[["fixture", "event", "team", "opp", "player", "xg", "xgot", "zone", "head", "sit", "pen", "raw"]].reset_index(drop=True)
+    sh["x"] = pd.to_numeric(sh.get("start_x"), errors="coerce")
+    sh["y"] = pd.to_numeric(sh.get("start_y"), errors="coerce")
+    sh["outcome"] = sh.get("outcome", pd.Series("", index=sh.index)).astype(str)
+    return sh[["fixture", "event", "team", "opp", "player", "xg", "xgot", "zone", "head", "sit", "pen", "raw", "x", "y", "outcome"]].reset_index(drop=True)
 
 
 def attribute_shots(sh, hist):
@@ -2670,6 +2673,7 @@ def odds_from_odds_api(events, look):
 
 
 SCORER_MARKET = "player_goal_scorer_anytime"      # The Odds API: soccer player props, US bookmakers, one event per call
+SHOT_MAPS = True      # export each player's shots this season (position, xG, outcome) for shot maps
 SCORER_DAYS = 4                                   # only fetched this close to the gameweek, to stay inside the free quota
 
 
@@ -2695,6 +2699,10 @@ def match_scorer_names(prices, cands):
                 pid = last[tail][0]
             elif len(web.get(tail, [])) == 1:
                 pid = web[tail][0]
+            elif tail and len(tail) >= 4:
+                inside = [p for p, fn, wn in cands if fn and tail in _ascii(fn).split(" ")]
+                if len(inside) == 1:
+                    pid = inside[0]
         if pid is not None and ps:
             out[int(pid)] = dict(p=round(float(min(0.95, max(0.01, np.mean(ps)))), 3), n=len(ps))
     return out
@@ -2785,6 +2793,152 @@ def fetch_scorer_odds(ds, gw, history):
             pass
     print(f"Goalscorer prices: {len(out)} players from {with_prices} of {seen} matches")
     return out
+
+
+SGO_API = "https://api.sportsgameodds.com/v2/events"
+SGO_ODDS = {"g": "points-PLAYER_ID-game-yn-yes", "a": "assists-PLAYER_ID-game-yn-yes", "s": "shots_onGoal-PLAYER_ID-game-yn-yes"}
+
+
+def american_to_prob(o):
+    """'+150' -> 0.4, '-120' -> 0.545. None if it can't be read."""
+    try:
+        v = float(str(o).replace("+", ""))
+    except (TypeError, ValueError):
+        return None
+    if v == 0:
+        return None
+    return 100 / (v + 100) if v > 0 else -v / (-v + 100)
+
+
+def sgo_player_name(pid, players):
+    info = (players or {}).get(pid) or {}
+    nm = info.get("name")
+    if isinstance(nm, dict):
+        nm = nm.get("display") or nm.get("long") or nm.get("full")
+    if not nm:
+        nm = " ".join(w for w in str(pid).split("_") if w and not w.isdigit() and w != "EPL").title()
+    return str(nm)
+
+
+def sgo_prices_from_events(events):
+    """{market: {player name: [chance, ...]}}, plus bookmaker names, from SportsGameOdds events."""
+    out, books, teams = {k: {} for k in SGO_ODDS}, set(), []
+    want = {v.split("-PLAYER_ID-")[0]: k for k, v in SGO_ODDS.items()}
+    for ev in events or []:
+        tm = ev.get("teams") or {}
+        names = []
+        for side in ("home", "away"):
+            t = tm.get(side) or {}
+            nm = (t.get("names") or {}).get("long") or (t.get("names") or {}).get("medium") or t.get("teamID") or ""
+            names.append(str(nm))
+        teams.append(tuple(names))
+        players = ev.get("players") or {}
+        for odd in (ev.get("odds") or {}).values():
+            stat = odd.get("statID")
+            if stat not in want or odd.get("betTypeID") != "yn" or odd.get("sideID") != "yes":
+                continue
+            ent = odd.get("statEntityID") or odd.get("playerID")
+            if not ent or ent in ("home", "away", "all"):
+                continue
+            p = american_to_prob(odd.get("fairOdds")) or american_to_prob(odd.get("bookOdds"))
+            if p is None:
+                continue
+            bb = odd.get("byBookmaker") or {}
+            books.update(k for k, v in bb.items() if (v or {}).get("available", True))
+            out[want[stat]].setdefault(sgo_player_name(ent, players), []).append(p)
+    return out, sorted(books), teams
+
+
+def fetch_sgo_props(ds, gw, history):
+    """Players' chances to score, assist and have a shot on target, from SportsGameOdds' free tier.
+    Collected and shown for comparison ONLY: they do not change any projection until a test shows they help.
+    Fetched at most once a day, close to the gameweek, to stay inside the free monthly allowance."""
+    key = os.environ.get("SGO_API_KEY")
+    label = "Player odds, SportsGameOdds (comparison only)"
+    if not key:
+        return {}, None
+    cache = Path(history) / "sgo_props.json" if history else None
+    saved = None
+    if cache and cache.exists():
+        try:
+            saved = json.loads(cache.read_text())
+        except Exception:  # noqa: BLE001
+            saved = None
+    today = dt.date.today().isoformat()
+    same_gw = bool(saved and saved.get("gw") == gw)
+    from_saved = lambda: ({int(k): v for k, v in saved["players"].items()}, saved.get("meta")) if same_gw else ({}, None)
+    if same_gw and saved.get("day") == today:
+        return from_saved()
+    fx = ds.fixtures[(ds.fixtures["event"] == gw) & ~ds.fixtures["finished"]]
+    if not len(fx):
+        return from_saved()
+    first, last = fx["kickoff"].min(), fx["kickoff"].max()
+    days = (first - pd.Timestamp.now(tz="UTC")).total_seconds() / 86400 if pd.notna(first) else 99
+    if days > SCORER_DAYS:
+        return from_saved()
+    events = []
+    try:
+        import requests
+        params = dict(leagueID="EPL", oddsAvailable="true", limit=25, oddID=",".join(SGO_ODDS.values()),
+                      startsAfter=(first - pd.Timedelta(hours=6)).isoformat(), startsBefore=(last + pd.Timedelta(hours=6)).isoformat())
+        cursor = None
+        for _ in range(3):
+            if cursor:
+                params["cursor"] = cursor
+            r = requests.get(SGO_API, params=params, headers={"x-api-key": key}, timeout=25)
+            if not r.ok:
+                note_source(label, f"SportsGameOdds refused the request (HTTP {r.status_code}: {r.text[:100]})")
+                SOURCE_STATE[label] = bool(from_saved()[0])
+                return from_saved()
+            j = r.json()
+            events += j.get("data") or []
+            cursor = j.get("nextCursor")
+            if not cursor:
+                break
+    except Exception as e:  # noqa: BLE001
+        note_source(label, f"{type(e).__name__}: {e}")
+        SOURCE_STATE[label] = bool(from_saved()[0])
+        return from_saved()
+    look = team_lookup(ds.teams)
+    names = {int(r.id): (f"{_text(getattr(r, 'first_name', ''))} {_text(getattr(r, 'second_name', ''))}".strip(), _text(r.web_name), int(r.team)) for r in ds.players.itertuples()}
+    out, priced, books, unknown = {}, {m: [0, 0] for m in SGO_ODDS}, set(), 0
+    for ev in events:
+        prices, bks, tms = sgo_prices_from_events([ev])
+        books.update(bks)
+        h, a = (look.get(_team_key(tms[0][0])), look.get(_team_key(tms[0][1]))) if tms else (None, None)
+        if not h or not a:
+            unknown += 1
+            continue
+        cands = [(pid, fn, wn) for pid, (fn, wn, t) in names.items() if t in (int(h), int(a))]
+        for m, pr in prices.items():
+            got = match_scorer_names(pr, cands)
+            priced[m][0] += len(pr); priced[m][1] += len(got)
+            for pid, v in got.items():
+                out.setdefault(int(pid), {})[m] = round(float(v["p"]), 3)
+                out[int(pid)]["n"] = max(out[int(pid)].get("n", 0), int(v.get("n", 1)))
+    books = sorted(books)
+    meta = dict(events=len(events), books=books[:20], n_books=len(books), priced={m: dict(asked=a, matched=b) for m, (a, b) in priced.items()},
+                players=len(out), day=today, gw=int(gw), unknown_teams=unknown)
+    print(f"SportsGameOdds: {len(events)} Premier League matches, {len(books)} bookmakers ({', '.join(books[:8]) or 'none'}); "
+          f"players priced to score {priced.get('g', (0, 0))[1]}/{priced.get('g', (0, 0))[0]}, to assist {priced.get('a', (0, 0))[1]}/{priced.get('a', (0, 0))[0]}, "
+          f"shot on target {priced.get('s', (0, 0))[1]}/{priced.get('s', (0, 0))[0]} (matched to FPL/offered)")
+    if not out:
+        note_source(label, f"no player prices came back ({len(events)} matches); the free tier may not carry Premier League player markets")
+        SOURCE_STATE[label] = bool(from_saved()[0])
+        return from_saved()
+    SOURCE_STATE[label] = True
+    if cache:
+        try:
+            cache.parent.mkdir(parents=True, exist_ok=True)
+            cache.write_text(json.dumps(dict(day=today, gw=int(gw), players=out, meta=meta)))
+            # keep each gameweek's last prices before the deadline, for the accuracy test later
+            logf = Path(history) / "sgo_history.json"
+            log = json.loads(logf.read_text()) if logf.exists() else {}
+            log[str(int(gw))] = dict(day=today, players=out)
+            logf.write_text(json.dumps(log))
+        except Exception:  # noqa: BLE001
+            pass
+    return out, meta
 
 
 def fetch_odds(teams, upcoming_pairs):
@@ -3027,6 +3181,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
     book = fetch_odds(ds.teams, set(zip(up.team_h, up.team_a))) if odds and online else {}
     sources["Bookmaker odds for the next round"] = bool(book)
     gs = fetch_scorer_odds(ds, gws[0], history) if odds and online else {}
+    bk, bk_meta = fetch_sgo_props(ds, gws[0], history) if odds and online else ({}, None)
     sources.update(SOURCE_STATE)
     up_refs = upcoming_referees(ds.teams, getattr(fetch_odds, "fixtures_file", None)) if odds and online else {}
     refs = {}
@@ -3116,7 +3271,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
         players.append(dict(
             id=pid, n=_text(p.get("web_name")), fn=f"{_text(p.get('first_name'))} {_text(p.get('second_name'))}".strip(),
             t=int(p["team"]), pos=r["pos"], price=round(float(p.get("now_cost") or 0), 1), own=round(own, 1),
-            st=_text(p.get("status")) or "a", news=_text(p.get("news")), gs=gs.get(pid),
+            st=_text(p.get("status")) or "a", news=_text(p.get("news")), gs=gs.get(pid), bk=bk.get(pid),
             cards=it.get("cards") if it.get("cards") and it["cards"]["y"] >= it["cards"]["need"] - 2 else None,
             pen=int(p["penalties_order"]) if p.get("penalties_order") is not None and not pd.isna(p.get("penalties_order")) else None,
             ep=it["ep"], ep6=round(sum(it["ep"]), 1), av=[round(a, 2) for a in it["av"]],
@@ -3147,6 +3302,17 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
             ctx=player_ctx.get(pid), summary=player_sum.get(pid),
             why=why,
         ))
+    if SHOT_MAPS and len(ds.shots) and "x" in ds.shots:
+        code = {"goal": "g", "save": "s", "post": "m", "miss": "m", "block": "b", "blocked-off-line": "b"}
+        shp = {}
+        for r in ds.shots.itertuples():
+            if pd.isna(r.player) or pd.isna(r.x) or pd.isna(r.y):
+                continue
+            shp.setdefault(int(r.player), []).append([round(float(r.x), 1), round(float(r.y), 1), round(float(r.xg), 2),
+                                                      code.get(str(r.outcome), "m"), int(r.opp) if pd.notna(r.opp) else 0, int(bool(r.pen))])
+        for x in players:
+            if x["id"] in shp:
+                x["shots"] = shp[x["id"]]
     w_fpl, kappa = (lab["w_fpl"], lab["kappa"]) if lab else (0.0, 1.0)
     recent = ds.hist[ds.hist["event"] > tm["last_gw"] - 3].groupby(["element", "event"])["event_points"].sum()
     hauled = {int(e) for (e, _), v in recent.items() if v >= 10}
@@ -3209,6 +3375,7 @@ def build(ds, with_backtest=True, history=None, team_id=None, league_id=None, od
                   unscheduled=getattr(ds, "unscheduled", []),
                   source_notes=SOURCE_NOTES, disagree=disagree, minutes_capped=tm.get("minutes_capped", {}), avail_decay=AVAIL_DECAY if USE_AVAIL_DECAY else None, haul_test=HAUL_TEST, venue=VENUE_TEST, form_test=FORM_TEST, future_test=FUTURE_TEST, breakout_test=BREAKOUT_TEST, trend_calls=calls, home_adv=round(tm["mu_h"] / tm["mu_a"] - 1, 3),
                   odds=dict(n=len(book), src=sorted({v["src"] for v in book.values()}), weight=BOOK_WEIGHT, fit=fit),
+                  sgo=bk_meta,
                   refs=dict(league=ref_league, n=len(ref_table)), sources=sources, lab=lab,
                   elite=dict(gw=elite["gw"], n=elite["n"], chips=elite["chips"]) if elite else None),
         teams=list(teams.values()), fixtures=fixtures, players=players,
