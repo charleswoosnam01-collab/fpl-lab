@@ -57,6 +57,7 @@ jobs:
           FPL_TEAM_ID: ${{ vars.FPL_TEAM_ID }}
           FPL_LEAGUE_ID: ${{ vars.FPL_LEAGUE_ID }}
           ODDS_API_KEY: ${{ secrets.ODDS_API_KEY }}
+          SGO_API_KEY: ${{ secrets.SGO_API_KEY }}             # optional: SportsGameOdds free key, player odds collected for comparison only
           NTFY_TOPIC: ${{ secrets.NTFY_TOPIC }}          # optional: your ntfy.sh topic for the deadline reminder
           PAGES_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
         run: python engine/fpl_engine.py --out site/data.json
