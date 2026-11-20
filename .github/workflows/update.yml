@@ -70,7 +70,16 @@ jobs:
           git config user.name "fpl-lab-bot"
           git config user.email "actions@users.noreply.github.com"
           git add site/history
-          git diff --cached --quiet || (git commit -m "Save pre-deadline projections" && git push)
+          if ! git diff --cached --quiet; then
+            git commit -m "Save pre-deadline projections"
+            # main may have moved since checkout (overlapping runs, re-runs, manual pushes): rebase and retry.
+            # A failed history save must never block the deploy, so this step always succeeds.
+            for i in 1 2 3 4; do
+              git pull --rebase --autostash origin "${GITHUB_REF_NAME}" && git push && break
+              git rebase --abort 2>/dev/null || true
+              echo "Push attempt $i failed, retrying"; sleep $((i * 3))
+            done || true
+          fi
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v3
         with:
