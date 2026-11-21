@@ -53,6 +53,9 @@ jobs:
         uses: actions/upload-pages-artifact@v3
         with:
           path: site
+      - name: Give GitHub a moment to register the uploaded site
+        if: steps.check.outputs.live == 'true'
+        run: sleep 15   # deploy-pages once started in the same second as the upload and found no artifact
       - if: steps.check.outputs.live == 'true'
         id: deployment
         uses: actions/deploy-pages@v4
