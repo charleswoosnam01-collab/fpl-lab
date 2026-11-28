@@ -11,7 +11,7 @@
 </p>
 
 <p align="center">
-  <a href="https://charleswoosnam01-collab.github.io/fpl-lab/"><b>Open the app</b></a> ·
+  <a href="https://vantage-tv.github.io/fpl-lab/"><b>Open the app</b></a> ·
   <a href="#what-it-does">What it does</a> ·
   <a href="#how-the-model-works">How it works</a> ·
   <a href="#how-accurate-is-it">Accuracy</a> ·
